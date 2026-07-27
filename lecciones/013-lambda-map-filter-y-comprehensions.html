@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 13: lambda, map, filter y comprehensions</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="012-funciones-de-primera-clase-y-composicion.html">← Anterior: 012</a>
+    <a href="014-generadores-y-evaluacion-perezosa.html">Siguiente: 014 — Generadores →</a>
+  </span>
+</nav>
+
+<h1><code>lambda</code>, <code>map</code>, <code>filter</code> y comprehensions</h1>
+<p class="subtitle">Pista 4, lección 3 — el kit clásico, y por qué Python prefiere otro</p>
+
+<h2>Funciones lambda</h2>
+
+<p>
+  Una <code>lambda</code> es una función sin nombre, escrita en una sola
+  expresión. Nada más. El nombre viene del cálculo lambda de Church que vimos
+  en la lección 011 — es literalmente la notación de 1936.
+</p>
+
+<pre><code>def doblar(x):
+    return x * 2
+
+doblar = lambda x: x * 2     # exactamente lo mismo
+</code></pre>
+
+<div class="regla">
+  <p><strong>Sintaxis:</strong> <code>lambda parámetros: expresión</code></p>
+  <p>El <code>return</code> es implícito. No lleva llaves, ni bloque, ni nombre.</p>
+</div>
+
+<pre><code>lambda: 42                          # cero parámetros
+lambda x: x ** 2                    # uno
+lambda x, y: x + y                  # dos
+lambda c: (-c["nota"], c["nombre"]) # devolviendo una tupla (desempate)
+lambda x, base=10: x * base         # con valor por defecto
+</code></pre>
+
+<h3>Los límites</h3>
+
+<p>
+  Una <code>lambda</code> sólo puede contener <strong>una expresión</strong>.
+  Nada de <code>if</code> en bloque, ni <code>for</code>, ni asignaciones, ni
+  <code>try</code>, ni varias líneas:
+</p>
+
+<pre><code>lambda x: if x &gt; 0: return x      # ❌ SyntaxError
+lambda x: x if x &gt; 0 else -x     # ✅ el ternario SÍ es una expresión
+</code></pre>
+
+<div class="clave">
+  Regla práctica que ahorra discusiones: <strong>si la lambda necesita un
+  nombre, no querías una lambda</strong>. <code>doblar = lambda x: x * 2</code>
+  es peor que <code>def doblar(x): return x * 2</code> — pierdes el nombre real
+  en los <em>tracebacks</em> (<code>&lt;lambda&gt;</code>), pierdes el
+  docstring, y no ganas nada. La PEP 8 lo dice explícitamente.
+</div>
+
+<h3>Dónde sí</h3>
+
+<p>La lambda brilla cuando es un argumento de usar y tirar:</p>
+
+<pre><code>sorted(candidatos, key=lambda c: c["nota"])
+sorted(candidatos, key=lambda c: (-c["nota"], c["nombre"]))   # desempate
+max(plazas, key=lambda p: p["vacantes"])
+</code></pre>
+
+<hr>
+
+<h2><code>map()</code>: transformar</h2>
+
+<p>
+  <code>map(funcion, iterable)</code> aplica la función a cada elemento. Es la
+  versión funcional del bucle que transforma:
+</p>
+
+<pre><code># Imperativo
+mayusculas = []
+for n in nombres:
+    mayusculas.append(n.upper())
+
+# Funcional
+mayusculas = list(map(str.upper, nombres))
+</code></pre>
+
+<div class="pista">
+  <code>map</code> devuelve un <strong>iterador perezoso</strong>, no una
+  lista. Si haces <code>print(map(...))</code> verás
+  <code>&lt;map object at 0x...&gt;</code>. Para ver el contenido hay que
+  consumirlo con <code>list()</code>, un <code>for</code>, o pasárselo a otra
+  función. Esa pereza es el tema de la lección 014 — y es una virtud, no un
+  estorbo.
+</div>
+
+<h3>Con varios iterables</h3>
+
+<pre><code>notas_teoria  = [7, 8, 5]
+notas_practica = [9, 6, 8]
+
+medias = list(map(lambda t, p: (t + p) / 2, notas_teoria, notas_practica))
+# [8.0, 7.0, 6.5]
+</code></pre>
+
+<p>Se para en cuanto el más corto se agota.</p>
+
+<hr>
+
+<h2><code>filter()</code>: seleccionar</h2>
+
+<p>
+  <code>filter(predicado, iterable)</code> se queda con los elementos para los
+  que el predicado da verdadero. Un <em>predicado</em> es simplemente una
+  función que devuelve un booleano.
+</p>
+
+<pre><code># Imperativo
+aprobados = []
+for n in notas:
+    if n &gt;= 5:
+        aprobados.append(n)
+
+# Funcional
+aprobados = list(filter(lambda n: n &gt;= 5, notas))
+</code></pre>
+
+<pre><code># Truco: filter(None, ...) quita todo lo "falsy"
+sucios = ["Ana", "", None, "Carlos", 0, "Beatriz"]
+list(filter(None, sucios))     # ['Ana', 'Carlos', 'Beatriz']
+</code></pre>
+
+<h3>Encadenando</h3>
+
+<pre><code>resultado = list(
+    map(lambda c: c["nombre"],
+        filter(lambda c: c["nota"] &gt;= 5, candidatos))
+)
+</code></pre>
+
+<p>
+  Funciona. Y ahí está el problema: para saber qué hace hay que leerlo de
+  dentro hacia fuera, y el <code>filter</code> — que ocurre primero — está
+  escrito el último.
+</p>
+
+<hr>
+
+<h2>Comprehensions: la respuesta de Python</h2>
+
+<p>
+  Guido van Rossum llegó a proponer eliminar <code>map</code>, <code>filter</code>
+  y <code>reduce</code> de Python 3. No lo consiguió del todo (<code>reduce</code>
+  fue desterrado a <code>functools</code>), pero el mensaje quedó claro: en
+  Python, la forma idiomática de hacer esto son las <strong>comprehensions</strong>.
+</p>
+
+<div class="regla">
+  <p><code>[<em>expresión</em> for <em>elemento</em> in <em>iterable</em> if <em>condición</em>]</p>
+  <p style="margin-top:0.4em">
+    La <em>expresión</em> es el <code>map</code>. La <em>condición</em> es el
+    <code>filter</code>. Y se leen en el orden en que ocurren.
+  </p>
+</div>
+
+<table>
+<tr><th>Con map/filter</th><th>Con comprehension</th></tr>
+<tr>
+  <td><code>list(map(str.upper, ns))</code></td>
+  <td><code>[n.upper() for n in ns]</code></td>
+</tr>
+<tr>
+  <td><code>list(filter(lambda n: n&gt;=5, ns))</code></td>
+  <td><code>[n for n in ns if n &gt;= 5]</code></td>
+</tr>
+<tr>
+  <td><code>list(map(f, filter(g, ns)))</code></td>
+  <td><code>[f(n) for n in ns if g(n)]</code></td>
+</tr>
+</table>
+
+<p>El ejemplo encadenado de antes, reescrito:</p>
+
+<pre><code>resultado = [c["nombre"] for c in candidatos if c["nota"] &gt;= 5]
+</code></pre>
+
+<div class="clave">
+  Misma semántica funcional — sin mutación, sin acumulador, sin bucle
+  explícito — pero legible de izquierda a derecha. Las comprehensions
+  <strong>son</strong> programación funcional; simplemente con la sintaxis que
+  Python eligió.
+</div>
+
+<h3>Las cuatro familias</h3>
+
+<pre><code># Lista
+[c["nota"] for c in candidatos]
+
+# Diccionario — clave: valor
+{c["nombre"]: c["nota"] for c in candidatos}
+
+# Conjunto — deduplicación gratis
+{c["cuerpo"] for c in candidatos}
+
+# Generador — ojo, paréntesis: NO construye nada en memoria (lección 014)
+(c["nota"] for c in candidatos)
+</code></pre>
+
+<p>
+  Un caso que usarás mucho, invertir un diccionario:
+</p>
+
+<pre><code>ranking = {"Sevilla": 1, "Cádiz": 2, "Huelva": 3}
+por_puesto = {puesto: ciudad for ciudad, puesto in ranking.items()}
+# {1: 'Sevilla', 2: 'Cádiz', 3: 'Huelva'}
+</code></pre>
+
+<h3>Anidadas — con cuidado</h3>
+
+<pre><code># Aplanar una matriz (matematicas/matrice.py)
+matriz = [[1, 2], [3, 4], [5, 6]]
+plana = [x for fila in matriz for x in fila]      # [1, 2, 3, 4, 5, 6]
+</code></pre>
+
+<div class="pista">
+  El orden de los <code>for</code> es el mismo que tendrían anidados en un
+  bucle normal: el de fuera primero. Se lee «para cada fila de la matriz, para
+  cada x de la fila». Con dos niveles vale; con tres, escribe un bucle.
+</div>
+
+<h3>Producto cartesiano y condicional en la expresión</h3>
+
+<pre><code># Todos los emparejamientos posibles (¡la fuerza bruta de la lección 005!)
+pares = [(c, p) for c in candidatos for p in plazas]
+
+# if/else va ANTES del for, porque forma parte de la expresión
+etiquetas = ["apto" if n &gt;= 5 else "no apto" for n in notas]
+
+# el if solo (filtro) va DESPUÉS del for
+aprobadas = [n for n in notas if n &gt;= 5]
+</code></pre>
+
+<div class="clave">
+  Esta asimetría confunde a todo el mundo al principio. La razón es simple:
+  <code>x if c else y</code> es una <strong>expresión</strong> y ocupa el hueco
+  del <code>map</code>; el <code>if</code> suelto del final es un
+  <strong>filtro</strong> y ocupa el hueco del <code>filter</code>. Son cosas
+  distintas en sitios distintos.
+</div>
+
+<hr>
+
+<h2>Entonces, ¿cuándo usar map/filter?</h2>
+
+<table>
+<tr><th>Situación</th><th>Elige</th></tr>
+<tr>
+  <td>Caso general en Python</td>
+  <td><strong>Comprehension</strong></td>
+</tr>
+<tr>
+  <td>La función ya existe con nombre: <code>map(str.strip, xs)</code></td>
+  <td><strong>map</strong> — es más corto y no inventa una variable</td>
+</tr>
+<tr>
+  <td>Estás componiendo funciones (lección 012) y necesitas
+      <code>map</code> como valor</td>
+  <td><strong>map/filter</strong></td>
+</tr>
+<tr>
+  <td>La lógica no cabe en una expresión</td>
+  <td><strong>Un bucle normal</strong>, sin complejos</td>
+</tr>
+<tr>
+  <td>Necesitas <code>break</code>, o llevar estado entre iteraciones</td>
+  <td><strong>Un bucle normal</strong>. Siempre.</td>
+</tr>
+</table>
+
+<div class="pista">
+  <strong>El antipatrón a evitar:</strong> la comprehension de cinco líneas con
+  tres <code>for</code>, dos <code>if</code> y un ternario dentro. Cabe en una
+  línea, sí, pero nadie — incluido tú dentro de dos meses — puede leerla. La
+  brevedad no es el objetivo; la claridad sí.
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Las tres versiones</h3>
+<p>
+  Vas a resolver el mismo puñado de problemas tres veces: con bucle
+  imperativo, con <code>map</code>/<code>filter</code> explícitos, y con
+  comprehension. No es trabajo repetido — es el ejercicio central de la pista:
+  ver la misma idea en tres notaciones hasta que las tres te resulten
+  transparentes. Incluye las cuatro familias de comprehension y un par de
+  trampas clásicas.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/013-map-filter-comprehensions.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> hemos dicho tres veces que
+  <code>map</code> es «perezoso» y lo hemos dejado a medias. Toca cobrárselo —
+  y descubrir que la pereza es la característica más útil de todo el kit:
+  <a href="014-generadores-y-evaluacion-perezosa.html">014 — Generadores y evaluación perezosa</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="012-funciones-de-primera-clase-y-composicion.html">← Anterior: 012</a>
+    <a href="014-generadores-y-evaluacion-perezosa.html">Siguiente: 014 — Generadores →</a>
+  </span>
+</nav>
+
+</body>
+</html>

@@ -1,0 +1,370 @@
+/* ==========================================================================
+   Hoja de estilo común — Lecciones (Aprendiendo Python)
+   --------------------------------------------------------------------------
+   Tema sepia cálido de la Rama B, con modo claro/oscuro automático.
+   Uso local: enlázala desde cada lección con
+       <link rel="stylesheet" href="../assets/estilos.css">
+   (funciona abriendo el HTML con doble clic, sin servidor).
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+/* --- Paleta: tema claro (por defecto) --- */
+:root {
+  --text: #3a2c1f;
+  --bg: #faf5ec;
+  --sidenote: #8a7561;
+  --accent: #7a4a2b;
+  --accent-dark: #5c3820;
+  --code-bg: #f1e8d8;
+  --border: #ddccb0;
+  --highlight: #f4e6c8;
+  --surface: #f5ece0;
+  --surface-alt: #ece0cb;
+  --ok: #4a6741;
+  --no: #8b3a3a;
+}
+
+/* --- Paleta: tema oscuro (si el sistema lo pide) --- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #e7dcc8;
+    --bg: #201812;
+    --sidenote: #b3a086;
+    --accent: #d79a5f;
+    --accent-dark: #eab884;
+    --code-bg: #2b2016;
+    --border: #4a3a28;
+    --highlight: #33281a;
+    --surface: #2a2016;
+    --surface-alt: #32271a;
+    --ok: #8fbf82;
+    --no: #e09a9a;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--bg);
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+}
+
+@media (max-width: 700px) {
+  body { font-size: 16px; padding: 1.5rem 1rem 4rem; }
+}
+
+/* --- Titulares --- */
+h1 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.3rem;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--sidenote);
+  margin-bottom: 2.5rem;
+  font-style: italic;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 0.8rem;
+  color: var(--accent-dark);
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent-dark);
+}
+
+p { margin-bottom: 1rem; }
+
+/* --- Código --- */
+code {
+  font-family: 'IBM Plex Mono', 'Menlo', monospace;
+  font-size: 0.85em;
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+}
+
+pre {
+  font-family: 'IBM Plex Mono', 'Menlo', monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  background: var(--code-bg);
+  padding: 1rem 1.2rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+}
+
+pre code { background: none; padding: 0; border-radius: 0; }
+
+/* Salida de terminal (siempre oscura, a propósito) */
+.output {
+  background: #1a1a1a;
+  color: #c9d1d9;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  font-family: 'IBM Plex Mono', 'Menlo', monospace;
+  font-size: 0.82rem;
+  margin: 1rem 0;
+}
+
+/* --- Listas --- */
+ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+li { margin-bottom: 0.4rem; }
+
+/* --- Citas --- */
+blockquote {
+  border-left: 3px solid var(--accent);
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  background: var(--highlight);
+  font-style: italic;
+}
+
+/* --- Cajas didácticas --- */
+.ejercicio {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.ejercicio h3 { margin-top: 0; color: var(--accent-dark); }
+
+.pista {
+  background: var(--surface-alt);
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+
+.clave {
+  background: var(--surface-alt);
+  border: 1px dashed var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.3rem;
+  margin: 1.5rem 0;
+}
+
+.historia {
+  background: var(--highlight);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.historia h3 { margin-top: 0; }
+
+/* --- Reglas numeradas (lecciones 006/007) --- */
+.regla {
+  background: var(--highlight);
+  border-radius: 8px;
+  padding: 1rem 1.3rem;
+  margin: 1rem 0;
+  border-left: 4px solid var(--accent);
+}
+
+.regla strong.num {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  text-align: center;
+  line-height: 1.6rem;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+/* --- Teoremas (lección 007) --- */
+.teorema {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 1rem 1.3rem;
+  margin: 1.5rem 0;
+}
+
+.teorema .etiqueta {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.6rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+/* --- Tablas --- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+}
+
+th, td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th { background: var(--code-bg); font-weight: 600; }
+
+td.num { text-align: right; font-family: 'IBM Plex Mono', monospace; }
+
+/* Marcas de estado en el cortejo (lección 006) */
+.aceptado { color: var(--ok); font-weight: 600; }
+.rechazado { color: var(--no); font-weight: 600; text-decoration: line-through; }
+.libre { color: var(--sidenote); font-style: italic; }
+
+/* Título de ronda (lección 006) */
+.ronda-titulo {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px 6px 0 0;
+  margin-top: 1.5rem;
+  display: inline-block;
+}
+
+/* --- Separadores y pie --- */
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+.referencia {
+  font-size: 0.9rem;
+  color: var(--sidenote);
+  margin-top: 0.3rem;
+}
+
+.retoque {
+  font-size: 0.9rem;
+  color: var(--sidenote);
+  font-style: italic;
+}
+
+/* --- Navegación entre lecciones --- */
+.nav-lecciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: var(--sidenote);
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-lecciones + .nav-lecciones,
+hr + .nav-lecciones,
+.retoque + .nav-lecciones {
+  margin-top: 2rem;
+  padding-bottom: 0;
+  padding-top: 0;
+  border-bottom: none;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.nav-lecciones a {
+  color: var(--accent-dark);
+  text-decoration: none;
+}
+
+.nav-lecciones a:hover { text-decoration: underline; }
+
+.nav-lecciones .nav-central {
+  display: flex;
+  gap: 1rem;
+}
+
+.nav-lecciones .nav-hueco {
+  visibility: hidden;
+}
+
+/* --- Índice de lecciones --- */
+.indice-grupo {
+  margin: 1.5rem 0 2.5rem;
+}
+
+.indice-grupo h2 { margin-top: 0; }
+
+.indice-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.indice-lista li {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.7rem;
+  background: var(--surface);
+}
+
+.indice-lista a {
+  color: var(--accent-dark);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.05rem;
+}
+
+.indice-lista a:hover { text-decoration: underline; }
+
+.indice-lista p {
+  margin: 0.3rem 0 0;
+  font-size: 0.92rem;
+  color: var(--sidenote);
+}
+
+.indice-lista .pendiente {
+  opacity: 0.6;
+}
+
+.indice-lista .etiqueta-pendiente {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sidenote);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.05rem 0.4rem;
+  margin-left: 0.5rem;
+}

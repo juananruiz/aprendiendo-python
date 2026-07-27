@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 14: Generadores y evaluación perezosa</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="013-lambda-map-filter-y-comprehensions.html">← Anterior: 013</a>
+    <a href="015-functools.html">Siguiente: 015 — functools →</a>
+  </span>
+</nav>
+
+<h1>Generadores y evaluación perezosa</h1>
+<p class="subtitle">Pista 4, lección 4 — calcular sólo lo que hace falta, justo cuando hace falta</p>
+
+<h2>El problema</h2>
+
+<p>
+  Quieres las tres primeras líneas de un fichero de log de 4 GB. Con el estilo
+  que conoces:
+</p>
+
+<pre><code>lineas = open("acceso.log").readlines()   # 4 GB en RAM 💥
+primeras = lineas[:3]                     # ...para quedarnos con 3
+</code></pre>
+
+<p>
+  Has construido la lista entera para tirar el 99,9999 %. Este es el coste
+  oculto de la <strong>evaluación ansiosa</strong> (<em>eager</em>): calcular
+  todo por adelantado, lo necesites o no.
+</p>
+
+<div class="clave">
+  La <strong>evaluación perezosa</strong> (<em>lazy</em>) invierte la lógica:
+  no calcules nada hasta que alguien pida el siguiente elemento. Y entonces
+  calcula sólo ese.
+</div>
+
+<hr>
+
+<h2><code>yield</code>: la palabra clave</h2>
+
+<p>
+  Una función que contiene <code>yield</code> en cualquier parte de su cuerpo
+  deja de ser una función normal: se convierte en una <strong>función
+  generadora</strong>. Llamarla no ejecuta nada — devuelve un objeto generador.
+</p>
+
+<pre><code>def contar_hasta(n):
+    print("  (arranco)")
+    i = 1
+    while i &lt;= n:
+        yield i          # ← entrego un valor y me CONGELO aquí
+        i += 1
+    print("  (termino)")
+
+g = contar_hasta(3)
+print(g)          # &lt;generator object contar_hasta at 0x...&gt;
+                  # fíjate: NO ha impreso "(arranco)". No se ha ejecutado nada.
+
+print(next(g))    #   (arranco)  →  1
+print(next(g))    #   2
+print(next(g))    #   3
+print(next(g))    #   (termino)  →  StopIteration
+</code></pre>
+
+<div class="regla">
+  <p>
+    <strong><code>return</code> vs <code>yield</code>:</strong>
+    <code>return</code> termina la función y destruye su estado local.
+    <code>yield</code> la <em>suspende</em>: las variables locales, la posición
+    del bucle, todo queda congelado esperando el siguiente
+    <code>next()</code>.
+  </p>
+</div>
+
+<p>
+  Esto es lo que hace especial a un generador: <strong>tiene memoria de dónde
+  se quedó</strong>, sin que tú tengas que guardarla en ningún sitio. Es la
+  pieza que en OOP resolverías con un objeto iterador, un atributo
+  <code>$posicion</code> y un método <code>next()</code> — aquí sale gratis de
+  la sintaxis.
+</p>
+
+<h3>Lo normal es no usar <code>next()</code></h3>
+
+<pre><code>for numero in contar_hasta(3):    # el for llama a next() por ti
+    print(numero)                  # y captura el StopIteration
+</code></pre>
+
+<hr>
+
+<h2>El ahorro, medido</h2>
+
+<p>No te fíes de mi palabra. Ejecútalo:</p>
+
+<pre><code>import sys
+
+lista     = [x * 2 for x in range(1_000_000)]   # corchetes → lista
+generador = (x * 2 for x in range(1_000_000))   # paréntesis → generador
+
+print(sys.getsizeof(lista))       # ≈ 8.448.728 bytes  (8 MB)
+print(sys.getsizeof(generador))   # ≈ 200 bytes        (constante)
+</code></pre>
+
+<p>
+  Cuarenta mil veces menos. Y no porque el generador comprima nada: es que
+  <strong>no contiene los datos</strong>. Contiene la <em>receta</em> para
+  producirlos, más un marcador de por dónde va.
+</p>
+
+<div class="pista">
+  <code>sys.getsizeof</code> mide el objeto en sí, no lo que apunta. Para medir
+  de verdad el pico de memoria de un proceso, usa <code>tracemalloc</code> — lo
+  harás en el ejercicio.
+</div>
+
+<h3>Y el ahorro de tiempo</h3>
+
+<pre><code># Ansioso: calcula el millón, luego coge 3
+primeros = [x**2 for x in range(1_000_000)][:3]
+
+# Perezoso: calcula 3
+from itertools import islice
+primeros = list(islice((x**2 for x in range(1_000_000)), 3))
+</code></pre>
+
+<div class="clave">
+  Con la evaluación perezosa el coste deja de depender del tamaño de la fuente
+  y pasa a depender de <strong>cuánto consumes</strong>. Eso es lo que permite
+  trabajar con secuencias infinitas sin que el ordenador arda.
+</div>
+
+<hr>
+
+<h2>Secuencias infinitas</h2>
+
+<pre><code>def naturales():
+    n = 0
+    while True:          # sí, un bucle infinito. Y no pasa nada.
+        yield n
+        n += 1
+
+def fibonacci():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+</code></pre>
+
+<p>El generador no se ejecuta solo; sólo avanza cuando le pides. Así que basta
+con parar de pedir:</p>
+
+<pre><code>from itertools import islice
+
+print(list(islice(fibonacci(), 10)))
+# [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+
+primer_fib_grande = next(f for f in fibonacci() if f &gt; 1_000_000)
+# 1346269 — y se detuvo justo ahí
+</code></pre>
+
+<div class="pista">
+  <strong>Nunca</strong> hagas <code>list(fibonacci())</code>,
+  <code>len(...)</code>, <code>sorted(...)</code> ni <code>in</code> sobre un
+  generador infinito: intentan consumirlo entero y no termina jamás.
+  Combínalos siempre con <code>islice</code>, <code>takewhile</code> (lección
+  016) o un <code>next()</code> con condición.
+</div>
+
+<hr>
+
+<h2>Pipelines: el patrón que justifica todo</h2>
+
+<p>
+  Aquí es donde generadores y programación funcional se encuentran. Cada etapa
+  es un generador que consume del anterior; ningún paso materializa la
+  colección completa.
+</p>
+
+<pre><code>def leer_lineas(ruta):
+    with open(ruta, encoding="utf-8") as f:
+        for linea in f:          # los ficheros YA son iterables perezosos
+            yield linea.rstrip("\n")
+
+def sin_comentarios(lineas):
+    for l in lineas:
+        if not l.startswith("#"):
+            yield l
+
+def sin_vacias(lineas):
+    for l in lineas:
+        if l.strip():
+            yield l
+
+def a_registro(lineas):
+    for l in lineas:
+        campos = l.split(";")
+        yield {"nombre": campos[0], "nota": float(campos[1])}
+
+
+# Montaje del pipeline: aún no se ha leído ni un byte del fichero
+registros = a_registro(sin_vacias(sin_comentarios(leer_lineas("datos.csv"))))
+
+# Sólo aquí empieza a fluir, línea a línea, con 1 línea en memoria a la vez
+aprobados = [r for r in registros if r["nota"] &gt;= 5]
+</code></pre>
+
+<div class="clave">
+  Ese fichero puede tener 40 GB. El pico de memoria del pipeline es
+  <em>una línea</em>. Y cada etapa es una función corta, pura y testeable por
+  separado — exactamente el "núcleo funcional" de la lección 011, ahora
+  aplicado a un flujo.
+</div>
+
+<hr>
+
+<h2>La trampa: los generadores se agotan</h2>
+
+<p>Este es el precio de la pereza, y hay que conocerlo:</p>
+
+<pre><code>g = (x for x in range(3))
+
+print(list(g))   # [0, 1, 2]
+print(list(g))   # []           😱 se ha vaciado
+
+print(len(g))    # TypeError: no tiene longitud
+print(g[0])      # TypeError: no es indexable
+</code></pre>
+
+<div class="regla">
+  <p>Un generador es un <strong>flujo de un solo uso</strong>, no una
+  colección. Si necesitas recorrerlo dos veces, indexarlo, o saber cuántos
+  elementos tiene, materialízalo: <code>datos = list(g)</code>.</p>
+</div>
+
+<hr>
+
+<h2><code>yield from</code>: delegar</h2>
+
+<pre><code>def aplanar(anidado):
+    for elemento in anidado:
+        if isinstance(elemento, list):
+            yield from aplanar(elemento)   # delega en la llamada recursiva
+        else:
+            yield elemento
+
+list(aplanar([1, [2, [3, [4, 5]], 6], 7]))   # [1, 2, 3, 4, 5, 6, 7]
+</code></pre>
+
+<p>
+  <code>yield from otro_iterable</code> equivale a <code>for x in
+  otro_iterable: yield x</code>, pero más corto y — en el caso recursivo —
+  bastante más claro.
+</p>
+
+<hr>
+
+<h2>Cuándo NO usar generadores</h2>
+
+<table>
+<tr><th>Situación</th><th>Usa</th></tr>
+<tr><td>Vas a recorrer los datos más de una vez</td><td>Lista</td></tr>
+<tr><td>Necesitas <code>len()</code>, índices o <em>slicing</em></td><td>Lista</td></tr>
+<tr><td>La colección es pequeña y conocida (20 candidatos)</td><td>Lista — la pereza sólo añade ruido</td></tr>
+<tr><td>Vas a ordenar el resultado igualmente</td><td>Lista — <code>sorted()</code> lo materializa de todas formas</td></tr>
+<tr><td>Fuente grande, infinita, o lenta (fichero, API, BD)</td><td><strong>Generador</strong></td></tr>
+<tr><td>Sólo necesitas los primeros N</td><td><strong>Generador</strong> + <code>islice</code></td></tr>
+<tr><td>Pipeline de varias etapas de transformación</td><td><strong>Generador</strong></td></tr>
+</table>
+
+<div class="pista">
+  Excepción cómoda: cuando el generador es el único argumento de una función,
+  puedes omitir sus paréntesis. <code>sum(x**2 for x in numeros)</code> es más
+  limpio — y más eficiente — que <code>sum([x**2 for x in numeros])</code>,
+  porque nunca construye la lista intermedia.
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Un pipeline que no cabe en memoria</h3>
+<p>
+  Escribirás tus propios generadores (<code>fibonacci</code>,
+  <code>naturales</code>, un lector de fichero línea a línea), medirás el
+  ahorro real con <code>sys.getsizeof</code> y <code>tracemalloc</code>, y
+  montarás un pipeline de cuatro etapas sobre un CSV generado al vuelo de
+  100.000 filas — comprobando que el pico de memoria no crece con el tamaño
+  del fichero.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/014-generadores.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> ya tienes funciones puras, composición y
+  flujos perezosos. Ahora la librería estándar te da las piezas que faltan para
+  no reinventarlas:
+  <a href="015-functools.html">015 — El módulo <code>functools</code></a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="013-lambda-map-filter-y-comprehensions.html">← Anterior: 013</a>
+    <a href="015-functools.html">Siguiente: 015 — functools →</a>
+  </span>
+</nav>
+
+</body>
+</html>

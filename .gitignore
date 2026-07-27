@@ -1,0 +1,15 @@
+# Entorno virtual
+venv/
+__pycache__/
+*.pyc
+
+# Sistema
+.DS_Store
+.ipynb_checkpoints/
+
+# Editor / IDE (configuración personal, no compartida)
+.vscode/
+.claude/settings.local.json
+
+# Datos generados en pruebas locales
+peticiones.db

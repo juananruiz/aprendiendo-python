@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 11: Funciones puras e inmutabilidad</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="index.html">Pista 4 — inicio</a>
+    <a href="012-funciones-de-primera-clase-y-composicion.html">Siguiente: 012 — Primera clase y composición →</a>
+  </span>
+</nav>
+
+<h1>Funciones puras e inmutabilidad</h1>
+<p class="subtitle">Pista 4, lección 1 — el cambio de aires empieza aquí</p>
+
+<div class="historia">
+  <p>
+    En 1936, dos personas resolvieron el mismo problema de dos maneras
+    incompatibles. Alan Turing imaginó una máquina con una cinta: un estado que
+    se lee, se modifica y se vuelve a escribir, paso a paso. Alonzo Church
+    imaginó el <em>cálculo lambda</em>: sólo funciones, aplicadas unas a otras,
+    sin ninguna cinta que modificar.
+  </p>
+  <p>
+    Ambos modelos calculan exactamente lo mismo. Pero de la máquina de Turing
+    salieron C, Java, PHP y el Python que ya escribes. Del cálculo lambda
+    salieron Lisp, Haskell y el Python que vas a aprender en esta pista.
+  </p>
+</div>
+
+<h2>Por qué estás aquí</h2>
+
+<p>
+  En PHP trabajas en modo objeto: creas un <code>$empleado</code>, le cambias
+  el estado con <code>$empleado-&gt;setDestino(...)</code>, y el objeto
+  <em>recuerda</em> lo que le ha pasado. Ese es el mundo de Turing: hay una
+  cinta, y la vas modificando.
+</p>
+
+<p>
+  La programación funcional dice algo casi ofensivo: <strong>no cambies nada
+  nunca</strong>. En lugar de modificar el empleado, produce un empleado nuevo.
+  En lugar de acumular en una variable, devuelve un valor. En lugar de tener
+  estado, ten funciones.
+</p>
+
+<div class="clave">
+  Esta pista no es sobre sintaxis de Python. Es sobre desactivar un reflejo
+  mental que llevas años entrenando, para poder elegir conscientemente cuándo
+  usarlo.
+</div>
+
+<hr>
+
+<h2>Qué es una función pura</h2>
+
+<p>Una función es <strong>pura</strong> si cumple dos condiciones:</p>
+
+<div class="regla">
+  <p><strong>1. Determinismo.</strong> Con los mismos argumentos, siempre
+  devuelve el mismo resultado. Siempre. Sin excepciones ni «depende».</p>
+  <p><strong>2. Sin efectos secundarios.</strong> No modifica nada fuera de sí
+  misma: ni variables globales, ni sus propios argumentos, ni ficheros, ni la
+  base de datos, ni la pantalla.</p>
+</div>
+
+<p>Una función pura, vista desde fuera, es indistinguible de una tabla de
+consulta. Podrías sustituirla por un diccionario gigante con todas las
+respuestas precalculadas y el programa se comportaría igual. Eso se llama
+<em>transparencia referencial</em>, y es la propiedad de la que sale todo lo
+demás.</p>
+
+<h3>Pura</h3>
+
+<pre><code>def puntuacion_total(experiencia, formacion, idiomas):
+    """Baremo de una oposición. Mismos méritos → misma nota. Siempre."""
+    return experiencia * 0.5 + formacion * 0.3 + idiomas * 0.2
+</code></pre>
+
+<p>Llámala mil veces con los mismos números y obtendrás mil veces lo mismo. No
+importa el orden en que la llames, ni cuántas veces, ni desde qué hilo.</p>
+
+<h3>Impura — tres formas de romperlo</h3>
+
+<pre><code>total = 0
+
+def acumular(nota):
+    global total
+    total += nota        # ❌ efecto secundario: toca una variable de fuera
+    return total         # ❌ y por eso ya no es determinista
+</code></pre>
+
+<pre><code>from datetime import date
+
+def antiguedad(fecha_ingreso):
+    return date.today().year - fecha_ingreso.year   # ❌ no determinista
+</code></pre>
+
+<p>Esta última es especialmente traicionera: no modifica nada, pero <em>lee</em>
+del mundo exterior. Hoy devuelve 12, el 1 de enero devolverá 13. No puedes
+escribir un test estable sobre ella.</p>
+
+<div class="pista">
+  <strong>La versión pura</strong> es recibir el dato en vez de ir a buscarlo:
+  <code>def antiguedad(fecha_ingreso, hoy): return hoy.year - fecha_ingreso.year</code>.
+  El impuro pasa a ser quien la llama — y eso es exactamente lo que queremos:
+  <em>empujar la impureza hacia los bordes del programa</em>.
+</div>
+
+<pre><code>def ordenar_candidatos(candidatos):
+    candidatos.sort(key=lambda c: c["nota"])   # ❌ muta el argumento
+    return candidatos
+</code></pre>
+
+<p>
+  Esta tercera es la que más disgustos da en Python. Quien llama a
+  <code>ordenar_candidatos(mi_lista)</code> espera recibir una lista ordenada
+  — y no espera que <code>mi_lista</code> haya cambiado a su espalda. La
+  versión pura usa <code>sorted()</code>, que devuelve una lista nueva:
+</p>
+
+<pre><code>def ordenar_candidatos(candidatos):
+    return sorted(candidatos, key=lambda c: c["nota"])   # ✅ lista nueva
+</code></pre>
+
+<div class="clave">
+  Regla mnemotécnica de la librería estándar: <strong>los métodos que mutan
+  devuelven <code>None</code></strong> (<code>lista.sort()</code>,
+  <code>lista.append()</code>, <code>lista.reverse()</code>). Las funciones
+  puras devuelven el resultado (<code>sorted()</code>, <code>reversed()</code>,
+  <code>lista + [x]</code>). Si escribes <code>x = lista.sort()</code> y te
+  sale <code>None</code>, acabas de tropezar con esta regla.
+</div>
+
+<hr>
+
+<h2>Qué te compra la pureza</h2>
+
+<table>
+<tr><th>Propiedad</th><th>Por qué te importa</th></tr>
+<tr>
+  <td><strong>Testeable</strong></td>
+  <td>Sin <em>mocks</em>, sin base de datos, sin fixtures. Entrada → salida.
+  Es la Pista 3 de testing hecha trivial.</td>
+</tr>
+<tr>
+  <td><strong>Razonable en local</strong></td>
+  <td>Para entender la función te basta con leer la función. No tienes que
+  reconstruir mentalmente el estado del programa.</td>
+</tr>
+<tr>
+  <td><strong>Cacheable</strong></td>
+  <td>Si el resultado sólo depende de los argumentos, se puede memorizar. Eso
+  es literalmente <code>@lru_cache</code> (lección 015), y <strong>sólo es
+  correcto sobre funciones puras</strong>.</td>
+</tr>
+<tr>
+  <td><strong>Paralelizable</strong></td>
+  <td>Sin estado compartido no hay condiciones de carrera. Se acabaron los
+  <em>locks</em>.</td>
+</tr>
+<tr>
+  <td><strong>Componible</strong></td>
+  <td>Puedes encadenarlas sin miedo, porque ninguna sabota a la siguiente.
+  Es el tema de la lección 012.</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Inmutabilidad</h2>
+
+<p>
+  La pureza es una propiedad de las <em>funciones</em>. La inmutabilidad es la
+  propiedad de los <em>datos</em> que la hace fácil de conseguir: si tus datos
+  no se pueden cambiar, ninguna función puede mutarlos por accidente.
+</p>
+
+<p>Python ya te da los dos grupos:</p>
+
+<table>
+<tr><th>Inmutables</th><th>Mutables</th></tr>
+<tr>
+  <td><code>int</code>, <code>float</code>, <code>str</code>, <code>bool</code>,
+  <code>tuple</code>, <code>frozenset</code>, <code>bytes</code></td>
+  <td><code>list</code>, <code>dict</code>, <code>set</code>,
+  <code>bytearray</code>, la mayoría de tus clases</td>
+</tr>
+</table>
+
+<pre><code>nombre = "ana"
+nombre.upper()        # devuelve "ANA" — NO modifica nombre
+print(nombre)         # "ana"  ← los strings son inmutables
+
+notas = [7, 9, 5]
+notas.append(8)       # SÍ modifica notas
+print(notas)          # [7, 9, 5, 8]  ← las listas son mutables
+</code></pre>
+
+<h3>Crear en vez de mutar</h3>
+
+<pre><code># Estilo imperativo: modificar en el sitio
+candidato["destino"] = "Sevilla"
+
+# Estilo funcional: construir uno nuevo
+candidato_asignado = {**candidato, "destino": "Sevilla"}
+</code></pre>
+
+<p>El operador <code>**</code> desempaqueta el diccionario original y las claves
+que escribes después ganan. El original queda intacto. Para listas:</p>
+
+<pre><code>asignados_ahora = [*asignados, nuevo]     # en vez de asignados.append(nuevo)
+sin_el_primero  = pendientes[1:]          # en vez de pendientes.pop(0)
+ordenados       = sorted(candidatos, key=...)   # en vez de candidatos.sort()
+</code></pre>
+
+<div class="pista">
+  <strong>«Pero eso copia toda la lista, será lentísimo».</strong> A veces sí,
+  y por eso el <code>deque</code> de la lección 003 existe. Pero antes de
+  optimizar, mide: para las decenas o cientos de elementos con los que trabajas
+  en una asignación de plazas, el coste es irrelevante y la claridad que ganas
+  no lo es. La optimización prematura sigue siendo la raíz de todo mal.
+</div>
+
+<h3>Tuplas y <code>frozenset</code></h3>
+
+<pre><code>plaza = ("Sevilla", "A2", 3)      # tupla: no se puede tocar
+plaza[0] = "Cádiz"                # TypeError
+
+# Bonus: sólo lo inmutable puede ser clave de un dict o elemento de un set
+preferencias = {("Sevilla", "A2"): 1, ("Cádiz", "A2"): 2}   # ✅
+preferencias = {["Sevilla", "A2"]: 1}                        # TypeError ❌
+</code></pre>
+
+<div class="clave">
+  Un objeto es <em>hashable</em> (usable como clave) sólo si es inmutable. No
+  es una restricción arbitraria: si la clave pudiera cambiar, el diccionario ya
+  no sabría en qué cajón la guardó.
+</div>
+
+<h3>Clases inmutables: <code>frozen=True</code></h3>
+
+<p>Cuando necesites un objeto con campos con nombre pero sin estado mutable:</p>
+
+<pre><code>from dataclasses import dataclass, replace
+
+@dataclass(frozen=True)
+class Candidato:
+    nombre: str
+    nota: float
+
+c = Candidato("Ana", 8.5)
+c.nota = 9.0                      # FrozenInstanceError ❌
+c2 = replace(c, nota=9.0)         # ✅ devuelve un Candidato NUEVO
+</code></pre>
+
+<p>
+  Compáralo con lo que harías en PHP: una clase con <code>private $nota</code>
+  y un <code>setNota()</code>. Aquí no hay <em>setter</em> porque no hay nada
+  que <em>setear</em>: hay una fábrica de versiones nuevas.
+</p>
+
+<hr>
+
+<h2>El gotcha: argumentos por defecto mutables</h2>
+
+<p>
+  Este es el error clásico de Python, y es exactamente un fallo de
+  inmutabilidad. Léelo despacio:
+</p>
+
+<pre><code>def registrar(nombre, historial=[]):     # ❌ TRAMPA
+    historial.append(nombre)
+    return historial
+
+print(registrar("Ana"))     # ['Ana']
+print(registrar("Carlos"))  # ['Ana', 'Carlos']  😱 ¿de dónde sale Ana?
+</code></pre>
+
+<p>
+  El valor por defecto se evalúa <strong>una sola vez</strong>, cuando Python
+  define la función — no cada vez que la llamas. Esa lista es un único objeto
+  compartido por todas las llamadas, y al mutarla lo arrastras entre llamadas.
+</p>
+
+<pre><code>def registrar(nombre, historial=None):   # ✅ el idioma correcto
+    historial = historial or []
+    return [*historial, nombre]          # y además, sin mutar nada
+</code></pre>
+
+<div class="clave">
+  Si nunca mutas los argumentos, este bug no puede existir. El estilo funcional
+  no es sólo elegante: elimina categorías enteras de error por construcción.
+</div>
+
+<hr>
+
+<h2>Cuándo NO ser purista</h2>
+
+<p>
+  Un programa 100 % puro no sirve para nada: no imprime, no guarda, no lee. Los
+  efectos secundarios <em>son</em> el objetivo del programa. Lo que buscamos no
+  es eliminarlos, sino <strong>concentrarlos</strong>:
+</p>
+
+<div class="regla">
+  <p><strong>Núcleo funcional, cáscara imperativa.</strong> El corazón que
+  calcula es puro y se testea trivialmente. La cáscara fina que lee ficheros,
+  llama a APIs e imprime es impura y se testea con integración.</p>
+</div>
+
+<pre><code>def main():                                    # cáscara: impura
+    datos = leer_csv("candidatos.csv")         # ← efecto: I/O
+    resultado = asignar_plazas(datos)          # ← núcleo: 100 % puro
+    escribir_csv("asignacion.csv", resultado)  # ← efecto: I/O
+</code></pre>
+
+<p>
+  Fíjate en la asimetría: <code>asignar_plazas</code> puede tener 300 líneas de
+  lógica delicada y se testea sin tocar el disco. Las dos líneas impuras son
+  triviales. Eso es todo el truco.
+</p>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Depurar la impureza</h3>
+<p>
+  Vas a recibir un puñado de funciones impuras — con estado global, con
+  mutación de argumentos, con el gotcha del argumento por defecto — y tu
+  trabajo es reescribirlas puras sin cambiar lo que hacen. Después, montarás
+  un mini-baremo con <code>@dataclass(frozen=True)</code> y comprobarás que
+  el original nunca cambia.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/011-funciones-puras.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> ya sabes escribir funciones que no
+  ensucian. Ahora vamos a tratarlas como lo que en Python siempre han sido —
+  valores que puedes guardar, pasar y devolver:
+  <a href="012-funciones-de-primera-clase-y-composicion.html">012 — Funciones de primera clase y composición</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="index.html">Pista 4 — inicio</a>
+    <a href="012-funciones-de-primera-clase-y-composicion.html">Siguiente: 012 — Primera clase y composición →</a>
+  </span>
+</nav>
+
+</body>
+</html>

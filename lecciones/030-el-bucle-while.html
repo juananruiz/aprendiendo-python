@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 30: El bucle while, de arriba abajo</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="index.html">Pista 3 — fundamentos</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+<h1>El bucle <code>while</code>, de arriba abajo</h1>
+<p class="subtitle">Todos los patrones, de un vistazo — y por qué ya has usado casi todos sin darte cuenta</p>
+
+<p>
+  Ya usas <code>while</code> desde tus primeros scripts. Esta lección no te
+  enseña la sintaxis básica (eso ya lo tienes marcado como hecho en el
+  ROADMAP) — te enseña <strong>el espectro completo</strong>: los patrones
+  con los que aparece en código real, incluido el tuyo, y los dos huecos que
+  seguían sin marcar: <code>while/else</code> y el trío
+  <code>break</code>/<code>continue</code>/<code>pass</code>.
+</p>
+
+<hr>
+
+<h2>Lo único que <code>while</code> hace de verdad</h2>
+
+<div class="clave">
+  Antes de <strong>cada</strong> vuelta (incluida la primera), Python evalúa
+  la condición. Si es verdadera, ejecuta el cuerpo y vuelve a evaluar. Si es
+  falsa, sale. Eso es <strong>todo</strong> lo que hace un <code>while</code>.
+  Todo lo demás en esta lección son formas de rellenar esa condición.
+</div>
+
+<pre><code>while condicion:
+    # cuerpo — se repite mientras condicion sea True
+</code></pre>
+
+<div class="pista">
+  A diferencia de otros lenguajes, Python <strong>no tiene</strong>
+  <code>do...while</code> (ejecutar el cuerpo al menos una vez, y comprobar
+  la condición al final). Si lo necesitas, lo simulas con
+  <code>while True</code> y un <code>break</code> al final del cuerpo — lo
+  ves en la sección 3.
+</div>
+
+<hr>
+
+<h2>1. Patrón contador</h2>
+
+<p>El que ya conoces: una variable que avanza en cada vuelta hasta cumplir una condición numérica.</p>
+
+<pre><code>i = 0
+while i < 5:
+    print(i)
+    i += 1     # si olvidas esta línea, bucle infinito — ver sección 7
+</code></pre>
+
+<hr>
+
+<h2>2. Patrón centinela</h2>
+
+<p>
+  Procesas datos hasta encontrar un valor especial ("centinela") que marca
+  el final — típico al leer datos de usuario o de un stream, sin saber de
+  antemano cuántos van a llegar.
+</p>
+
+<pre><code>total = 0
+i = 0
+while i < len(numeros) and numeros[i] != -1:   # -1 es el centinela
+    total += numeros[i]
+    i += 1
+</code></pre>
+
+<div class="pista">
+  El orden de la condición <strong>importa</strong>:
+  <code>i &lt; len(numeros) and numeros[i] != -1</code> funciona porque
+  Python evalúa <code>and</code> de izquierda a derecha y para en cuanto
+  algo es falso (<em>short-circuit</em>). Si lo escribieras al revés,
+  <code>numeros[i] != -1 and i &lt; len(numeros)</code>, podrías acceder a
+  <code>numeros[i]</code> con un <code>i</code> ya fuera de rango.
+</div>
+
+<hr>
+
+<h2>3. Patrón bandera (flag)</h2>
+
+<p>
+  Una variable booleana que resume "¿debo seguir?". Ya lo usaste tú mismo,
+  sin ponerle nombre, en <code>algoritmos/orden_burbuja.py</code>:
+</p>
+
+<pre><code>cambio = True
+while cambio:
+    cambio = False
+    for i in range(n - 1):
+        if lista[i] > lista[i + 1]:
+            lista[i], lista[i + 1] = lista[i + 1], lista[i]
+            cambio = True   # si hubo un intercambio, hace falta otra vuelta
+</code></pre>
+
+<p>
+  La bandera <code>cambio</code> responde a una pregunta que un simple
+  contador no puede responder: <em>"¿ha pasado algo interesante en esta
+  vuelta?"</em>. Mientras la respuesta sea sí, sigues.
+</p>
+
+<hr>
+
+<h2>3.5. <code>while True</code> + <code>break</code>: el bucle sin condición de entrada</h2>
+
+<p>
+  A veces no sabes de antemano cuántas vueltas harán falta, y la condición
+  de parada solo se puede comprobar <strong>dentro</strong> del cuerpo. Ahí
+  usas <code>while True</code> (siempre verdadero) y sales con
+  <code>break</code> — o, como aquí, con <code>return</code>. Ya lo hiciste
+  en <code>algoritmos/babylonian_square_root.py</code>:
+</p>
+
+<pre><code>def babylonian_squareroot(n):
+    guess = n / 2.0
+    while True:
+        better_guess = (guess + n / guess) / 2.0
+        if math.isclose(guess, better_guess):
+            return better_guess   # la condición de parada vive AQUÍ dentro
+        guess = better_guess
+</code></pre>
+
+<div class="clave">
+  Esto <strong>es</strong> el <code>do...while</code> que Python no tiene:
+  el cuerpo se ejecuta siempre al menos una vez, y la decisión de parar se
+  toma al final de cada vuelta, con toda la información fresca de esa
+  vuelta.
+</div>
+
+<hr>
+
+<h2>4. <code>break</code>, <code>continue</code> y <code>pass</code></h2>
+
+<table>
+<tr><th>Palabra</th><th>Qué hace</th></tr>
+<tr><td><code>break</code></td><td>Sale del bucle inmediatamente, sin terminar la vuelta actual ni volver a comprobar la condición</td></tr>
+<tr><td><code>continue</code></td><td>Salta el resto del cuerpo de <strong>esta</strong> vuelta y va directo a comprobar la condición de la siguiente</td></tr>
+<tr><td><code>pass</code></td><td>No hace nada. Es un "cuerpo vacío" — un marcador de sitio para código que aún no has escrito</td></tr>
+</table>
+
+<pre><code>i = 0
+while i < 10:
+    i += 1
+    if i == 3:
+        continue      # salta el print de este 3, pero sigue el bucle
+    if i == 7:
+        break         # sale del todo al llegar a 7
+    print(i)
+# Imprime: 1 2 4 5 6
+</code></pre>
+
+<div class="pista">
+  <code>pass</code> no tiene nada que ver con controlar el flujo de un
+  bucle — es simplemente la forma de decir "aquí no hay nada, pero
+  sintácticamente necesito algo". Verás mucho <code>pass</code> en los
+  esqueletos de ejercicio de este sitio, marcando dónde falta tu código.
+</div>
+
+<hr>
+
+<h2>5. <code>while</code> / <code>else</code></h2>
+
+<div class="regla">
+  El bloque <code>else</code> de un <code>while</code> se ejecuta
+  <strong>solo si el bucle terminó porque la condición se volvió falsa</strong>
+  — nunca si terminó por un <code>break</code>.
+</div>
+
+<p>Ya lo usaste en <code>algoritmos/busqueda_binaria_02.py</code>:</p>
+
+<pre><code>while min <= max:
+    posicion = (min + max) // 2
+    if numero == lista[posicion]:
+        print("Número encontrado")
+        break
+    elif numero > lista[posicion]:
+        min = posicion + 1
+    else:
+        max = posicion - 1
+else:
+    print("No se ha encontrado el elemento en la lista")
+</code></pre>
+
+<p>
+  Si encuentras el número, hay un <code>break</code> → el <code>else</code>
+  <strong>no</strong> se ejecuta. Si el bucle agota todas las posiciones sin
+  encontrarlo, la condición <code>min &lt;= max</code> se vuelve falsa por sí
+  sola → el <code>else</code> <strong>sí</strong> se ejecuta.
+</p>
+
+<div class="pista">
+  Mentalmente, lee <code>while ... else</code> como
+  <strong>"si no hubo break"</strong>. Es la traducción literal y evita la
+  confusión con el <code>else</code> de un <code>if</code>.
+</div>
+
+<hr>
+
+<h2>6. Bucles anidados</h2>
+
+<pre><code>fila = 0
+while fila < 3:
+    columna = 0
+    while columna < 3:
+        print(f"({fila},{columna})", end=" ")
+        columna += 1
+    print()
+    fila += 1
+</code></pre>
+
+<div class="pista">
+  <strong>Ojo con <code>break</code> en bucles anidados:</strong> solo sale
+  del <code>while</code> más interno, no de los dos. Si necesitas salir de
+  ambos de golpe, lo habitual es usar una bandera comprobada también en el
+  bucle exterior, o extraer el bucle interno a una función y hacer
+  <code>return</code>.
+</div>
+
+<hr>
+
+<h2>7. El bug clásico: el bucle infinito de verdad</h2>
+
+<p>
+  Todos los patrones de arriba comparten un riesgo: si <strong>nada</strong>
+  dentro del cuerpo cambia el resultado de la condición, el bucle no termina
+  nunca.
+</p>
+
+<pre><code># ❌ Bucle infinito: falta actualizar i
+i = 0
+while i < 5:
+    print(i)
+    # i += 1   ← si esta línea no está, i siempre vale 0, la condición
+    #            siempre es True, y esto no termina jamás
+</code></pre>
+
+<div class="clave">
+  <strong>Checklist mental</strong> antes de ejecutar cualquier
+  <code>while</code> que hayas escrito tú: ¿hay, dentro del cuerpo, al
+  menos una línea que <strong>cambia</strong> alguna variable que aparece
+  en la condición? Si la respuesta es no, tienes un bucle infinito
+  garantizado.
+</div>
+
+<hr>
+
+<h2><code>while</code> vs <code>for</code>: cuándo usar cada uno</h2>
+
+<table>
+<tr><th>Usa <code>for</code> cuando...</th><th>Usa <code>while</code> cuando...</th></tr>
+<tr><td>Sabes de antemano sobre qué vas a iterar (una lista, un <code>range()</code>)</td><td>No sabes cuántas vueltas harán falta — depende de una condición que se decide en marcha</td></tr>
+<tr><td>Recorres una colección entera</td><td>Esperas una condición externa: convergencia, entrada de usuario, un centinela</td></tr>
+</table>
+
+<p>
+  Regla rápida: si en algún momento piensas "voy a llevar la cuenta yo mismo
+  de en qué posición estoy", probablemente deberías estar usando
+  <code>for</code> con <code>enumerate()</code> (lección 0001) en vez de un
+  <code>while</code> con un contador manual.
+</p>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Los seis patrones, en código</h3>
+<p>
+  Un ejercicio por patrón: contador, centinela, bandera, <code>while
+  True</code> + <code>break</code>, <code>while</code>/<code>else</code>, y
+  arreglar un bucle infinito real (protegido con una guarda de seguridad
+  para que no te cuelgue el intérprete mientras lo depuras).
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/030-el-bucle-while.py</code></p>
+</div>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="index.html">Pista 3 — fundamentos</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+</body>
+</html>

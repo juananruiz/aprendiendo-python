@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 17: Decoradores de propósito general</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="016-itertools.html">← Anterior: 016</a>
+    <a href="index.html">Pista 4 — proyecto insignia →</a>
+  </span>
+</nav>
+
+<h1>Decoradores de propósito general</h1>
+<p class="subtitle">Pista 4, lección 7 — funciones que envuelven funciones</p>
+
+<p>
+  Los decoradores son la cara visible de la programación funcional en el Python
+  cotidiano: los ves en Flask, en pytest, en FastAPI, en SQLAlchemy. Y, aunque
+  parecen magia, no hay nada nuevo en ellos. Son closures (lección 012) de
+  orden superior, servidos con azúcar sintáctico.
+</p>
+
+<hr>
+
+<h2>El azúcar</h2>
+
+<div class="regla">
+  <p>
+    <code>@decorador</code> encima de un <code>def</code> significa
+    exactamente esto:
+  </p>
+  <p style="margin-top:0.4em">
+    <code>mi_funcion = decorador(mi_funcion)</code>
+  </p>
+</div>
+
+<pre><code># Estas dos formas son idénticas:
+
+@cronometrar
+def calcular():
+    ...
+
+# ---
+
+def calcular():
+    ...
+calcular = cronometrar(calcular)
+</code></pre>
+
+<p>
+  Eso es todo. La <code>@</code> ahorra escribir el nombre tres veces y pone la
+  intención arriba, donde se ve. No hay nada más.
+</p>
+
+<hr>
+
+<h2>Construyendo uno, paso a paso</h2>
+
+<p>Objetivo: un decorador que mida cuánto tarda una función.</p>
+
+<h3>Paso 1 — una función que recibe una función</h3>
+
+<pre><code>def cronometrar(funcion):
+    ...
+    return algo
+</code></pre>
+
+<p>
+  Tiene que devolver <em>algo llamable</em>, porque quien use
+  <code>calcular()</code> espera poder llamarlo igual que antes.
+</p>
+
+<h3>Paso 2 — el envoltorio</h3>
+
+<pre><code>def cronometrar(funcion):
+    def envoltorio():
+        return funcion()
+    return envoltorio
+</code></pre>
+
+<p>
+  Ya funciona… para funciones sin argumentos. Insuficiente.
+</p>
+
+<h3>Paso 3 — aceptar cualquier firma</h3>
+
+<pre><code>def cronometrar(funcion):
+    def envoltorio(*args, **kwargs):
+        return funcion(*args, **kwargs)
+    return envoltorio
+</code></pre>
+
+<div class="clave">
+  <code>*args, **kwargs</code> es lo que hace que un decorador sea de
+  <strong>propósito general</strong>: recoge cualquier combinación de
+  argumentos posicionales y nombrados, y los reenvía intactos. Sin esto, tu
+  decorador sólo sirve para una firma concreta.
+</div>
+
+<h3>Paso 4 — hacer algo antes y después</h3>
+
+<pre><code>import time
+
+def cronometrar(funcion):
+    def envoltorio(*args, **kwargs):
+        inicio = time.perf_counter()
+        resultado = funcion(*args, **kwargs)      # ← no olvides el resultado
+        transcurrido = time.perf_counter() - inicio
+        print(f"{funcion.__name__} tardó {transcurrido:.4f}s")
+        return resultado                          # ← ni devolverlo
+    return envoltorio
+</code></pre>
+
+<div class="pista">
+  <strong>Los dos olvidos clásicos:</strong> no capturar el resultado de la
+  función envuelta, o no devolverlo. En ambos casos tu función decorada empieza
+  a devolver <code>None</code> silenciosamente. Si un decorador "rompe" algo,
+  mira primero el <code>return</code>.
+</div>
+
+<h3>Paso 5 — <code>@wraps</code>, siempre</h3>
+
+<pre><code>from functools import wraps
+
+def cronometrar(funcion):
+    @wraps(funcion)
+    def envoltorio(*args, **kwargs):
+        inicio = time.perf_counter()
+        resultado = funcion(*args, **kwargs)
+        print(f"{funcion.__name__} tardó {time.perf_counter() - inicio:.4f}s")
+        return resultado
+    return envoltorio
+</code></pre>
+
+<p>
+  Sin <code>@wraps</code> perderías el nombre y el docstring de la función
+  original (lección 015). Este es el decorador terminado.
+</p>
+
+<hr>
+
+<h2>Decoradores con parámetros</h2>
+
+<p>
+  Ahora quieres <code>@reintentar(veces=3)</code>. Fíjate en el detalle: hay
+  <strong>paréntesis</strong>, o sea que <code>reintentar(veces=3)</code> se
+  ejecuta primero y <em>su resultado</em> es el decorador. Necesitas un nivel
+  más de anidamiento:
+</p>
+
+<div class="regla">
+  <p>
+    <code>@decorador</code> → 2 niveles: <em>decorador → envoltorio</em><br>
+    <code>@decorador(args)</code> → 3 niveles: <em>fábrica → decorador → envoltorio</em>
+  </p>
+</div>
+
+<pre><code>from functools import wraps
+import time
+
+def reintentar(veces=3, espera=1.0):
+    def decorador(funcion):                       # nivel 2
+        @wraps(funcion)
+        def envoltorio(*args, **kwargs):          # nivel 3
+            for intento in range(1, veces + 1):
+                try:
+                    return funcion(*args, **kwargs)
+                except Exception as e:
+                    if intento == veces:
+                        raise
+                    print(f"Intento {intento} falló ({e}). Reintentando…")
+                    time.sleep(espera)
+        return envoltorio
+    return decorador
+
+
+@reintentar(veces=5, espera=0.5)
+def consultar_api(url):
+    ...
+</code></pre>
+
+<p>Léelo de fuera hacia dentro:</p>
+
+<div class="output">reintentar(veces=5, espera=0.5)   →  devuelve `decorador`
+decorador(consultar_api)          →  devuelve `envoltorio`
+consultar_api                      =  envoltorio</div>
+
+<div class="pista">
+  <strong>Si quieres que funcione con y sin paréntesis</strong>
+  (<code>@reintentar</code> y <code>@reintentar(veces=5)</code>), hay que
+  detectar si el primer argumento es llamable. Es un truco conocido, pero añade
+  ruido: en la práctica, elige una de las dos formas y sé consistente.
+</div>
+
+<hr>
+
+<h2>Un catálogo útil</h2>
+
+<h3>Registro (el patrón de Flask)</h3>
+
+<pre><code>RUTAS = {}
+
+def ruta(camino):
+    def decorador(funcion):
+        RUTAS[camino] = funcion      # sólo registra; NO envuelve
+        return funcion               # devuelve la original intacta
+    return decorador
+
+@ruta("/candidatos")
+def listar_candidatos(): ...
+</code></pre>
+
+<p>
+  Aquí el decorador no modifica nada: usa el momento de la definición como
+  <em>gancho</em> para apuntarse en un diccionario. Es el diccionario de
+  funciones de la lección 012, poblado declarativamente. Así funcionan
+  <code>@app.route</code> de Flask y <code>@app.get</code> de FastAPI.
+</p>
+
+<h3>Validación de argumentos</h3>
+
+<pre><code>def validar_positivo(funcion):
+    @wraps(funcion)
+    def envoltorio(*args, **kwargs):
+        if any(isinstance(a, (int, float)) and a &lt; 0 for a in args):
+            raise ValueError(f"{funcion.__name__} no acepta negativos")
+        return funcion(*args, **kwargs)
+    return envoltorio
+</code></pre>
+
+<h3>Registro de llamadas (logging)</h3>
+
+<pre><code>def trazar(funcion):
+    @wraps(funcion)
+    def envoltorio(*args, **kwargs):
+        firma = ", ".join([*map(repr, args),
+                           *(f"{k}={v!r}" for k, v in kwargs.items())])
+        print(f"→ {funcion.__name__}({firma})")
+        resultado = funcion(*args, **kwargs)
+        print(f"← {resultado!r}")
+        return resultado
+    return envoltorio
+</code></pre>
+
+<h3>Apilar decoradores</h3>
+
+<pre><code>@cronometrar
+@trazar
+@validar_positivo
+def calcular_baremo(experiencia, formacion):
+    ...
+</code></pre>
+
+<p>
+  Se aplican <strong>de abajo arriba</strong>:
+  <code>cronometrar(trazar(validar_positivo(calcular_baremo)))</code>. Y se
+  <em>ejecutan</em> de arriba abajo: el cronómetro es el más externo, así que
+  mide también el tiempo de los otros dos.
+</p>
+
+<div class="clave">
+  El orden importa. <code>@cronometrar</code> encima de <code>@lru_cache</code>
+  mide los aciertos de caché (casi 0 s). <code>@lru_cache</code> encima de
+  <code>@cronometrar</code> cachea el resultado del cronometrado, y sólo verás
+  la medición la primera vez. Cuando un decorador apilado se comporte raro,
+  dibuja el orden de envoltura.
+</div>
+
+<hr>
+
+<h2>Dónde encaja esto en el paradigma</h2>
+
+<p>
+  Un decorador es <strong>composición de funciones</strong> (lección 012) con
+  otra cara: <code>decorador ∘ funcion</code>. Y sirve para lo que los
+  funcionales llaman <em>preocupaciones transversales</em> — cronometrar,
+  cachear, registrar, reintentar, autorizar — que en OOP resolverías con
+  herencia, mixins o programación orientada a aspectos.
+</p>
+
+<table>
+<tr><th>En PHP/OOP</th><th>Aquí</th></tr>
+<tr><td>Clase base con lógica común</td><td>Decorador aplicado a cada función</td></tr>
+<tr><td>Middleware de framework</td><td>Decorador</td></tr>
+<tr><td>Patrón Decorator (GoF) con interfaces</td><td>Decorador de una línea</td></tr>
+<tr><td>Anotaciones + reflexión</td><td>Decorador de registro</td></tr>
+</table>
+
+<div class="pista">
+  <strong>Cuándo NO decorar.</strong> Un decorador esconde código en la
+  distancia: leyendo <code>calcular_baremo()</code> no ves que hay tres capas
+  encima. Úsalos para lo transversal y genérico, nunca para lógica de negocio.
+  Si un decorador sólo se aplica a una función, probablemente querías
+  escribir esas líneas dentro de la función.
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Construye tu caja de decoradores</h3>
+<p>
+  Escribirás <code>@cronometrar</code>, <code>@trazar</code>,
+  <code>@contar_llamadas</code>, un <code>@reintentar(veces=3)</code>
+  paramétrico, un <code>@memoizar</code> hecho a mano (para ver qué hace
+  <code>lru_cache</code> por dentro) y un registro estilo Flask. Y comprobarás
+  con tus ojos qué cambia al invertir el orden de dos decoradores apilados.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/017-decoradores.py</code></p>
+</div>
+
+<hr>
+
+<h2>Proyecto insignia de la Pista 4</h2>
+
+<div class="ejercicio">
+<h3>Imperativo vs. funcional</h3>
+<p>
+  Con esto cierras el kit completo. El proyecto final del ROADMAP tiene tres
+  partes y está montado en un solo fichero:
+</p>
+<ol>
+  <li>Reescribir <code>algoritmos/orden_burbuja.py</code> y
+      <code>algoritmos/busqueda_binaria_01.py</code> en estilo funcional puro,
+      sin <code>for</code> ni <code>while</code> explícitos.</li>
+  <li>Montar un pipeline de datos completo encadenando funciones, sin
+      variables mutables intermedias.</li>
+  <li>Escribir la reflexión: dónde salió más claro el estilo funcional y
+      dónde fue forzar la nota.</li>
+</ol>
+<p>Esqueleto para teclear: <code>ejercicios/018-imperativo-vs-funcional.py</code></p>
+</div>
+
+<div class="clave">
+  El punto 3 es el más importante de toda la pista. El objetivo declarado en tu
+  MISSION no era «programar funcional», era <strong>tener criterio</strong>.
+  Una reescritura funcional que quede peor que el original es un resultado
+  igual de válido — siempre que sepas explicar por qué.
+</div>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="016-itertools.html">← Anterior: 016</a>
+    <a href="index.html">Índice →</a>
+  </span>
+</nav>
+
+</body>
+</html>

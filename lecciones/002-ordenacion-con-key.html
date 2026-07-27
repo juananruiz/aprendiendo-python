@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 2: Ordenación avanzada con sorted() y lambda</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="001-preferencias-con-diccionarios.html">← Anterior: 001</a>
+    <a href="003-deque-y-colas.html">Siguiente: 003 — Deque y colas →</a>
+  </span>
+</nav>
+
+<h1>Ordenación avanzada con <code>sorted()</code> y <code>lambda</code></h1>
+<p class="subtitle">El segundo ingrediente para generar rankings automáticamente</p>
+
+<h2><code>sorted()</code> — lo básico</h2>
+
+<pre><code>nums = [3, 1, 4, 1, 5, 9]
+sorted(nums)                    # → [1, 1, 3, 4, 5, 9]
+sorted(nums, reverse=True)     # → [9, 5, 4, 3, 1, 1]
+</code></pre>
+
+<p><code>sorted()</code> <strong>siempre devuelve una nueva lista</strong>. No modifica la original.</p>
+
+<h2>El parámetro <code>key</code></h2>
+
+<p><code>key</code> recibe una función que transforma cada elemento antes de comparar.</p>
+
+<pre><code>palabras = ["manzana", "pera", "kiwi", "sandía"]
+sorted(palabras, key=len)       # → ["kiwi", "pera", "manzana", "sandía"]
+</code></pre>
+
+<h2>Funciones lambda</h2>
+
+<p>Una lambda es una función anónima de una sola expresión:</p>
+
+<pre><code>lambda x: x[1]       # devuelve el segundo elemento de x
+lambda x: -x         # devuelve el negativo de x (para orden inverso numérico)
+lambda x: x["nota"]  # el valor de la clave "nota" de un dict
+</code></pre>
+
+<p>Equivalente a:</p>
+
+<pre><code>def extrae_nota(candidato):
+    return candidato["nota"]
+</code></pre>
+
+<div class="pista">
+  Esta lección es también donde vas a entrenar la <strong>Pista 4 —
+  Programación funcional</strong> del ROADMAP: una lambda es una función de
+  primera clase, y <code>key=</code> es exactamente pasar una función como
+  argumento a otra función.
+</div>
+
+<hr>
+
+<h2>Casos prácticos para matching</h2>
+
+<h3>Ordenar candidatos por puntuación (orden descendente)</h3>
+
+<pre><code>candidatos = [
+    {"nombre": "Ana",     "nota": 85},
+    {"nombre": "Carlos",  "nota": 92},
+    {"nombre": "Beatriz", "nota": 78},
+]
+
+ranking = sorted(candidatos, key=lambda c: c["nota"], reverse=True)
+# → [{"nombre": "Carlos", "nota": 92}, {"nombre": "Ana", "nota": 85}, ...]
+</code></pre>
+
+<h3>Ordenar destinos por preferencia del candidato</h3>
+
+<pre><code>preferencias = {"Ana": ["Madrid", "Barcelona", "Valencia"]}
+# Ya están ordenadas. Si vienen desordenadas con puntuaciones:
+puntuacion_destinos = {"Madrid": 10, "Barcelona": 8, "Valencia": 6}
+destinos_ordenados = sorted(
+    puntuacion_destinos.items(),
+    key=lambda d: d[1],
+    reverse=True
+)
+# → [("Madrid", 10), ("Barcelona", 8), ("Valencia", 6)]
+</code></pre>
+
+<h3>Varios criterios (estabilidad en empates)</h3>
+
+<pre><code>candidatos = [
+    {"nombre": "Ana",     "nota": 85, "edad": 30},
+    {"nombre": "Carlos",  "nota": 85, "edad": 28},
+    {"nombre": "Beatriz", "nota": 78, "edad": 32},
+]
+
+# Desempate: nota descendente, luego edad ascendente
+sorted(candidatos, key=lambda c: (-c["nota"], c["edad"]))
+</code></pre>
+
+<div class="pista">
+  <strong>El truco de <code>(-c["nota"], c["edad"])</code>:</strong> al
+  devolver una tupla, Python compara primero el primer elemento y solo
+  desempata con el segundo. El signo <code>-</code> invierte el orden
+  <em>solo</em> de ese criterio — útil cuando quieres nota descendente pero
+  edad ascendente <strong>a la vez</strong> (un único <code>reverse=True</code>
+  invertiría los dos).
+</div>
+
+<h2><code>list.sort()</code> vs <code>sorted()</code></h2>
+
+<ul>
+  <li><code>lista.sort()</code> — ordena in-place, devuelve <code>None</code>. Solo funciona en listas.</li>
+  <li><code>sorted()</code> — devuelve una nueva lista. Funciona con cualquier iterable.</li>
+</ul>
+
+<div class="clave">
+  <strong>Importante para Gale-Shapley.</strong> Vas a necesitar generar
+  rankings automáticamente a partir de datos numéricos. Acostúmbrate a
+  escribir lambdas que extraigan el campo que te interesa y a usar
+  <code>reverse=True</code> para orden descendente.
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Los patrones de ordenación que necesitarás</h3>
+<p>Cuatro bloques progresivos:</p>
+<ol>
+  <li>Ordenar un dict por valor, con desempate alfabético</li>
+  <li>Ordenar una lista de dicts por un campo <strong>anidado</strong></li>
+  <li>Asignar "puestos" tipo ranking de tenis, con empates compartiendo puesto</li>
+  <li>Encontrar el mejor candidato disponible para un destino</li>
+</ol>
+<p>Esqueleto para teclear: <code>ejercicios/002-ordenar-con-key.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> ya sabes generar y ordenar
+  preferencias. Ahora necesitas una estructura para ir procesando a los
+  participantes uno a uno — eso es
+  <a href="003-deque-y-colas.html">003 — Colas con <code>collections.deque</code></a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="001-preferencias-con-diccionarios.html">← Anterior: 001</a>
+    <a href="003-deque-y-colas.html">Siguiente: 003 — Deque y colas →</a>
+  </span>
+</nav>
+
+</body>
+</html>

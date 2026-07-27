@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 1: Slicing, enumerate y control de bucles</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+</nav>
+
+<h1>Slicing, enumerate y control de bucles</h1>
+<p class="subtitle">Tres herramientas de Python que harán tus algoritmos más limpios</p>
+
+<p>
+  Ya implementaste <a href="../algoritmos/busqueda_binaria_01.py">búsqueda binaria</a> y
+  <a href="../algoritmos/orden_burbuja.py">ordenamiento burbuja</a> — bien.
+  Ahora vamos a refinar <em>cómo</em> escribes esos bucles.
+  Estos tres patrones aparecen en cada algoritmo que implementes.
+</p>
+
+<hr>
+
+<h2>1. Slicing — rebanar listas</h2>
+
+<p>
+  El slicing te permite extraer sublistas sin bucles manuales.
+  Es una de las características más potentes de Python y aparece
+  constantemente en algoritmos de divide y vencerás (capítulo 4 de tu libro).
+</p>
+
+<p>La sintaxis: <code>lista[inicio:fin:paso]</code></p>
+
+<table>
+  <tr><th>Expresión</th><th>Resultado</th><th>Explicación</th></tr>
+  <tr><td><code>lista[1:4]</code></td><td><code>[20, 30, 40]</code></td><td>Desde índice 1 hasta 4 (excluido)</td></tr>
+  <tr><td><code>lista[:3]</code></td><td><code>[10, 20, 30]</code></td><td>Desde el inicio hasta 3</td></tr>
+  <tr><td><code>lista[3:]</code></td><td><code>[40, 50, 60]</code></td><td>Desde 3 hasta el final</td></tr>
+  <tr><td><code>lista[-2:]</code></td><td><code>[50, 60]</code></td><td>Últimos 2 elementos</td></tr>
+  <tr><td><code>lista[::2]</code></td><td><code>[10, 30, 50]</code></td><td>Cada 2 elementos</td></tr>
+  <tr><td><code>lista[::-1]</code></td><td><code>[60, 50, 40, 30, 20, 10]</code></td><td>Lista invertida</td></tr>
+</table>
+
+<p class="referencia">Referencia completa en <a href="../REFERENCIA_PYTHON/03_listas.md">03_listas.md</a></p>
+
+<h3>En algoritmos</h3>
+
+<p>
+  En <em>Quicksort</em> (capítulo 4), partirás listas en dos usando slicing.
+  En <em>Búsqueda binaria</em>, aunque tú usaste índices con <code>while</code>,
+  también podrías pensar en términos de "sub-lista izquierda" y "sub-lista derecha".
+</p>
+
+<pre><code># Ejemplo: partir una lista por la mitad
+lista = [2, 5, 8, 12, 16, 23, 38, 45]
+medio = len(lista) // 2
+izquierda = lista[:medio]   # [2, 5, 8, 12]
+derecha  = lista[medio:]    # [16, 23, 38, 45]
+
+
+# Obtener el último elemento sin saber su longitud
+ultimo = lista[-1]  # 45
+
+
+# Obtener todos menos el primero y el último
+medio = lista[1:-1]  # [5, 8, 12, 16, 23, 38]
+</code></pre>
+
+<div class="pista">
+  <strong>Cuidado:</strong> el slicing crea una <em>copia</em> de la sublista.
+  En listas grandes, hacer <code>lista[:]</code> repetidamente tiene coste O(n).
+  Para algoritmos de búsqueda binaria, es mejor usar índices como ya haces.
+</div>
+
+<hr>
+
+<h2>2. enumerate — índice y valor a la vez</h2>
+
+<p>
+  Cuando necesitas la posición <em>y</em> el elemento en un bucle,
+  <code>enumerate</code> evita el patrón feo de <code>range(len(lista))</code>.
+</p>
+
+<pre><code># Sin enumerate (el patrón que debes evitar):
+for i in range(len(lista)):
+    print(i, lista[i])
+
+# Con enumerate (Python idiomático):
+for i, valor in enumerate(lista):
+    print(i, valor)
+
+# Puedes empezar en otro número:
+for i, valor in enumerate(lista, start=1):
+    print(f"{i}: {valor}")   # empieza en 1 en vez de 0
+</code></pre>
+
+<h3>En algoritmos</h3>
+
+<p>
+  Tu script de <strong>burbuja</strong> tiene este error (línea 26):
+</p>
+
+<pre><code>lista[1], lista[i + 1] = lista[i + 1], lista[i]  # &#x2717; usa índice fijo 1
+</code></pre>
+
+<p>Debería ser <code>lista[i]</code> en vez de <code>lista[1]</code>. Este error
+  es menos probable si usas <code>enumerate</code> — porque el índice te lo da
+  el propio bucle.</p>
+
+<pre><code># Así sería más difícil equivocarse:
+for i, valor in enumerate(lista[:-1]):
+    if valor > lista[i + 1]:
+        lista[i], lista[i + 1] = lista[i + 1], valor
+</code></pre>
+
+<hr>
+
+<h2>3. break, continue y else en bucles</h2>
+
+<h3>break — salir del bucle</h3>
+<p>Ya lo usas en tu búsqueda binaria. Rompe el bucle inmediatamente.</p>
+
+<h3>continue — saltar iteración</h3>
+<p>Salta al siguiente ciclo sin ejecutar el resto del bloque.</p>
+
+<pre><code># Sumar solo números pares
+numeros = [3, 8, 2, 7, 10, 5]
+suma = 0
+for n in numeros:
+    if n % 2 != 0:
+        continue
+    suma += n
+print(suma)  # 20 (8 + 2 + 10)
+</code></pre>
+
+<h3>for/else — el bloque sorpresa</h3>
+<p>El <code>else</code> en un <code>for</code> se ejecuta si el bucle terminó
+  <strong>sin</strong> encontrar un <code>break</code>. Es como un "premio
+  por no haber roto el bucle".</p>
+
+<pre><code># Buscar si hay un número par en la lista
+numeros = [3, 7, 9, 11]
+for n in numeros:
+    if n % 2 == 0:
+        print("Encontrado par:", n)
+        break
+else:
+    print("No hay ningún par")  # &#x2190; esto se ejecuta
+</code></pre>
+
+<p>En tu búsqueda binaria, podrías eliminar la bandera
+  <code>numero_encontrado</code> usando este patrón:</p>
+
+<pre><code># En vez de usar una bandera...
+numero_encontrado = False
+while ...:
+    if numero == lista[posicion]:
+        numero_encontrado = True
+        break
+    ...
+
+if numero_encontrado:
+    print("Encontrado")
+else:
+    print("No encontrado")
+
+
+# ...puedes hacer esto:
+while ...:
+    if numero == lista[posicion]:
+        print("Encontrado")
+        break
+    ...
+else:
+    print("No encontrado")  # solo si el while terminó sin break
+</code></pre>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Refactoriza tu ordenamiento burbuja</h3>
+
+<p>
+  Abre <code>algoritmos/orden_burbuja.py</code> y aplícale estos cambios:
+</p>
+
+<ol>
+  <li><strong>Usa <code>enumerate</code></strong> en el bucle <code>for</code> para evitar errores de índice</li>
+  <li><strong>Elimina la bandera <code>cambio</code></strong> y usa <code>break</code> + <code>else</code> en su lugar (opcional, piensa cómo)</li>
+</ol>
+
+<p>Ejecuta el script después de cada cambio para verificar que sigue funcionando.</p>
+
+<div class="pista">
+  <strong>Pista para el punto 2:</strong> puedes iterar con
+  <code>for i, valor in enumerate(lista[:-1])</code> — el <code>[:-1]</code>
+  evita que compares el último con el siguiente (que no existe).
+</div>
+
+<div class="pista">
+  <strong>Pista para el punto 3:</strong> usa <code>while True</code>,
+  <code>break</code> cuando no haya cambios, y un bucle <code>for</code>
+  anidado. ¿O puedes hacerlo sin <code>while</code>?
+</div>
+
+</div>
+
+<hr>
+
+<h2>Para profundizar</h2>
+
+<ul>
+  <li>Lee el <strong>capítulo 2</strong> de "Comprender los algoritmos" (Selection Sort) — verás bucles anidados en acción</li>
+  <li>Practica slicing en la consola: <code>python -c "print([1,2,3,4,5][::-1])"</code></li>
+  <li>Consulta la referencia de <a href="../REFERENCIA_PYTHON/03_listas.md">listas</a> y <a href="../REFERENCIA_PYTHON/05_control_de_flujo.md">control de flujo</a></li>
+  <li><a href="https://docs.python.org/es/3/tutorial/controlflow.html">Tutorial oficial de Python — Control Flow</a></li>
+</ul>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+  Puedes pedirme que revise tu código, explique un concepto de otra forma,
+  o que diseñe la siguiente lección.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+</nav>
+
+</body>
+</html>

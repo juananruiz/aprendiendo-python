@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Índice de lecciones</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<h1>Índice de lecciones</h1>
+<p class="subtitle">Aprendiendo Python — todas las lecciones, en un solo sitio al que siempre puedes volver</p>
+
+<div class="indice-grupo">
+<h2>Fundamentos sueltos</h2>
+<p>Temas de Python generales, sin relación con la secuencia de matching de abajo.</p>
+<ul class="indice-lista">
+  <li>
+    <a href="0001-slicing-enumerate-y-control-de-bucles.html">0001 — Slicing, enumerate y control de bucles</a>
+    <p>Slicing de listas y strings, <code>enumerate()</code>, <code>for/else</code>, <code>break</code>/<code>continue</code>.</p>
+  </li>
+</ul>
+</div>
+
+<div class="indice-grupo">
+<h2>Rama A — Conceptos previos al matching</h2>
+<p>Estructuras de datos y herramientas que necesitas antes de abordar Gale-Shapley.</p>
+<ul class="indice-lista">
+  <li>
+    <a href="001-preferencias-con-diccionarios.html">001 — Preferencias modeladas con diccionarios</a>
+    <p>Cómo representar listas de preferencias con dicts, y generar rankings a partir de puntuaciones.</p>
+  </li>
+  <li>
+    <a href="002-ordenacion-con-key.html">002 — Ordenación avanzada con <code>sorted()</code> y <code>lambda</code></a>
+    <p><code>key=</code>, funciones lambda, desempates con múltiples criterios.</p>
+  </li>
+  <li>
+    <a href="003-deque-y-colas.html">003 — Colas con <code>collections.deque</code></a>
+    <p>Por qué <code>pop(0)</code> es lento y <code>deque.popleft()</code> es la solución O(1).</p>
+  </li>
+  <li>
+    <a href="004-estabilidad-y-pares-bloqueantes.html">004 — Estabilidad y pares bloqueantes</a>
+    <p>Qué es un matching, qué es un par bloqueante, y por qué importa la estabilidad.</p>
+  </li>
+</ul>
+</div>
+
+<div class="indice-grupo">
+<h2>Rama B — El algoritmo del amor</h2>
+<p>Gale-Shapley (1962) en detalle, paso a paso. Requiere la Rama A completa.</p>
+<ul class="indice-lista">
+  <li>
+    <a href="005-el-problema-de-los-matrimonios-estables.html">005 — El problema de los matrimonios estables</a>
+    <p>La historia real, el planteamiento formal, y por qué la fuerza bruta no sirve.</p>
+  </li>
+  <li>
+    <a href="006-el-cortejo-ronda-a-ronda.html">006 — El cortejo, ronda a ronda</a>
+    <p>Las reglas exactas del algoritmo, trazadas a mano con un ejemplo 4×4.</p>
+  </li>
+  <li>
+    <a href="007-por-que-funciona.html">007 — Por qué funciona</a>
+    <p>Las cuatro garantías: terminación, completitud, estabilidad y optimalidad.</p>
+  </li>
+  <li class="pendiente">
+    <span>008 — Implementación guiada</span>
+    <span class="etiqueta-pendiente">pendiente</span>
+    <p>Traducir las reglas de la 006 a código completo con <code>deque</code>.</p>
+  </li>
+  <li class="pendiente">
+    <span>009 — Variantes reales</span>
+    <span class="etiqueta-pendiente">pendiente</span>
+    <p>Conjuntos de distinto tamaño, notas de corte, empates.</p>
+  </li>
+  <li class="pendiente">
+    <span>010 — Algoritmos relacionados</span>
+    <span class="etiqueta-pendiente">pendiente</span>
+    <p>Serial dictatorship, algoritmo húngaro, Top Trading Cycles, Stable Roommates.</p>
+  </li>
+</ul>
+</div>
+
+<div class="indice-grupo">
+<h2>Pista 1 — Algoritmos (el libro)</h2>
+<p>
+  Capítulos de <em>Comprender los algoritmos</em> (Aditya Bhargava) que
+  merecen su propia lección, con ejercicio de contraste O(n log n) vs. O(n²)
+  medido con datos reales.
+</p>
+<ul class="indice-lista">
+  <li>
+    <a href="020-quicksort.html">020 — Quicksort</a>
+    <p>Divide y vencerás con recursión: partición, pivote, caso medio O(n log n) y peor caso O(n²) medido con código.</p>
+  </li>
+</ul>
+</div>
+
+<div class="indice-grupo">
+<h2>Pista 3 — Fundamentos</h2>
+<p>
+  Temas base de Python, tratados en profundidad — no solo la sintaxis, sino
+  el espectro completo de patrones y los errores clásicos.
+</p>
+<ul class="indice-lista">
+  <li>
+    <a href="030-el-bucle-while.html">030 — El bucle <code>while</code>, de arriba abajo</a>
+    <p>Contador, centinela, bandera, <code>while True</code> + <code>break</code>, <code>while</code>/<code>else</code>, y el bug del bucle infinito.</p>
+  </li>
+</ul>
+</div>
+
+<div class="indice-grupo">
+<h2>Pista 4 — Programación funcional</h2>
+<p>
+  El cambio de aires deliberado: el paradigma contrario al OOP que usas a
+  diario. Secuencia completa, de los conceptos base al proyecto insignia.
+  Cada lección tiene su esqueleto de ejercicio con <code>assert</code>s que
+  deben pasar.
+</p>
+<ul class="indice-lista">
+  <li>
+    <a href="011-funciones-puras-e-inmutabilidad.html">011 — Funciones puras e inmutabilidad</a>
+    <p>Determinismo, efectos secundarios, crear en vez de mutar, <code>frozen=True</code> y el gotcha del argumento por defecto.</p>
+  </li>
+  <li>
+    <a href="012-funciones-de-primera-clase-y-composicion.html">012 — Funciones de primera clase y composición</a>
+    <p>Funciones como valores, orden superior, closures y <code>componer()</code>.</p>
+  </li>
+  <li>
+    <a href="013-lambda-map-filter-y-comprehensions.html">013 — <code>lambda</code>, <code>map</code>, <code>filter</code> y comprehensions</a>
+    <p>El kit clásico y por qué Python prefiere las comprehensions. Las cuatro familias.</p>
+  </li>
+  <li>
+    <a href="014-generadores-y-evaluacion-perezosa.html">014 — Generadores y evaluación perezosa</a>
+    <p><code>yield</code>, secuencias infinitas, pipelines y el ahorro de memoria medido.</p>
+  </li>
+  <li>
+    <a href="015-functools.html">015 — El módulo <code>functools</code></a>
+    <p><code>reduce</code>, <code>partial</code>, <code>lru_cache</code> y <code>wraps</code>.</p>
+  </li>
+  <li>
+    <a href="016-itertools.html">016 — El módulo <code>itertools</code></a>
+    <p><code>chain</code>, <code>islice</code>, <code>groupby</code>, <code>product</code>, <code>takewhile</code>/<code>dropwhile</code>.</p>
+  </li>
+  <li>
+    <a href="017-decoradores.html">017 — Decoradores de propósito general</a>
+    <p>Construir uno paso a paso, decoradores con parámetros, apilado y el proyecto insignia.</p>
+  </li>
+</ul>
+</div>
+
+<hr>
+
+<p class="retoque">
+  Consulta también el <a href="../ROADMAP.md">ROADMAP</a> para ver cómo encajan
+  estas lecciones en el plan de aprendizaje completo.
+</p>
+
+</body>
+</html>

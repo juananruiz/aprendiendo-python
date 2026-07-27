@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 20: Quicksort</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="index.html">Pista 1 — el libro</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+<h1>Quicksort</h1>
+<p class="subtitle">Divide y vencerás con recursión — el capítulo que acabas de leer, ahora con las manos</p>
+
+<div class="historia">
+  <p>
+    Tony Hoare inventó quicksort en 1959, mientras estaba en la Unión
+    Soviética, como estudiante intentando traducir ruso al inglés con un
+    diccionario, y necesitaba ordenar palabras. Décadas después sigue siendo,
+    en la práctica, uno de los algoritmos de ordenación más usados del mundo
+    — a pesar de que, como vas a ver, su peor caso es tan malo como el de la
+    ordenación burbuja.
+  </p>
+</div>
+
+<hr>
+
+<h2>Recordando divide y vencerás</h2>
+
+<p>
+  Ya usaste esta idea en <code>algoritmos/factorial_recursivo.py</code> y en
+  <code>algoritmos/cuadrar_parcela.py</code>: un <strong>caso base</strong>
+  donde la respuesta es trivial, y un <strong>caso recursivo</strong> donde
+  reduces el problema y se lo pasas a una versión más pequeña de si mismo.
+</p>
+
+<div class="regla">
+  <p><strong>Divide y vencerás, en tres pasos:</strong></p>
+  <ol style="margin-bottom:0;">
+    <li><strong>Divide</strong> el problema en subproblemas más pequeños</li>
+    <li><strong>Vencerás</strong> (resuelve) cada subproblema — llamando recursivamente</li>
+    <li><strong>Combina</strong> las soluciones de los subproblemas en la solución completa</li>
+  </ol>
+</div>
+
+<p>
+  Quicksort aplica exactamente este patrón a la ordenación de una lista.
+</p>
+
+<hr>
+
+<h2>El algoritmo</h2>
+
+<div class="regla">
+  <strong class="num">1</strong>
+  <strong>Caso base:</strong> una lista de 0 o 1 elementos ya está ordenada. Devuélvela tal cual.
+</div>
+
+<div class="regla">
+  <strong class="num">2</strong>
+  <strong>Elige un pivote:</strong> cualquier elemento de la lista. El primero es la opción más simple.
+</div>
+
+<div class="regla">
+  <strong class="num">3</strong>
+  <strong>Particiona:</strong> divide el resto de la lista en dos: los menores o iguales al pivote, y los mayores.
+</div>
+
+<div class="regla">
+  <strong class="num">4</strong>
+  <strong>Combina:</strong> <code>quicksort(menores) + [pivote] + quicksort(mayores)</code>. Los dos <code>quicksort()</code> son las llamadas recursivas.
+</div>
+
+<p>El código que seguramente acabas de leer en el libro:</p>
+
+<pre><code>def quicksort(array):
+    if len(array) < 2:
+        return array          # caso base: 0 o 1 elementos
+
+    pivote = array[0]
+    menores = [x for x in array[1:] if x <= pivote]
+    mayores = [x for x in array[1:] if x > pivote]
+
+    return quicksort(menores) + [pivote] + quicksort(mayores)
+</code></pre>
+
+<div class="pista">
+  Fíjate en algo que ya conoces de la Pista 4 (programación funcional):
+  esta versión no muta nada. Cada llamada construye listas <strong>nuevas</strong>
+  con comprehensions, y el resultado final es la concatenación de listas
+  nuevas. Es exactamente el estilo "crear en vez de mutar" de la lección 011.
+</div>
+
+<h3>Trazado a mano</h3>
+
+<pre><code>quicksort([5, 3, 8, 1, 9])
+  pivote = 5
+  menores = [3, 1]      mayores = [8, 9]
+  → quicksort([3, 1]) + [5] + quicksort([8, 9])
+
+  quicksort([3, 1]):  pivote=3, menores=[1], mayores=[]  → [1] + [3] + [] → [1, 3]
+  quicksort([8, 9]):  pivote=8, menores=[],  mayores=[9] → [] + [8] + [9] → [8, 9]
+
+  resultado: [1, 3] + [5] + [8, 9] = [1, 3, 5, 8, 9]
+</code></pre>
+
+<hr>
+
+<h2>La complejidad: por qué no hay una respuesta única</h2>
+
+<p>
+  A diferencia de la búsqueda binaria (siempre O(log n)) o la burbuja
+  (siempre O(n²)), quicksort <strong>no tiene una complejidad fija</strong>:
+  depende de lo bien que el pivote parta la lista en cada paso.
+</p>
+
+<h3>Caso medio: O(n log n)</h3>
+
+<p>
+  Si el pivote deja la lista más o menos partida por la mitad, cada nivel de
+  recursión procesa los <code>n</code> elementos una vez (repartidos entre
+  las llamadas), y hay <code>log n</code> niveles — igual que en la búsqueda
+  binaria. Total: <strong>O(n log n)</strong>.
+</p>
+
+<h3>Peor caso: O(n²)</h3>
+
+<p>
+  Si el pivote es <strong>siempre el menor o el mayor</strong> del trozo
+  actual, una de las dos particiones queda vacía y la otra tiene
+  <code>n-1</code> elementos. Eso significa <code>n</code> niveles de
+  recursión en vez de <code>log n</code> — igual de malo que la ordenación
+  burbuja: <strong>O(n²)</strong>.
+</p>
+
+<div class="clave">
+  <strong>El caso que dispara el peor escenario:</strong> una lista
+  <strong>ya ordenada</strong> (o ya ordenada al revés), combinada con la
+  estrategia ingenua de "pivote = primer elemento". El primer elemento de
+  una lista ordenada es siempre el mínimo — la peor elección posible.
+</div>
+
+<h3>Comprobado con código, no solo en teoría</h3>
+
+<p>
+  Para una lista de 500 elementos, contando comparaciones reales:
+</p>
+
+<table>
+<tr><th>Entrada</th><th>Pivote</th><th>Comparaciones medidas</th><th>Predicción teórica</th></tr>
+<tr><td>Ya ordenada</td><td>Primer elemento</td><td class="num">124.750</td><td class="num">n²/2 = 125.000</td></tr>
+<tr><td>Aleatoria</td><td>Primer elemento</td><td class="num">5.012</td><td class="num">n·log₂n ≈ 4.483</td></tr>
+<tr><td>Ya ordenada</td><td>Aleatorio</td><td class="num">4.412</td><td class="num">n·log₂n ≈ 4.483</td></tr>
+</table>
+
+<p>
+  Las cifras casan casi exactamente con la teoría. Y la tercera fila es la
+  que importa en la práctica: <strong>elegir el pivote al azar</strong> (o con
+  la técnica de la "mediana de tres") convierte el peor caso del dato de
+  entrada en un problema de mala suerte estadística, no de mala suerte
+  garantizada. Por eso las implementaciones reales de quicksort casi nunca
+  usan "primer elemento" como pivote.
+</p>
+
+<hr>
+
+<h2>La pila de recursión</h2>
+
+<p>
+  Cada llamada a <code>quicksort()</code> que no ha terminado ocupa un
+  hueco en la pila de llamadas (el mismo concepto que en
+  <code>factorial_recursivo.py</code>). La <strong>profundidad</strong> de
+  esa pila sigue el mismo patrón que la complejidad:
+</p>
+
+<ul>
+  <li>Caso medio: profundidad <strong>O(log n)</strong> — la lista se parte a la mitad en cada nivel</li>
+  <li>Peor caso: profundidad <strong>O(n)</strong> — cada llamada solo quita un elemento</li>
+</ul>
+
+<div class="pista">
+  Esto no es solo una curiosidad teórica: en Python, cada nivel de recursión
+  cuenta contra el límite de <code>sys.getrecursionlimit()</code> (1000 por
+  defecto). Una lista ordenada de más de ~1000 elementos con pivote fijo no
+  solo sería lenta — literalmente rompería con
+  <code>RecursionError</code>.
+</div>
+
+<hr>
+
+<h2>Referencias</h2>
+<ul>
+	<li><a href="https://es.wikipedia.org/wiki/Quicksort">https://es.wikipedia.org/wiki/Quicksort</a></li>
+</ul>
+
+<hr>
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Implementa, verifica y mide</h3>
+<p>
+  No vas a copiar el código del libro: vas a escribir tu propia versión desde
+  cero, añadir una alternativa <strong>in-place</strong> más eficiente en
+  memoria, y comprobar con tus propias manos el contraste O(n log n) / O(n²)
+  que acabas de leer arriba.
+</p>
+<ol>
+  <li>Tu propia versión de <code>quicksort()</code> con comprehensions (como la del libro, pero tecleada por ti)</li>
+  <li>Partición <strong>in-place</strong> (esquema de Lomuto): sin crear listas nuevas, solo intercambiando elementos dentro de la misma lista</li>
+  <li>Contar comparaciones con pivote fijo vs. pivote aleatorio, sobre listas ordenadas y aleatorias — reproduciendo la tabla de arriba con tus propios números</li>
+</ol>
+<p>Esqueleto para teclear: <code>ejercicios/020-quicksort.py</code></p>
+</div>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="index.html">Pista 1 — el libro</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+</body>
+</html>

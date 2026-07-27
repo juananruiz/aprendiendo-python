@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 6: El cortejo, ronda a ronda</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="005-el-problema-de-los-matrimonios-estables.html">← Anterior: 005</a>
+    <a href="007-por-que-funciona.html">Siguiente: 007 — Por qué funciona →</a>
+  </span>
+</nav>
+
+<h1>El cortejo, ronda a ronda</h1>
+<p class="subtitle">Las reglas exactas del algoritmo de aceptación diferida, trazadas a mano</p>
+
+<p>
+  En la lección anterior viste que existe un matching estable, y que
+  encontrarlo por fuerza bruta es inviable para casos grandes. Ahora vas a
+  ver el procedimiento — la <strong>metáfora del cortejo</strong> — que lo
+  construye directamente, sin probar combinaciones.
+</p>
+
+<hr>
+
+<h2>1. La metáfora</h2>
+
+<p>
+  Imagina que los <strong>proponentes</strong> van, uno a uno o todos a la
+  vez, <strong>proponiendo matrimonio</strong> a su receptor favorito
+  todavía disponible. Un receptor puede tener varias propuestas a la vez:
+  se queda <strong>provisionalmente</strong> con la que más le gusta y
+  rechaza el resto. Pero "provisional" es la palabra clave: si más adelante
+  le llega una propuesta que le gusta más, <strong>puede romper el
+  compromiso actual</strong> y quedarse con la nueva. La persona rechazada
+  no se rinde: tacha a quien la rechazó y prueba con su siguiente opción.
+</p>
+
+<p>Esto se repite hasta que nadie queda libre.</p>
+
+<hr>
+
+<h2>2. Las reglas, una a una</h2>
+
+<div class="regla">
+  <strong class="num">1</strong>
+  Todo proponente que está libre le propone a la persona <strong>mejor
+  valorada de su lista que todavía no le ha rechazado</strong>.
+</div>
+
+<div class="regla">
+  <strong class="num">2</strong>
+  Cada receptor mira <strong>todas</strong> las propuestas que recibe en esa
+  ronda (más su compromiso provisional actual, si tiene uno), y se queda
+  con la que más prefiera. Rechaza el resto — incluido, si toca, su
+  compromiso anterior.
+</div>
+
+<div class="regla">
+  <strong class="num">3</strong>
+  Quien es rechazado (incluso si antes tenía un compromiso provisional)
+  vuelve a estar libre y tacha a quien lo rechazó de su lista. En la
+  siguiente ronda propone a su próxima opción disponible.
+</div>
+
+<div class="regla">
+  <strong class="num">4</strong>
+  El algoritmo termina cuando <strong>nadie está libre</strong>: todos los
+  proponentes tienen un compromiso (provisional o no). En ese momento, todos
+  los compromisos se vuelven <strong>definitivos</strong>.
+</div>
+
+<div class="pista">
+  <strong>Detalle que se suele dar por supuesto:</strong> un proponente
+  <strong>nunca</strong> propone dos veces a la misma persona. Su lista de
+  preferencias, a medida que avanza el algoritmo, se va "tachando" desde
+  arriba. Esto es clave para que el algoritmo termine — lo demostraremos en
+  la lección 007.
+</div>
+
+<hr>
+
+<h2>3. Ejemplo completo, 4×4</h2>
+
+<p>Preferencias de los proponentes (de más a menos preferido):</p>
+
+<pre><code>Alba:  Nora, Mar, Olga, Pau
+Bruno: Mar, Nora, Pau, Olga
+Cora:  Mar, Olga, Nora, Pau
+Dario: Pau, Olga, Nora, Mar
+</code></pre>
+
+<p>Preferencias de los receptores:</p>
+
+<pre><code>Mar:  Cora, Alba, Bruno, Dario
+Nora: Bruno, Alba, Dario, Cora
+Olga: Alba, Dario, Cora, Bruno
+Pau:  Dario, Bruno, Alba, Cora
+</code></pre>
+
+<span class="ronda-titulo">Ronda 1</span>
+<table>
+  <tr><th>Receptor</th><th>Propuestas recibidas</th><th>Decisión</th></tr>
+  <tr><td>Nora</td><td>Alba</td><td>Se queda con <span class="aceptado">Alba</span> (única propuesta)</td></tr>
+  <tr><td>Mar</td><td>Bruno, Cora</td><td>Prefiere Cora a Bruno → <span class="aceptado">Cora</span>, rechaza a <span class="rechazado">Bruno</span></td></tr>
+  <tr><td>Pau</td><td>Dario</td><td>Se queda con <span class="aceptado">Dario</span> (única propuesta)</td></tr>
+  <tr><td>Olga</td><td>ninguna</td><td class="libre">sigue libre</td></tr>
+</table>
+<p><strong>Estado:</strong> comprometidos Alba–Nora, Cora–Mar, Dario–Pau. Libre: Bruno.</p>
+
+<span class="ronda-titulo">Ronda 2</span>
+<p>
+  Bruno fue rechazado por Mar. Su lista era <code>Mar, Nora, Pau, Olga</code>
+  — tacha a Mar y propone a su siguiente opción: <strong>Nora</strong>.
+</p>
+<table>
+  <tr><th>Receptor</th><th>Propuestas recibidas</th><th>Decisión</th></tr>
+  <tr><td>Nora</td><td>Bruno (+ compromiso previo con Alba)</td><td>Su lista es <code>Bruno, Alba, Dario, Cora</code> → prefiere Bruno → se queda con <span class="aceptado">Bruno</span>, rompe con <span class="rechazado">Alba</span></td></tr>
+</table>
+<p><strong>Estado:</strong> comprometidos Bruno–Nora, Cora–Mar, Dario–Pau. Libre: Alba (rechazada, vuelve al juego).</p>
+
+<span class="ronda-titulo">Ronda 3</span>
+<p>
+  Alba fue rechazada por Nora. Su lista era <code>Nora, Mar, Olga, Pau</code>
+  — tacha a Nora y propone a su siguiente opción: <strong>Mar</strong>.
+</p>
+<table>
+  <tr><th>Receptor</th><th>Propuestas recibidas</th><th>Decisión</th></tr>
+  <tr><td>Mar</td><td>Alba (+ compromiso previo con Cora)</td><td>Su lista es <code>Cora, Alba, Bruno, Dario</code> → prefiere a Cora, que ya tenía → mantiene a <span class="aceptado">Cora</span>, rechaza a <span class="rechazado">Alba</span></td></tr>
+</table>
+<p><strong>Estado:</strong> sin cambios en los compromisos. Alba sigue libre — pero ahora ha sido rechazada por sus dos primeras opciones.</p>
+
+<span class="ronda-titulo">Ronda 4</span>
+<p>
+  Alba tacha a Mar. Su siguiente opción es <strong>Olga</strong>, que
+  todavía no ha recibido ninguna propuesta.
+</p>
+<table>
+  <tr><th>Receptor</th><th>Propuestas recibidas</th><th>Decisión</th></tr>
+  <tr><td>Olga</td><td>Alba</td><td>Se queda con <span class="aceptado">Alba</span> (única propuesta)</td></tr>
+</table>
+<p><strong>Estado final:</strong> nadie queda libre. El algoritmo termina.</p>
+
+<div class="clave">
+  <strong>Matching final:</strong> Alba–Olga, Bruno–Nora, Cora–Mar, Dario–Pau.
+  <br>
+  Fíjate en un detalle curioso de este ejemplo: los cuatro receptores
+  terminaron con su <strong>primera opción</strong>. Esto no es una regla
+  general — es una casualidad de estas preferencias concretas. Lo vas a
+  comprobar tú mismo con otros ejemplos en el ejercicio.
+</div>
+
+<h3>Una observación importante</h3>
+<p>
+  Aquí hemos procesado las propuestas <strong>por rondas</strong> (todos los
+  libres proponen a la vez, luego los receptores deciden). El algoritmo
+  también se puede describir procesando <strong>un proponente libre cada
+  vez</strong>, en cualquier orden. Es un resultado del propio teorema de
+  Gale-Shapley que <strong>el matching final es el mismo</strong>
+  independientemente del orden en que se procesen las propuestas — solo
+  cambia el camino para llegar a él. Lo veremos con más detalle en la
+  lección 007.
+</p>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Traza tu propio ejemplo</h3>
+
+<p>
+  Antes de programar el algoritmo completo (eso es la lección 008), practica
+  con un caso propio a mano:
+</p>
+<ol>
+  <li>Inventa preferencias para 4 proponentes y 4 receptores (puedes reutilizar nombres o inventar los tuyos)</li>
+  <li>Traza las rondas en papel o en un editor de texto, como en la tabla de arriba</li>
+  <li>Cuando tengas el matching final, usa tu función <code>es_matching_estable()</code> de la lección 004 para comprobar que efectivamente es estable</li>
+</ol>
+
+<div class="pista">
+  <strong>Reto extra:</strong> construye un ejemplo donde el matching final
+  <em>no</em> le dé a nadie del lado receptor su primera opción. ¿Es más
+  difícil de lo que esperabas? ¿Por qué crees que pasa esto?
+</div>
+
+</div>
+
+<hr>
+
+<h2>Preguntas de reflexión</h2>
+
+<ul>
+  <li>¿Por qué el lado que <strong>propone</strong> nunca puede terminar peor de lo que empieza, ronda a ronda? (Pista: piensa en qué dirección se mueve su lista de preferencias)</li>
+  <li>¿Por qué el lado que <strong>recibe</strong> nunca puede terminar peor que su compromiso provisional actual?</li>
+  <li>¿Qué pasaría si, en vez de que los proponentes propongan, fueran los receptores quienes proponen? ¿Cambiaría el resultado?</li>
+</ul>
+
+<hr>
+
+<h2>Siguiente lección</h2>
+
+<p>
+  En la <strong>lección 007</strong> vamos a demostrar, de forma intuitiva,
+  las tres preguntas que probablemente te estás haciendo ahora mismo: ¿por
+  qué esto siempre termina?, ¿por qué el resultado es siempre estable?, y
+  ¿por qué el lado que propone sale beneficiado?
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+  Puedes pedirme que revise tu código, explique un concepto de otra forma,
+  o que diseñe la siguiente lección.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="005-el-problema-de-los-matrimonios-estables.html">← Anterior: 005</a>
+    <a href="007-por-que-funciona.html">Siguiente: 007 — Por qué funciona →</a>
+  </span>
+</nav>
+
+</body>
+</html>

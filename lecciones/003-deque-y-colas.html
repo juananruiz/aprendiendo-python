@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 3: Colas con collections.deque</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="002-ordenacion-con-key.html">← Anterior: 002</a>
+    <a href="004-estabilidad-y-pares-bloqueantes.html">Siguiente: 004 — Estabilidad →</a>
+  </span>
+</nav>
+
+<h1>Colas con <code>collections.deque</code></h1>
+<p class="subtitle">La estructura que lleva la cuenta de quién sigue libre</p>
+
+<h2>Qué es una cola (FIFO)</h2>
+
+<p>
+  Una cola es como la fila del pan: el primero que llega es el primero en
+  ser atendido. <strong>First In, First Out (FIFO)</strong>.
+</p>
+
+<p>
+  En Gale-Shapley, los participantes que aún no tienen asignación
+  definitiva esperan en una cola. Cuando un participante es rechazado,
+  vuelve a la cola. Cuando uno acepta provisionalmente, sale de la cola.
+</p>
+
+<hr>
+
+<h2><code>list</code> como cola — problema</h2>
+
+<p>Podrías usar una lista:</p>
+
+<pre><code>cola = []
+cola.append("Ana")     # entra al final → ["Ana"]
+cola.append("Carlos")  # → ["Ana", "Carlos"]
+siguiente = cola.pop(0)  # "Ana" — pero pop(0) es O(n) 😱
+</code></pre>
+
+<p>
+  <code>pop(0)</code> es lento porque Python tiene que desplazar todos los
+  elementos restantes una posición. Para conjuntos pequeños no se nota, pero
+  es ineficiente.
+</p>
+
+<h2><code>collections.deque</code> — la solución</h2>
+
+<pre><code>from collections import deque
+
+cola = deque()
+cola.append("Ana")        # → deque(["Ana"])
+cola.append("Carlos")     # → deque(["Ana", "Carlos"])
+siguiente = cola.popleft()  # → "Ana", O(1) — instantáneo
+</code></pre>
+
+<div class="clave"><code>popleft()</code> es O(1). Siempre.</div>
+
+<h2>Operaciones útiles</h2>
+
+<pre><code>cola = deque(["Ana", "Carlos", "Beatriz"])
+
+cola.popleft()        # saca por la izquierda: "Ana"
+cola.append("David")  # añade por la derecha
+cola[0]               # mira el primero sin sacarlo: "Carlos"
+len(cola)             # cuántos quedan
+"Carlos" in cola      # comprueba si está (O(n), pero útil)
+</code></pre>
+
+<hr>
+
+<h2>En Gale-Shapley</h2>
+
+<pre><code># Participantes que aún no están asignados (o han sido rechazados)
+pendientes = deque(todos_los_participantes)
+
+while pendientes:
+    participante = pendientes.popleft()
+    destino = siguiente_preferencia(participante)
+    if destino_acepta(participante, destino):
+        # el participante queda asignado provisionalmente
+        # (sale de la cola)
+        ...
+    else:
+        # vuelve a la cola a intentar con el siguiente destino
+        pendientes.append(participante)
+</code></pre>
+
+<div class="pista">
+  <strong>Alternativa: conjunto de pendientes.</strong> A veces se usa un
+  <code>set</code> en vez de <code>deque</code> cuando no importa el orden
+  exacto de procesamiento. Pero <code>deque</code> es más natural: refleja
+  la idea de «ir atendiendo uno por uno».
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Simula la fila de propuestas</h3>
+<p>
+  En Gale-Shapley, los candidatos libres esperan en una cola y van
+  proponiendo uno por uno; si son rechazados, vuelven a la cola. Vas a
+  simular esa dinámica a pequeña escala: operaciones básicas de
+  <code>deque</code>, una simulación de ronda de propuestas con destinos de
+  plazas limitadas, y una variante que ordena la cola por prioridad antes de
+  empezar.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/003-colas-con-deque.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> ya tienes preferencias, ordenación y
+  una cola de pendientes. Falta el concepto central de todo el algoritmo:
+  <a href="004-estabilidad-y-pares-bloqueantes.html">004 — Estabilidad y pares bloqueantes</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="002-ordenacion-con-key.html">← Anterior: 002</a>
+    <a href="004-estabilidad-y-pares-bloqueantes.html">Siguiente: 004 — Estabilidad →</a>
+  </span>
+</nav>
+
+</body>
+</html>

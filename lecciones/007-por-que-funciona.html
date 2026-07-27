@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 7: Por qué funciona</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="006-el-cortejo-ronda-a-ronda.html">← Anterior: 006</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+<h1>Por qué funciona</h1>
+<p class="subtitle">Las tres garantías del algoritmo — y por qué el que propone sale ganando</p>
+
+<p>
+  En la lección 6 viste <em>cómo</em> funciona el cortejo: propuestas,
+  aceptación provisional, rechazo. Trazaste un ejemplo 4×4 y salió un
+  matching estable. Pero un ejemplo no es una demostración. ¿Cómo sabemos que
+  el algoritmo <strong>siempre</strong> termina, que <strong>siempre</strong>
+  empareja a todo el mundo y que el resultado es <strong>siempre</strong>
+  estable — para cualquier tamaño y cualesquiera preferencias?
+</p>
+
+<p>
+  En esta lección lo demostramos. No con álgebra pesada, sino con tres
+  argumentos que puedes seguir con lápiz. Y al final veremos algo más
+  inquietante: el algoritmo no es neutral. <strong>El lado que propone sale
+  sistemáticamente beneficiado.</strong>
+</p>
+
+<div class="clave">
+  <strong>Convención de la lección.</strong> Como en el resto de la Rama B:
+  N proponentes y N receptores (mismo número), preferencias completas (cada
+  uno ordena a <em>todos</em> los del otro lado) y sin empates. Llamaré
+  <em>proponentes</em> a quienes proponen y <em>receptores</em> a quienes
+  reciben.
+</div>
+
+<hr>
+
+<h2>Garantía 1 — El algoritmo siempre termina</h2>
+
+<p>
+  El miedo razonable es que el algoritmo entre en un bucle infinito: A rompe
+  con B, B se lía con C, C vuelve con A… dando vueltas para siempre. Vamos a
+  ver que eso es imposible, apoyándonos en una única observación de la
+  lección anterior:
+</p>
+
+<div class="regla">
+  <strong>Invariante de los proponentes:</strong> un proponente recorre su
+  lista de preferencias <strong>en orden estricto, de arriba abajo</strong>, y
+  <strong>nunca propone dos veces</strong> a la misma persona.
+</div>
+
+<p>
+  Cada vez que un proponente es rechazado, tacha a quien lo rechazó y baja un
+  peldaño en su lista. Nunca vuelve a subir. Por tanto:
+</p>
+
+<ul>
+  <li>Un proponente hace <strong>como mucho N propuestas</strong> (las de toda su lista).</li>
+  <li>Hay N proponentes → en total, <strong>como mucho N × N = N² propuestas</strong> en toda la ejecución.</li>
+</ul>
+
+<p>
+  Y aquí está el cierre: mientras el algoritmo no haya terminado, hay al menos
+  un proponente libre que hace una propuesta <strong>nueva</strong> (nunca
+  hecha antes). Las propuestas son un recurso finito: no puede haber más de
+  N². Como cada paso consume al menos una, el algoritmo no puede seguir
+  eternamente.
+</p>
+
+<div class="teorema">
+  <span class="etiqueta">Garantía 1</span>
+  <p style="margin:0;">
+    El algoritmo termina tras <strong>a lo sumo N² propuestas</strong>. Para
+    un proceso de 500 plazas, eso son 250.000 propuestas como máximo — un
+    suspiro para un ordenador. Nada de fuerza bruta con sus N! combinaciones.
+  </p>
+</div>
+
+<hr>
+
+<h2>Garantía 2 — El resultado empareja a todo el mundo</h2>
+
+<p>
+  Que termine no basta: podría terminar dejando a alguien soltero. Vamos a ver
+  que no. La clave es una segunda observación, esta vez sobre los receptores:
+</p>
+
+<div class="regla">
+  <strong>Invariante de los receptores:</strong> en cuanto un receptor recibe
+  <strong>su primera propuesta</strong>, queda comprometido <strong>para
+  siempre</strong>. Puede cambiar de pareja más adelante, pero
+  <strong>solo hacia alguien que prefiere</strong>. Nunca vuelve a estar
+  libre, y nunca empeora.
+</div>
+
+<p>Con eso, la demostración es un razonamiento por reducción al absurdo:</p>
+
+<div class="clave">
+  <p><strong>Supón</strong> que al terminar hay un proponente <code>P</code> soltero.</p>
+  <p>
+    Que el algoritmo haya terminado significa que <code>P</code> ya no tiene a
+    quién proponer: ha <strong>agotado su lista</strong>, es decir, ha
+    propuesto a los N receptores y todos lo han rechazado.
+  </p>
+  <p>
+    Pero por el invariante de los receptores, <strong>todo receptor al que se
+    le propone queda comprometido para siempre</strong>. Si <code>P</code>
+    propuso a los N receptores, entonces los N receptores están comprometidos.
+  </p>
+  <p>
+    Y N receptores comprometidos significan N proponentes comprometidos (cada
+    receptor con uno distinto). O sea: los N proponentes tienen pareja…
+    incluido <code>P</code>. <strong>Contradicción</strong> con que
+    <code>P</code> estuviera soltero.
+  </p>
+</div>
+
+<div class="teorema">
+  <span class="etiqueta">Garantía 2</span>
+  <p style="margin:0;">
+    Nadie termina soltero. Como hay el mismo número de proponentes que de
+    receptores, el resultado es un <strong>matching completo</strong>: todos
+    emparejados, uno a uno.
+  </p>
+</div>
+
+<hr>
+
+<h2>Garantía 3 — El resultado siempre es estable</h2>
+
+<p>
+  Esta es la joya. Recuerda de la lección 4 qué es un <strong>par
+  bloqueante</strong>: dos personas de lados opuestos que se prefieren
+  mutuamente por encima de sus parejas actuales. Un matching es estable si
+  <strong>no existe</strong> ningún par bloqueante. Vamos a demostrar que el
+  resultado del cortejo nunca tiene ninguno.
+</p>
+
+<div class="clave">
+  <p>
+    <strong>Supón</strong> que sí existe un par bloqueante: un proponente
+    <code>P</code> y un receptor <code>r</code> tales que
+  </p>
+  <ul>
+    <li><code>P</code> prefiere <code>r</code> por encima de su pareja final, y</li>
+    <li><code>r</code> prefiere <code>P</code> por encima de su pareja final.</li>
+  </ul>
+  <p>
+    Como <code>P</code> prefiere <code>r</code> a su pareja final, y los
+    proponentes bajan por su lista en orden, <code>P</code> tuvo que
+    <strong>proponerle a <code>r</code> antes</strong> de acabar con quien
+    acabó. (Solo se llega a una opción peor después de que las mejores te
+    rechacen.)
+  </p>
+  <p>
+    ¿Qué hizo <code>r</code> cuando <code>P</code> le propuso? O lo rechazó en
+    el acto (porque ya tenía a alguien mejor), o lo aceptó y luego lo dejó por
+    alguien mejor. <strong>En ambos casos</strong>, desde ese momento la pareja
+    de <code>r</code> es siempre alguien que prefiere a <code>P</code> — porque
+    los receptores solo cambian hacia arriba (Garantía 2).
+  </p>
+  <p>
+    Así que la pareja <strong>final</strong> de <code>r</code> es alguien a
+    quien <code>r</code> prefiere sobre <code>P</code>. Pero eso
+    <strong>contradice</strong> que <code>r</code> prefiriera <code>P</code> a
+    su pareja final. <strong>El par bloqueante no puede existir.</strong>
+  </p>
+</div>
+
+<div class="teorema">
+  <span class="etiqueta">Garantía 3 · Teorema de Gale-Shapley (1962)</span>
+  <p style="margin:0;">
+    El matching que produce el algoritmo es <strong>siempre estable</strong>.
+    Combinado con las garantías 1 y 2: para cualquier entrada, el algoritmo
+    termina rápido y devuelve un emparejamiento completo y estable. Esto es lo
+    que Gale y Shapley demostraron, y lo que hace 60 años convirtió una
+    pregunta de "¿existe siempre?" en un "sí, y aquí está el método".
+  </p>
+</div>
+
+<hr>
+
+<h2>El giro: el algoritmo no es neutral</h2>
+
+<p>
+  Hasta aquí, buenas noticias para todos. Pero hay un matiz que cambia cómo se
+  mira este algoritmo en la vida real (oposiciones, asignación de médicos,
+  reparto de plazas). Cuando existe <strong>más de un</strong> matching
+  estable posible, ¿cuál de ellos elige el algoritmo? La respuesta no es
+  "uno cualquiera".
+</p>
+
+<h3>Parejas válidas</h3>
+
+<p>
+  Primero, una definición. Decimos que <code>r</code> es una <strong>pareja
+  válida</strong> de <code>P</code> si existe <em>algún</em> matching estable
+  en el que <code>P</code> y <code>r</code> aparecen juntos. Un mismo
+  proponente puede tener varias parejas válidas: en un matching estable le
+  toca una, en otro matching estable le toca otra.
+</p>
+
+<div class="teorema">
+  <span class="etiqueta">Garantía 4 · Optimalidad</span>
+  <p style="margin-bottom:0.5rem;">
+    En el algoritmo tal como lo hemos escrito (los proponentes proponen):
+  </p>
+  <ul style="margin-bottom:0;">
+    <li>
+      Cada <strong>proponente</strong> obtiene su <strong>mejor pareja
+      válida</strong> posible. No hay ningún matching estable en el que
+      salga mejor parado. (<em>proponente-óptimo</em>)
+    </li>
+    <li>
+      Simultáneamente, cada <strong>receptor</strong> obtiene su
+      <strong>peor pareja válida</strong>. No hay ningún matching estable en
+      el que salga peor. (<em>receptor-pésimo</em>)
+    </li>
+  </ul>
+</div>
+
+<p>
+  Dicho en corto: <strong>proponer es una ventaja</strong>. El lado activo se
+  lleva el mejor resultado estable que le permiten sus preferencias; el lado
+  que espera, el peor.
+</p>
+
+<h3>Por qué (idea intuitiva)</h3>
+
+<p>
+  La demostración formal es más fina que las tres anteriores, así que quédate
+  con la intuición. La afirmación clave es:
+</p>
+
+<div class="regla">
+  <strong>Ningún proponente es rechazado jamás por una pareja válida suya</strong>
+  durante la ejecución del algoritmo.
+</div>
+
+<p>
+  Si eso es cierto, cada proponente nunca pierde a ninguna de sus parejas
+  válidas por el camino, así que acaba con la mejor de todas ellas — que es
+  justo lo que dice "proponente-óptimo". ¿Y por qué es cierto? Porque la
+  primera vez que un proponente fuera rechazado por una pareja válida, ese
+  rechazo crearía un par bloqueante en el mismo matching estable que hace
+  "válida" a esa pareja — y un matching estable no tiene pares bloqueantes.
+  La contradicción cierra el argumento. El "receptor-pésimo" sale gratis
+  después: si los proponentes se llevan lo mejor, a los receptores les queda
+  lo peor.
+</p>
+
+<div class="pista">
+  <strong>Esto no es un tecnicismo académico.</strong> En 1998 el NRMP —el
+  sistema que asigna médicos residentes a hospitales en EEUU— cambió su
+  algoritmo para que fueran <em>los residentes</em> quienes "proponen", en
+  vez de los hospitales. ¿Por qué? Exactamente por la Garantía 4: querían que
+  el resultado fuera el óptimo <em>para los médicos</em>. La misma decisión de
+  diseño aparece cuando se asignan plazas en un proceso selectivo: ¿quién
+  propone, el candidato o la plaza? No es indiferente.
+</p>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Comprueba los teoremas con código</h3>
+
+<p>
+  Las garantías 3 y 4 se pueden <strong>verificar empíricamente</strong> sin
+  haber programado aún el algoritmo completo (eso es la lección 8). La idea:
+  reutiliza la fuerza bruta del ejercicio 5 para generar <em>todos</em> los
+  matchings estables de un caso pequeño, y a partir de ahí:
+</p>
+<ol>
+  <li>
+    Escribe <code>parejas_bloqueantes(pp, pr, matching)</code>, que devuelve
+    la lista de <em>todos</em> los pares bloqueantes de un matching (ampliando
+    tu detector del ejercicio 4, que solo decía sí/no).
+  </li>
+  <li>
+    Construye el matching <strong>proponente-óptimo</strong> dando a cada
+    proponente su mejor pareja válida, y comprueba que resulta ser uno de los
+    matchings estables (Garantía 4).
+  </li>
+  <li>
+    Construye el matching <strong>receptor-pésimo</strong> y comprueba que es
+    <em>el mismo</em> que el proponente-óptimo.
+  </li>
+</ol>
+
+<p>
+  Tienes el esqueleto listo para teclear en
+  <code>ejercicios/007-verificar-teoremas.py</code>, con un caso 3×3 que a
+  propósito tiene <strong>dos</strong> matchings estables (para que la
+  optimalidad se note).
+</p>
+
+<div class="pista">
+  <strong>Reto extra:</strong> inventa un caso donde haya <em>un solo</em>
+  matching estable. En ese caso, ¿qué relación hay entre el proponente-óptimo
+  y el receptor-pésimo? ¿Tiene sentido que "proponer sea una ventaja" cuando
+  solo existe una única solución estable?
+</div>
+
+</div>
+
+<hr>
+
+<h2>Preguntas de reflexión</h2>
+
+<ul>
+  <li>La Garantía 1 dice "a lo sumo N² propuestas". ¿Puedes construir un caso 3×3 que se acerque a ese máximo? ¿Y uno que termine en la primera ronda?</li>
+  <li>En la demostración de la Garantía 2, ¿dónde se usa exactamente que hay el <em>mismo número</em> de proponentes que de receptores? ¿Qué pasaría si sobraran receptores?</li>
+  <li>La Garantía 4 dice que proponer es una ventaja. En tu proceso selectivo real, ¿quién dirías que está "proponiendo": el candidato o la plaza? ¿Cambiarías el diseño?</li>
+</ul>
+
+<hr>
+
+<h2>Siguiente lección</h2>
+
+<p>
+  Ya sabes que el algoritmo termina, empareja a todos, es estable y favorece
+  al que propone. En la <strong>lección 008</strong> por fin lo
+  <strong>programamos entero</strong>: traducimos las reglas de la lección 6 a
+  Python, línea a línea, con <code>collections.deque</code> para la cola de
+  proponentes libres y diccionarios de preferencias. Y verificamos el
+  resultado con tu función de estabilidad de la lección 4.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Alguna demostración se te ha resistido? Pídeme que la explique de otra
+  forma, que la trace con un ejemplo concreto, o que revise tu ejercicio 7.
+  Este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="006-el-cortejo-ronda-a-ronda.html">← Anterior: 006</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+</body>
+</html>

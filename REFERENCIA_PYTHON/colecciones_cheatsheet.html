@@ -1,0 +1,360 @@
+<title>Colecciones de Python — Cheatsheet</title>
+<style>
+  :root {
+    /* Neutrales con sesgo frío (azul pizarra) — elegidos, no heredados */
+    --bg:        #f4f6f8;
+    --surface:   #ffffff;
+    --surface-2: #eef1f5;
+    --ink:       #1c2430;
+    --ink-soft:  #55606f;
+    --ink-faint: #8a94a3;
+    --line:      #dde3ea;
+    --line-strong:#c6cfda;
+    /* Un color por tipo de colección */
+    --lista:  #e0603a;  /* coral   [] */
+    --tupla:  #178a86;  /* teal    () */
+    --set:    #7b5cd6;  /* violeta {}  */
+    --dict:   #c1901a;  /* ámbar   {k:v} */
+    --ok:     #2f9e5f;
+    --no:     #d24b4b;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Menlo", "Consolas", monospace;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:        #12161c;
+      --surface:   #1a2028;
+      --surface-2: #212934;
+      --ink:       #e8edf3;
+      --ink-soft:  #a7b2c0;
+      --ink-faint: #6c7787;
+      --line:      #2b333e;
+      --line-strong:#3a4551;
+      --lista:  #f4805e;
+      --tupla:  #3fc0bb;
+      --set:    #a68bf0;
+      --dict:   #e6b23e;
+      --ok:     #4fc47f;
+      --no:     #f06a6a;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f4f6f8; --surface:#fff; --surface-2:#eef1f5; --ink:#1c2430;
+    --ink-soft:#55606f; --ink-faint:#8a94a3; --line:#dde3ea; --line-strong:#c6cfda;
+    --lista:#e0603a; --tupla:#178a86; --set:#7b5cd6; --dict:#c1901a; --ok:#2f9e5f; --no:#d24b4b;
+  }
+  :root[data-theme="dark"] {
+    --bg:#12161c; --surface:#1a2028; --surface-2:#212934; --ink:#e8edf3;
+    --ink-soft:#a7b2c0; --ink-faint:#6c7787; --line:#2b333e; --line-strong:#3a4551;
+    --lista:#f4805e; --tupla:#3fc0bb; --set:#a68bf0; --dict:#e6b23e; --ok:#4fc47f; --no:#f06a6a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: clamp(20px, 4vw, 56px); }
+
+  /* ---- Cabecera ---- */
+  header { margin-bottom: 40px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 12px;
+  }
+  h1 {
+    font-family: var(--mono); font-weight: 700; letter-spacing: -.02em;
+    font-size: clamp(1.9rem, 5vw, 3rem); margin: 0; line-height: 1.05;
+    text-wrap: balance;
+  }
+  h1 .brackets { color: var(--ink-faint); }
+  .sub { color: var(--ink-soft); max-width: 62ch; margin: 14px 0 0; font-size: 1.02rem; }
+
+  /* ---- Fichas resumen ---- */
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .chip {
+    font-family: var(--mono); font-size: .82rem; padding: 6px 12px;
+    border-radius: 999px; border: 1px solid var(--line-strong);
+    background: var(--surface); display: inline-flex; align-items: center; gap: 8px;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  h2 {
+    font-family: var(--mono); font-size: .9rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin: 52px 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  }
+
+  /* ---- Tabla comparativa ---- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: .93rem; }
+  th, td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  thead th {
+    font-family: var(--mono); font-size: .8rem; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--ink-faint); font-weight: 600;
+    position: sticky; top: 0; background: var(--surface-2);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  th[scope="row"] { font-family: var(--mono); font-weight: 600; }
+  .syn { font-family: var(--mono); color: var(--ink-soft); }
+  .yes { color: var(--ok); font-weight: 600; }
+  .nope { color: var(--no); font-weight: 600; }
+
+  /* ---- Rejilla de tarjetas por tipo ---- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 16px; padding: 22px; border-top: 4px solid var(--accent);
+    display: flex; flex-direction: column;
+  }
+  .card.lista { --accent: var(--lista); }
+  .card.tupla { --accent: var(--tupla); }
+  .card.set   { --accent: var(--set); }
+  .card.dict  { --accent: var(--dict); }
+  .card h3 {
+    font-family: var(--mono); margin: 0 0 4px; font-size: 1.25rem;
+    color: var(--accent); display: flex; align-items: baseline; gap: 10px;
+  }
+  .card h3 small { font-family: var(--mono); font-size: .95rem; color: var(--ink-faint); font-weight: 400; }
+  .card .tag { color: var(--ink-soft); font-size: .9rem; margin: 0 0 14px; }
+  .card pre { margin: 0 0 14px; }
+  .methods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
+  .methods li { display: grid; grid-template-columns: minmax(120px, auto) 1fr; gap: 12px; font-size: .88rem; align-items: baseline; }
+  .methods code {
+    font-family: var(--mono); background: var(--surface-2); color: var(--accent);
+    padding: 2px 7px; border-radius: 6px; font-size: .84rem; white-space: nowrap;
+  }
+  .methods span { color: var(--ink-soft); }
+  .card .foot { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: .84rem; color: var(--ink-soft); }
+  .card .foot b { color: var(--ink); }
+
+  /* ---- Bloques de código ---- */
+  pre {
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px 16px; overflow-x: auto;
+    font-family: var(--mono); font-size: .84rem; line-height: 1.6; color: var(--ink);
+  }
+  pre .c { color: var(--ink-faint); }        /* comentario */
+  pre .k { color: var(--set); font-weight:600; } /* keyword */
+  pre .s { color: var(--tupla); }             /* string */
+  pre .n { color: var(--lista); }             /* número/valor */
+
+  /* ---- Operaciones comunes ---- */
+  .common { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .common .box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .common h4 { font-family: var(--mono); margin: 0 0 10px; font-size: .95rem; color: var(--ink); }
+  .common p { margin: 0; color: var(--ink-soft); font-size: .88rem; }
+  .common code { font-family: var(--mono); background: var(--surface-2); padding: 1px 6px; border-radius: 5px; font-size: .82rem; }
+
+  /* ---- Avisos ---- */
+  .traps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .trap {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 3px solid var(--no); border-radius: 10px; padding: 14px 16px;
+  }
+  .trap b { font-family: var(--mono); font-size: .86rem; color: var(--no); }
+  .trap p { margin: 6px 0 0; font-size: .86rem; color: var(--ink-soft); }
+  .trap code { font-family: var(--mono); background: var(--surface-2); padding: 1px 6px; border-radius: 5px; font-size: .8rem; }
+
+  footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-faint); font-family: var(--mono); font-size: .78rem; }
+
+  @media (max-width: 480px) {
+    .methods li { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Aprendiendo Python · Referencia</p>
+    <h1>Colecciones <span class="brackets">[ ] ( ) { }</span></h1>
+    <p class="sub">Las cuatro estructuras de datos base de Python, cara a cara: qué son, cómo se comportan y qué funciones usa cada una. Guárdala y vuelve cuando dudes.</p>
+    <div class="legend">
+      <span class="chip"><span class="dot" style="background:var(--lista)"></span>Lista <code style="background:none;color:var(--ink-faint)">[]</code></span>
+      <span class="chip"><span class="dot" style="background:var(--tupla)"></span>Tupla <code style="background:none;color:var(--ink-faint)">()</code></span>
+      <span class="chip"><span class="dot" style="background:var(--set)"></span>Conjunto <code style="background:none;color:var(--ink-faint)">{ }</code></span>
+      <span class="chip"><span class="dot" style="background:var(--dict)"></span>Diccionario <code style="background:none;color:var(--ink-faint)">{k:v}</code></span>
+    </div>
+  </header>
+
+  <h2>De un vistazo</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th><th>Sintaxis</th><th>¿Ordenada?</th><th>¿Mutable?</th>
+          <th>¿Duplicados?</th><th>Acceso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row" style="color:var(--lista)">list</th>
+          <td class="syn">[1, 2, 3]</td>
+          <td class="yes">Sí</td><td class="yes">Sí</td>
+          <td class="yes">Sí</td><td>por índice <code class="syn">l[0]</code></td>
+        </tr>
+        <tr>
+          <th scope="row" style="color:var(--tupla)">tuple</th>
+          <td class="syn">(1, 2, 3)</td>
+          <td class="yes">Sí</td><td class="nope">No</td>
+          <td class="yes">Sí</td><td>por índice <code class="syn">t[0]</code></td>
+        </tr>
+        <tr>
+          <th scope="row" style="color:var(--set)">set</th>
+          <td class="syn">{1, 2, 3}</td>
+          <td class="nope">No</td><td class="yes">Sí</td>
+          <td class="nope">No</td><td>solo <code class="syn">in</code> / iterar</td>
+        </tr>
+        <tr>
+          <th scope="row" style="color:var(--dict)">dict</th>
+          <td class="syn">{"a": 1}</td>
+          <td class="yes">Sí*</td><td class="yes">Sí</td>
+          <td>claves no</td><td>por clave <code class="syn">d["a"]</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="sub" style="font-size:.85rem;margin-top:10px">* Los <b>dict</b> conservan el orden de inserción desde Python 3.7. Los <b>set</b> nunca garantizan orden.</p>
+
+  <h2>Cada una en detalle</h2>
+  <div class="grid">
+
+    <!-- LISTA -->
+    <div class="card lista">
+      <h3>list <small>[ ]</small></h3>
+      <p class="tag">Colección ordenada y mutable. La navaja suiza: para casi todo lo que "cambia".</p>
+      <pre><span class="n">frutas</span> = [<span class="s">"pera"</span>, <span class="s">"uva"</span>, <span class="s">"pera"</span>]
+<span class="n">frutas</span>[<span class="n">0</span>]        <span class="c"># 'pera'  (índice)</span>
+<span class="n">frutas</span>[<span class="n">-1</span>]       <span class="c"># 'pera'  (desde el final)</span>
+<span class="n">frutas</span>[<span class="n">0</span>:<span class="n">2</span>]      <span class="c"># ['pera','uva'] (slicing)</span></pre>
+      <ul class="methods">
+        <li><code>.append(x)</code><span>añade x al final</span></li>
+        <li><code>.extend(it)</code><span>añade todos los de un iterable</span></li>
+        <li><code>.insert(i,x)</code><span>inserta x en la posición i</span></li>
+        <li><code>.remove(x)</code><span>borra la 1ª aparición de x</span></li>
+        <li><code>.pop([i])</code><span>saca y devuelve (último por defecto)</span></li>
+        <li><code>.sort()</code><span>ordena in-place</span></li>
+        <li><code>.reverse()</code><span>invierte in-place</span></li>
+        <li><code>.index(x)</code><span>posición de x</span></li>
+        <li><code>.count(x)</code><span>cuántas veces aparece x</span></li>
+        <li><code>.copy()</code><span>copia superficial</span></li>
+      </ul>
+      <p class="foot"><b>Comprehension:</b> <code style="font-family:var(--mono)">[x*2 for x in nums if x&gt;0]</code></p>
+    </div>
+
+    <!-- TUPLA -->
+    <div class="card tupla">
+      <h3>tuple <small>( )</small></h3>
+      <p class="tag">Ordenada pero inmutable. Para datos fijos: coordenadas, registros, claves de dict.</p>
+      <pre><span class="n">punto</span> = (<span class="n">3</span>, <span class="n">4</span>)
+<span class="n">x</span>, <span class="n">y</span> = <span class="n">punto</span>     <span class="c"># desempaquetado</span>
+<span class="n">solo</span> = (<span class="n">5</span>,)         <span class="c"># ¡la coma la hace tupla!</span>
+<span class="n">nada</span> = (<span class="n">5</span>)          <span class="c"># esto es un int, no tupla</span></pre>
+      <ul class="methods">
+        <li><code>.count(x)</code><span>cuántas veces aparece x</span></li>
+        <li><code>.index(x)</code><span>posición de x</span></li>
+      </ul>
+      <p class="tag" style="margin-top:14px">Solo tiene 2 métodos: al ser inmutable, no puede añadir ni borrar. Sí admite índice, slicing e <code style="font-family:var(--mono);background:var(--surface-2);padding:1px 5px;border-radius:5px">in</code>.</p>
+      <p class="foot"><b>Truco:</b> son hashables, así que sirven como clave de un dict o elemento de un set (una lista no).</p>
+    </div>
+
+    <!-- SET -->
+    <div class="card set">
+      <h3>set <small>{ }</small></h3>
+      <p class="tag">Sin orden y sin duplicados. Para pertenencia rápida y álgebra de conjuntos.</p>
+      <pre><span class="n">a</span> = {<span class="n">1</span>, <span class="n">2</span>, <span class="n">2</span>, <span class="n">3</span>}   <span class="c"># -> {1, 2, 3}</span>
+<span class="n">vacio</span> = <span class="k">set</span>()        <span class="c"># ¡{} es un dict vacío!</span>
+<span class="n">2</span> <span class="k">in</span> <span class="n">a</span>              <span class="c"># True — búsqueda O(1)</span></pre>
+      <ul class="methods">
+        <li><code>.add(x)</code><span>añade un elemento</span></li>
+        <li><code>.discard(x)</code><span>borra x si está (no falla)</span></li>
+        <li><code>.remove(x)</code><span>borra x (falla si no está)</span></li>
+        <li><code>.pop()</code><span>saca uno cualquiera</span></li>
+        <li><code>a | b</code><span>unión</span></li>
+        <li><code>a &amp; b</code><span>intersección</span></li>
+        <li><code>a - b</code><span>diferencia</span></li>
+        <li><code>a ^ b</code><span>diferencia simétrica</span></li>
+        <li><code>.issubset(b)</code><span>¿a está contenido en b?</span></li>
+      </ul>
+      <p class="foot"><b>Inmutable:</b> <code style="font-family:var(--mono)">frozenset(...)</code> es la versión fija (sirve de clave/elemento).</p>
+    </div>
+
+    <!-- DICT -->
+    <div class="card dict">
+      <h3>dict <small>{k:v}</small></h3>
+      <p class="tag">Pares clave→valor. Claves únicas y hashables. El caballo de batalla de Python.</p>
+      <pre><span class="n">edad</span> = {<span class="s">"ana"</span>: <span class="n">30</span>, <span class="s">"leo"</span>: <span class="n">27</span>}
+<span class="n">edad</span>[<span class="s">"ana"</span>]         <span class="c"># 30  (KeyError si no existe)</span>
+<span class="n">edad</span>.get(<span class="s">"x"</span>, <span class="n">0</span>)    <span class="c"># 0   (seguro, sin error)</span></pre>
+      <ul class="methods">
+        <li><code>.get(k,d)</code><span>valor de k, o d por defecto</span></li>
+        <li><code>.keys()</code><span>vista de las claves</span></li>
+        <li><code>.values()</code><span>vista de los valores</span></li>
+        <li><code>.items()</code><span>pares (clave, valor)</span></li>
+        <li><code>.update(d2)</code><span>fusiona otro dict</span></li>
+        <li><code>.pop(k)</code><span>saca y devuelve el valor de k</span></li>
+        <li><code>.setdefault(k,d)</code><span>lee o inicializa k</span></li>
+        <li><code>.popitem()</code><span>saca el último par insertado</span></li>
+      </ul>
+      <p class="foot"><b>Recorrer:</b> <code style="font-family:var(--mono)">for k, v in edad.items():</code></p>
+    </div>
+  </div>
+
+  <h2>Lo que sirve para todas</h2>
+  <div class="common">
+    <div class="box">
+      <h4>len(col)</h4>
+      <p>Número de elementos. Funciona en las cuatro: <code>len([1,2])</code>, <code>len({1,2})</code>...</p>
+    </div>
+    <div class="box">
+      <h4>x in col</h4>
+      <p>¿Está x dentro? Rapidísimo en <code>set</code> y <code>dict</code> (busca en claves); lineal en <code>list</code> y <code>tuple</code>.</p>
+    </div>
+    <div class="box">
+      <h4>for x in col</h4>
+      <p>Itera los elementos. En <code>dict</code> recorre las <b>claves</b> por defecto.</p>
+    </div>
+    <div class="box">
+      <h4>Conversión</h4>
+      <p><code>list(t)</code>, <code>tuple(l)</code>, <code>set(l)</code> (¡quita duplicados!), <code>dict(pares)</code>.</p>
+    </div>
+    <div class="box">
+      <h4>Comprehensions</h4>
+      <p>Cada tipo tiene la suya: <code>[…]</code>, <code>{…}</code> (set), <code>{k:v …}</code> (dict). La tupla usa <code>tuple(… )</code>.</p>
+    </div>
+    <div class="box">
+      <h4>sorted / sum / min / max</h4>
+      <p>Funciones que aceptan cualquier iterable y devuelven un resultado nuevo sin modificar el original.</p>
+    </div>
+  </div>
+
+  <h2>Trampas típicas</h2>
+  <div class="traps">
+    <div class="trap">
+      <b>{} no es un set</b>
+      <p><code>{}</code> crea un <b>dict</b> vacío. Para un set vacío usa <code>set()</code>.</p>
+    </div>
+    <div class="trap">
+      <b>(5) no es una tupla</b>
+      <p>Un solo elemento necesita la coma: <code>(5,)</code>. Sin ella es solo el número entre paréntesis.</p>
+    </div>
+    <div class="trap">
+      <b>Mutable como valor por defecto</b>
+      <p><code>def f(x=[])</code> comparte la <b>misma</b> lista entre llamadas. Usa <code>x=None</code> y créala dentro.</p>
+    </div>
+    <div class="trap">
+      <b>Copiar no es asignar</b>
+      <p><code>b = a</code> apunta a la misma lista. Para copiar de verdad: <code>a.copy()</code> o <code>a[:]</code>.</p>
+    </div>
+    <div class="trap">
+      <b>El set desordena</b>
+      <p>Convertir a <code>set</code> quita duplicados pero <b>pierde el orden</b>. Si lo necesitas, ordénalo después.</p>
+    </div>
+    <div class="trap">
+      <b>Modificar mientras iteras</b>
+      <p>Añadir o borrar de una colección dentro de su propio <code>for</code> da errores raros. Itera sobre una copia.</p>
+    </div>
+  </div>
+
+  <footer>Python 3.14 · aprendiendo-python/REFERENCIA_PYTHON · hecho para Juanan</footer>
+</div>

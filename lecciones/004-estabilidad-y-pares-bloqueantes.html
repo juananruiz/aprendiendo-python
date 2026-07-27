@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 4: Estabilidad y pares bloqueantes</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="003-deque-y-colas.html">← Anterior: 003</a>
+    <a href="005-el-problema-de-los-matrimonios-estables.html">Siguiente: 005 — Rama B →</a>
+  </span>
+</nav>
+
+<h1>Estabilidad y pares bloqueantes</h1>
+<p class="subtitle">El concepto que hace que Gale-Shapley valga la pena — el cierre de la Rama A</p>
+
+<h2>¿Qué es un matching?</h2>
+
+<p>
+  Un <strong>matching</strong> es una asignación entre dos conjuntos del
+  mismo tamaño donde cada elemento de un conjunto se empareja con
+  exactamente uno del otro.
+</p>
+
+<pre><code>Participantes: {A, B, C}
+Destinos:      {M, V, Bcn}
+
+Matching posible:
+  A → M,  B → V,  C → Bcn
+</code></pre>
+
+<h2>¿Qué significa que sea <em>estable</em>?</h2>
+
+<p>Un matching es <strong>estable</strong> si no hay ningún <strong>par bloqueante</strong>.</p>
+
+<h2>¿Qué es un par bloqueante?</h2>
+
+<p>
+  Un par bloqueante son dos elementos (uno de cada conjunto)
+  <strong>que no están emparejados entre sí</strong> pero
+  <strong>preferirían estar juntos</strong> antes que con su asignación
+  actual.
+</p>
+
+<h3>Ejemplo concreto</h3>
+
+<p>Preferencias de candidatos (de más a menos preferido):</p>
+
+<pre><code>Ana:     M > Bcn > V
+Carlos:  Bcn > V > M
+Beatriz: V > M > Bcn
+</code></pre>
+
+<p>Preferencias de destinos:</p>
+
+<pre><code>Madrid:    A > B > C
+Barcelona: C > A > B
+Valencia:  B > A > C
+</code></pre>
+
+<p>Matching actual:</p>
+
+<pre><code>Ana → Barcelona
+Carlos → Madrid
+Beatriz → Valencia
+</code></pre>
+
+<p>Pregunta: ¿hay algún par bloqueante?</p>
+
+<ol>
+  <li>Ana prefiere <strong>Madrid</strong> antes que Barcelona ✅</li>
+  <li>Madrid prefiere <strong>Ana</strong> antes que Carlos (su asignado actual) ✅</li>
+</ol>
+
+<div class="clave">
+  <strong>Ana y Madrid</strong> son un par bloqueante: ninguno está con el
+  otro, y ambos preferirían estar juntos. El matching es
+  <strong>inestable</strong>.
+</div>
+
+<hr>
+
+<h2>¿Por qué es importante la estabilidad?</h2>
+
+<p>
+  Si el matching es inestable, Ana y Madrid tienen incentivos para saltarse
+  el sistema e intentar un acuerdo bilateral. En un proceso selectivo, eso
+  genera conflictos, reclamaciones y sensación de injusticia.
+</p>
+
+<p>Gale-Shapley garantiza que <strong>siempre</strong> se obtiene un matching estable.</p>
+
+<h2>Propiedades de los matchings estables</h2>
+
+<ul>
+  <li>Puede haber múltiples matchings estables para el mismo conjunto de preferencias</li>
+  <li>Gale-Shapley produce el <strong>óptimo para el lado que propone</strong> (candidatos proponen → mejor para candidatos)</li>
+  <li>El lado que recibe propuestas obtiene el <strong>peor matching estable posible</strong> para ellos</li>
+</ul>
+
+<div class="pista">
+  Esto no es un adelanto suelto: en la lección 007 (Rama B) vas a
+  <strong>demostrar</strong> por qué es así, no solo comprobarlo con un
+  ejemplo.
+</div>
+
+<h2>En código: detectar par bloqueante</h2>
+
+<pre><code>def es_par_bloqueante(prefs_candidatos, prefs_destinos,
+                      matching, candidato, destino):
+    """
+    True si el candidato y el destino preferirían estar juntos
+    antes que con sus asignaciones actuales.
+    """
+    destino_actual = matching[candidato]
+    candidato_actual = obtener_asignado(destino, matching)
+
+    candidato_quiere = (prefs_candidatos[candidato].index(destino) <
+                        prefs_candidatos[candidato].index(destino_actual))
+    destino_quiere = (prefs_destinos[destino].index(candidato) <
+                      prefs_destinos[destino].index(candidato_actual))
+
+    return candidato_quiere and destino_quiere
+</code></pre>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Implementa el detector de estabilidad</h3>
+<p>
+  Este es el ejercicio clave antes de implementar Gale-Shapley: dado un
+  matching y las preferencias de ambos lados, determina si es estable.
+  Construirás, en orden, <code>prefieres()</code>, el inverso del matching,
+  <code>es_par_bloqueante()</code> y finalmente
+  <code>es_matching_estable()</code> — que reutilizarás en toda la Rama B.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/004-detectar-par-bloqueante.py</code></p>
+</div>
+
+<hr>
+
+<h2>Rama A completa</h2>
+
+<p>
+  Con esta lección cierras la Rama A: diccionarios de preferencias,
+  <code>sorted</code>+<code>key</code>, <code>deque</code> y estabilidad.
+  Tienes ya todas las herramientas que exige la Rama B para entrar de
+  lleno en Gale-Shapley.
+</p>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong>
+  <a href="005-el-problema-de-los-matrimonios-estables.html">005 — El problema de los matrimonios estables</a>,
+  el arranque de la Rama B — la historia real detrás del algoritmo y por
+  qué la fuerza bruta no sirve.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="003-deque-y-colas.html">← Anterior: 003</a>
+    <a href="005-el-problema-de-los-matrimonios-estables.html">Siguiente: 005 — Rama B →</a>
+  </span>
+</nav>
+
+</body>
+</html>

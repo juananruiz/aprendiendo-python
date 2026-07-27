@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 16: El módulo itertools</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="015-functools.html">← Anterior: 015</a>
+    <a href="017-decoradores.html">Siguiente: 017 — Decoradores →</a>
+  </span>
+</nav>
+
+<h1>El módulo <code>itertools</code></h1>
+<p class="subtitle">Pista 4, lección 6 — álgebra de iteradores</p>
+
+<p>
+  Si <code>functools</code> opera sobre funciones, <code>itertools</code> opera
+  sobre <strong>iteradores</strong>. Todo lo que hay dentro es perezoso
+  (lección 014): recibe iterables, devuelve iteradores, y no materializa nada
+  hasta que consumes.
+</p>
+
+<div class="clave">
+  La documentación oficial lo llama «un álgebra de iteradores»: un conjunto
+  pequeño de piezas que se combinan entre sí. Todas están escritas en C, así
+  que además de expresivas son rápidas.
+</div>
+
+<hr>
+
+<h2><code>chain</code> — concatenar sin copiar</h2>
+
+<pre><code>from itertools import chain
+
+turno_libre = ["Ana", "Carlos"]
+turno_discapacidad = ["Beatriz"]
+turno_promocion = ["David", "Elena"]
+
+todos = chain(turno_libre, turno_discapacidad, turno_promocion)
+list(todos)   # ['Ana', 'Carlos', 'Beatriz', 'David', 'Elena']
+</code></pre>
+
+<p>
+  <code>lista_a + lista_b + lista_c</code> haría lo mismo, pero construyendo
+  una lista nueva con todo dentro. <code>chain</code> no copia nada: recorre
+  una detrás de otra.
+</p>
+
+<pre><code># chain.from_iterable: aplanar un nivel de anidamiento
+from itertools import chain
+matriz = [[1, 2], [3, 4], [5, 6]]
+list(chain.from_iterable(matriz))    # [1, 2, 3, 4, 5, 6]
+</code></pre>
+
+<hr>
+
+<h2><code>islice</code> — <em>slicing</em> para lo que no se puede indexar</h2>
+
+<p>
+  Un generador no acepta <code>[2:5]</code> porque no tiene índices.
+  <code>islice</code> es el sustituto:
+</p>
+
+<pre><code>from itertools import islice
+
+islice(iterable, fin)
+islice(iterable, inicio, fin)
+islice(iterable, inicio, fin, paso)
+</code></pre>
+
+<pre><code>list(islice(fibonacci(), 10))        # los 10 primeros de un infinito
+list(islice(fibonacci(), 5, 10))     # del 5º al 9º
+list(islice(range(20), 0, 20, 3))    # de 3 en 3
+
+# Leer sólo las 100 primeras líneas de un fichero de 40 GB
+with open("enorme.log") as f:
+    for linea in islice(f, 100):
+        print(linea)
+</code></pre>
+
+<div class="pista">
+  <code>islice</code> no admite índices negativos. No puede: para saber cuál es
+  el penúltimo elemento habría que llegar al final, y con un flujo infinito eso
+  no ocurre nunca.
+</div>
+
+<hr>
+
+<h2><code>groupby</code> — agrupar consecutivos (¡ojo!)</h2>
+
+<p>
+  Es la más útil y la que más disgustos da, porque casi nadie lee la letra
+  pequeña. <code>groupby</code> agrupa elementos <strong>consecutivos</strong>
+  que comparten clave. No agrupa la colección entera: sólo detecta cuándo
+  cambia el valor.
+</p>
+
+<pre><code>from itertools import groupby
+
+candidatos = [
+    {"nombre": "Ana",     "cuerpo": "A2"},
+    {"nombre": "Carlos",  "cuerpo": "C1"},
+    {"nombre": "Beatriz", "cuerpo": "A2"},
+]
+
+for cuerpo, grupo in groupby(candidatos, key=lambda c: c["cuerpo"]):
+    print(cuerpo, [c["nombre"] for c in grupo])
+</code></pre>
+
+<div class="output">A2 ['Ana']
+C1 ['Carlos']
+A2 ['Beatriz']     ← ¡A2 aparece DOS veces!</div>
+
+<div class="regla">
+  <p>
+    <strong>La regla de oro: <code>sorted()</code> antes de
+    <code>groupby()</code>, con la misma <code>key</code>.</strong> Siempre. Sin
+    excepciones. Si los datos no vienen ordenados por la clave de agrupación,
+    el resultado es basura silenciosa — no lanza error.
+  </p>
+</div>
+
+<pre><code>por_cuerpo = lambda c: c["cuerpo"]
+
+for cuerpo, grupo in groupby(sorted(candidatos, key=por_cuerpo), key=por_cuerpo):
+    print(cuerpo, [c["nombre"] for c in grupo])
+</code></pre>
+
+<div class="output">A2 ['Ana', 'Beatriz']
+C1 ['Carlos']</div>
+
+<h3>La segunda trampa: el grupo también es perezoso</h3>
+
+<pre><code>grupos = {k: g for k, g in groupby(datos_ordenados, key=por_cuerpo)}
+# ❌ los valores son iteradores YA AGOTADOS
+
+grupos = {k: list(g) for k, g in groupby(datos_ordenados, key=por_cuerpo)}
+# ✅ materializa cada grupo mientras es válido
+</code></pre>
+
+<p>
+  El iterador de un grupo sólo es válido hasta que avanzas al siguiente grupo.
+  <code>groupby</code> recorre la fuente una sola vez y no guarda nada.
+</p>
+
+<div class="pista">
+  <strong>Cuándo NO usar <code>groupby</code>.</strong> Si sólo quieres un
+  diccionario de grupos y los datos no están ordenados, ordenar cuesta
+  O(n log n) para nada. <code>collections.defaultdict(list)</code> lo hace en
+  O(n) y se lee mejor. <code>groupby</code> gana cuando los datos <em>ya</em>
+  vienen ordenados (de una consulta SQL con <code>ORDER BY</code>, por ejemplo)
+  o cuando quieres agrupar un flujo enorme sin cargarlo en memoria.
+</div>
+
+<hr>
+
+<h2><code>product</code> — el producto cartesiano</h2>
+
+<pre><code>from itertools import product
+
+candidatos = ["Ana", "Carlos"]
+plazas = ["Sevilla", "Cádiz", "Huelva"]
+
+list(product(candidatos, plazas))
+# [('Ana','Sevilla'), ('Ana','Cádiz'), ('Ana','Huelva'),
+#  ('Carlos','Sevilla'), ('Carlos','Cádiz'), ('Carlos','Huelva')]
+</code></pre>
+
+<p>Equivale a bucles anidados, pero sin anidar:</p>
+
+<pre><code># Estos dos son lo mismo
+for c, p in product(candidatos, plazas): ...
+
+for c in candidatos:
+    for p in plazas: ...
+</code></pre>
+
+<pre><code>list(product([0, 1], repeat=3))    # todas las combinaciones de 3 bits
+# [(0,0,0), (0,0,1), (0,1,0), (0,1,1), (1,0,0), ...]
+</code></pre>
+
+<h3>La familia combinatoria</h3>
+
+<table>
+<tr><th>Función</th><th>Qué genera</th><th>Ejemplo con <code>ABC</code></th></tr>
+<tr><td><code>product(x, repeat=2)</code></td><td>Con repetición, orden importa</td><td>AA AB AC BA BB BC CA CB CC</td></tr>
+<tr><td><code>permutations(x, 2)</code></td><td>Sin repetición, orden importa</td><td>AB AC BA BC CA CB</td></tr>
+<tr><td><code>combinations(x, 2)</code></td><td>Sin repetición, orden NO importa</td><td>AB AC BC</td></tr>
+<tr><td><code>combinations_with_replacement(x, 2)</code></td><td>Con repetición, orden NO importa</td><td>AA AB AC BB BC CC</td></tr>
+</table>
+
+<div class="clave">
+  <code>permutations(candidatos)</code> es <em>exactamente</em> la fuerza bruta
+  del problema de los matrimonios estables (lección 005). Para 10 candidatos
+  son 3.628.800 emparejamientos; para 20, más que segundos tiene el universo.
+  Por eso existe Gale-Shapley. Ahora ya sabes generarlos en una línea — y por
+  qué no debes.
+</div>
+
+<hr>
+
+<h2><code>takewhile</code> y <code>dropwhile</code> — cortar por condición</h2>
+
+<p>
+  Son primos de <code>filter</code>, pero con una diferencia crucial:
+  <code>filter</code> examina todos los elementos; estos dos
+  <strong>paran</strong> en cuanto la condición cambia por primera vez.
+</p>
+
+<pre><code>from itertools import takewhile, dropwhile
+
+notas = [9, 8, 7, 4, 9, 3]     # ordenadas de mayor a menor... casi
+
+list(takewhile(lambda n: n &gt;= 5, notas))   # [9, 8, 7]   ← se para en el 4
+list(dropwhile(lambda n: n &gt;= 5, notas))   # [4, 9, 3]   ← todo desde el 4
+list(filter(lambda n: n &gt;= 5, notas))      # [9, 8, 7, 9] ← el 9 tardío sí entra
+</code></pre>
+
+<div class="regla">
+  <p>
+    <code>takewhile</code> = «dame el prefijo que cumple».<br>
+    <code>dropwhile</code> = «sáltate el prefijo que cumple y dame el resto».<br>
+    <code>filter</code> = «dame todos los que cumplen, estén donde estén».
+  </p>
+</div>
+
+<p>La utilidad real de <code>takewhile</code> es domar lo infinito:</p>
+
+<pre><code># Todos los Fibonacci por debajo de un millón — sin saber cuántos son
+list(takewhile(lambda f: f &lt; 1_000_000, fibonacci()))
+
+# Saltar la cabecera de un fichero sin contar líneas
+datos = dropwhile(lambda l: l.startswith("#"), leer_lineas("datos.csv"))
+</code></pre>
+
+<hr>
+
+<h2>Cuatro más que usarás</h2>
+
+<pre><code>from itertools import accumulate, count, cycle, zip_longest, tee
+
+# accumulate: sumas parciales (el "reduce que enseña los pasos")
+list(accumulate([1, 2, 3, 4]))              # [1, 3, 6, 10]
+list(accumulate([1, 2, 3, 4], max))         # [1, 2, 3, 4] — máximo acumulado
+
+# count: range() infinito
+list(islice(count(10, 5), 4))               # [10, 15, 20, 25]
+
+# cycle: repetir para siempre (repartir plazas en round-robin)
+list(islice(cycle(["A", "B", "C"]), 7))     # ['A','B','C','A','B','C','A']
+
+# zip_longest: zip() que no descarta la cola del más largo
+list(zip_longest([1, 2, 3], "ab", fillvalue="-"))
+# [(1,'a'), (2,'b'), (3,'-')]
+
+# tee: duplicar un iterador para recorrerlo dos veces
+it1, it2 = tee(mi_generador)
+</code></pre>
+
+<div class="pista">
+  <code>tee</code> parece resolver el problema del agotamiento de la lección
+  014, pero cuidado: por dentro <em>guarda en memoria</em> todo lo que un ramal
+  ha consumido y el otro no. Si vas a recorrer dos veces algo pequeño, una
+  <code>list()</code> es más honesta y más barata.
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>El arsenal de iteradores</h3>
+<p>
+  Agruparás candidatos por cuerpo con <code>groupby</code> — primero mal (sin
+  ordenar) para ver el desastre en tus datos, y luego bien. Generarás todos
+  los emparejamientos posibles con <code>permutations</code> y comprobarás
+  empíricamente por qué la fuerza bruta muere en N=10. Y montarás un repartidor
+  de plazas en round-robin con <code>cycle</code>. También reharás el
+  <code>mejor_de_cada_cuerpo()</code> del ejercicio 013, para comparar.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/016-itertools.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> la última pieza del kit — y la que más se
+  ve en el Python profesional. Ya tienes todo lo necesario para entenderla:
+  closures (012), orden superior (012) y <code>wraps</code> (015).
+  <a href="017-decoradores.html">017 — Decoradores de propósito general</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="015-functools.html">← Anterior: 015</a>
+    <a href="017-decoradores.html">Siguiente: 017 — Decoradores →</a>
+  </span>
+</nav>
+
+</body>
+</html>

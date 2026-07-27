@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 5: El problema de los matrimonios estables</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="004-estabilidad-y-pares-bloqueantes.html">← Anterior: 004</a>
+    <a href="006-el-cortejo-ronda-a-ronda.html">Siguiente: 006 — El cortejo →</a>
+  </span>
+</nav>
+
+<h1>El problema de los matrimonios estables</h1>
+<p class="subtitle">La historia real detrás del algoritmo que la IA usó hoy en tu trabajo</p>
+
+<p>
+  Hoy resolviste un problema real: asignar destinos a candidatos según sus
+  puntuaciones. La IA que te ayudó usó un algoritmo con más de 60 años de
+  historia. Antes de programarlo, vamos a entender <strong>exactamente</strong>
+  qué problema resuelve y por qué no es tan simple como parece — sin dar nada
+  por supuesto.
+</p>
+
+<hr>
+
+<h2>1. La historia</h2>
+
+<div class="historia">
+<h3>1962 — Gale y Shapley</h3>
+<p>
+  David Gale y Lloyd Shapley publicaron un artículo con un título que no
+  esconde nada: <em>"College Admissions and the Stability of Marriage"</em>.
+  Planteaban un problema aparentemente doméstico — cómo casar a un grupo de
+  hombres y mujeres de forma que nadie tenga incentivos para dejar a su
+  pareja por otra persona — y demostraron algo muy poderoso: <strong>siempre
+  existe una solución estable, y hay un procedimiento mecánico para
+  encontrarla</strong>.
+</p>
+<p>
+  Ese "problema doméstico" resultó tener el mismo esqueleto matemático que
+  problemas mucho más serios: asignar estudiantes a colegios, médicos
+  residentes a hospitales, o — como hiciste tú hoy — candidatos a destinos.
+</p>
+<h3>2012 — El Premio Nobel</h3>
+<p>
+  Cincuenta años después, Alvin Roth y Lloyd Shapley recibieron el Premio
+  Nobel de Economía por este trabajo (Gale había fallecido en 2008 y el
+  Nobel no se concede a título póstumo). Roth había llevado la teoría a la
+  práctica: rediseñó el <strong>NRMP</strong> (National Resident Matching
+  Program), el sistema que en EEUU asigna cada año a más de 40.000 médicos
+  residentes a hospitales, y sistemas de admisión escolar en Nueva York y
+  Boston.
+</p>
+</div>
+
+<p>
+  El nombre "algoritmo del amor" que le vamos a dar en esta rama no es solo
+  una broma: es literalmente el marco original del problema, y te va a
+  ayudar a razonar sobre él de forma más intuitiva que pensar en
+  "candidato 3, destino 7".
+</p>
+
+<hr>
+
+<h2>2. Planteamiento formal, sin atajos</h2>
+
+<p>Vamos a definir cada pieza. No se asume nada del vocabulario técnico:</p>
+
+<h3>Dos conjuntos del mismo tamaño</h3>
+<p>
+  Tenemos dos grupos de personas, <strong>del mismo tamaño N</strong>: los
+  <strong>proponentes</strong> (quienes hacen propuestas) y los
+  <strong>receptores</strong> (quienes las reciben). En tu caso de hoy, los
+  candidatos eran los proponentes y los destinos los receptores — pero para
+  esta rama vamos a usar personas y preferencias mutuas, que es el marco
+  original y el más fácil de razonar.
+</p>
+
+<h3>Preferencias completas y sin empates</h3>
+<p>
+  Cada persona tiene una lista que ordena a <strong>todas</strong> las
+  personas del otro grupo, de la que más prefiere a la que menos. Dos
+  matices importantes que se suelen dar por supuestos y no deberían:
+</p>
+<ul>
+  <li><strong>Completa</strong>: no hay a nadie "descartado" de antemano. Incluso a la persona que menos te gusta, la ordenas en algún puesto.</li>
+  <li><strong>Sin empates</strong>: para cada dos personas, siempre prefieres estrictamente a una sobre la otra. (En la lección 009 veremos qué pasa cuando esto no es cierto — con notas de corte, por ejemplo.)</li>
+</ul>
+
+<pre><code>preferencias_A = {
+    "Alba":  ["Nora", "Mar", "Olga", "Pau"],
+    "Bruno": ["Mar", "Nora", "Pau", "Olga"],
+    "Cora":  ["Mar", "Olga", "Nora", "Pau"],
+    "Dario": ["Pau", "Olga", "Nora", "Mar"],
+}
+</code></pre>
+
+<h3>Un matching (emparejamiento)</h3>
+<p>
+  Un <strong>matching</strong> es una asignación donde cada proponente queda
+  emparejado con exactamente un receptor, y viceversa — nadie se queda sin
+  pareja, y nadie tiene dos. En términos matemáticos, es una
+  <strong>biyección</strong> entre los dos conjuntos: a cada elemento de un
+  lado le corresponde uno y solo uno del otro, sin que sobre ni falte nadie.
+</p>
+
+<div class="pista">
+  <strong>Repaso de la lección 4:</strong> ya viste qué es un <em>par
+  bloqueante</em> — dos personas no emparejadas entre sí que preferirían
+  estar juntas antes que con su pareja actual. Un matching es
+  <strong>estable</strong> si no tiene ningún par bloqueante. Si esto no te
+  suena, vuelve a
+  <a href="004-estabilidad-y-pares-bloqueantes.md">004-estabilidad-y-pares-bloqueantes.md</a>
+  antes de seguir.
+</div>
+
+<hr>
+
+<h2>3. ¿Por qué no probar todas las combinaciones?</h2>
+
+<p>
+  Si tienes 4 proponentes y 4 receptores, parece razonable probar
+  <strong>todos</strong> los matchings posibles y quedarte con uno estable.
+  El problema es cuántos hay: con N personas en cada lado, el número de
+  matchings posibles es <strong>N!</strong> (N factorial) — todas las formas
+  de emparejar un conjunto con otro.
+</p>
+
+<table>
+  <tr><th>N (personas por lado)</th><th>Matchings posibles (N!)</th></tr>
+  <tr><td>4</td><td class="num">24</td></tr>
+  <tr><td>10</td><td class="num">3.628.800</td></tr>
+  <tr><td>20</td><td class="num">≈ 2,43 × 10¹⁸</td></tr>
+  <tr><td>40.000 (como el NRMP real)</td><td class="num">un número con más de 166.000 dígitos</td></tr>
+</table>
+
+<p>
+  Con 4 personas por lado, fuerza bruta es viable — de hecho es tu ejercicio
+  de hoy. Con 40.000 médicos residentes, ni todos los ordenadores del mundo
+  juntos terminarían antes del fin del universo. Necesitamos un
+  procedimiento que <strong>construya</strong> una solución estable sin
+  probarlas todas.
+</p>
+
+<div class="clave">
+  <strong>El teorema de Gale y Shapley (sin demostrar todavía):</strong>
+  para cualquier conjunto de preferencias completas y sin empates, existe
+  <strong>al menos un</strong> matching estable — y hay un algoritmo simple
+  (el de "aceptación diferida") que siempre lo encuentra, en un número de
+  pasos razonable. La demostración de por qué esto es cierto la veremos en
+  la lección 007. Por ahora, quédate con que el problema tiene solución
+  garantizada, y que no hace falta fuerza bruta para encontrarla.
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Fuerza bruta: comprueba tú mismo la explosión combinatoria</h3>
+
+<p>
+  Abre <code>ejercicios/005-fuerza-bruta-matchings.py</code>. Vas a:
+</p>
+<ol>
+  <li>Generar <strong>todos</strong> los matchings posibles para un caso de 3×3 usando <code>itertools.permutations</code></li>
+  <li>Para cada uno, comprobar si es estable reutilizando tu función de la lección 004</li>
+  <li>Contar cuántos matchings hay en total y cuántos de ellos son estables</li>
+</ol>
+
+<div class="pista">
+  <strong>Pista:</strong> si fijas el orden de los proponentes
+  (<code>["Alba", "Bruno", "Cora"]</code>), cada permutación de los
+  receptores <code>["Mar", "Nora", "Olga"]</code> te da un matching distinto
+  al emparejarlos en ese orden.
+</div>
+
+</div>
+
+<hr>
+
+<h2>Preguntas de reflexión</h2>
+
+<ul>
+  <li>¿Puede haber más de un matching estable para el mismo conjunto de preferencias? (Lo comprobarás en el ejercicio)</li>
+  <li>Si las preferencias no fueran completas (alguien no ordena a todo el mundo), ¿qué problema práctico aparecería?</li>
+  <li>¿Por qué crees que "sin empates" es una simplificación importante para el algoritmo, y no solo un detalle técnico?</li>
+</ul>
+
+<hr>
+
+<h2>Siguiente lección</h2>
+
+<p>
+  En <a href="006-el-cortejo-ronda-a-ronda.html">006-el-cortejo-ronda-a-ronda.html</a>
+  vas a ver el procedimiento exacto que garantiza un matching estable, trazado
+  a mano, ronda a ronda, con un ejemplo completo de 4×4.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+  Puedes pedirme que revise tu código, explique un concepto de otra forma,
+  o que diseñe la siguiente lección.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="004-estabilidad-y-pares-bloqueantes.html">← Anterior: 004</a>
+    <a href="006-el-cortejo-ronda-a-ronda.html">Siguiente: 006 — El cortejo →</a>
+  </span>
+</nav>
+
+</body>
+</html>

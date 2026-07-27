@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 1: Preferencias modeladas con diccionarios</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <span class="nav-hueco">Anterior</span>
+    <a href="002-ordenacion-con-key.html">Siguiente: 002 — Ordenación con key →</a>
+  </span>
+</nav>
+
+<h1>Preferencias modeladas con diccionarios</h1>
+<p class="subtitle">La estructura de datos que sostiene todo el algoritmo de matching</p>
+
+<p>
+  El algoritmo Gale-Shapley trabaja con <em>listas de preferencias</em>. Cada
+  participante ordena a los miembros del otro conjunto de mejor a peor. En
+  Python, la forma natural de modelar esto es con <strong>diccionarios</strong>.
+</p>
+
+<hr>
+
+<h2>Estructura básica</h2>
+
+<pre><code>preferencias_candidatos = {
+    "Ana":     ["Madrid", "Barcelona", "Valencia"],
+    "Carlos":  ["Barcelona", "Valencia", "Madrid"],
+    "Beatriz": ["Valencia", "Madrid", "Barcelona"],
+}
+</code></pre>
+
+<p>
+  Cada clave es un candidato, y el valor es una lista con sus destinos
+  ordenados de más preferido a menos preferido (posición 0 = el más
+  deseado).
+</p>
+
+<h2>Preferencias desde ambos lados</h2>
+
+<p>
+  En Gale-Shapley, <strong>ambos</strong> conjuntos tienen preferencias. Las
+  plazas/destinos también ordenan a los candidatos:
+</p>
+
+<pre><code>preferencias_destinos = {
+    "Madrid":    ["Ana", "Beatriz", "Carlos"],
+    "Barcelona": ["Carlos", "Ana", "Beatriz"],
+    "Valencia":  ["Beatriz", "Ana", "Carlos"],
+}
+</code></pre>
+
+<h2>De puntuaciones a preferencias</h2>
+
+<p>
+  En tu caso real no hay preferencias declaradas: tienes
+  <strong>puntuaciones</strong>. La preferencia de un destino por un
+  candidato es directamente su nota. La preferencia del candidato por los
+  destinos puede calcularse combinando sus intereses personales con la nota
+  mínima exigida por cada plaza.
+</p>
+
+<p>Para generar el ranking automáticamente:</p>
+
+<pre><code>candidatos = {"Ana": 85, "Carlos": 92, "Beatriz": 78}
+
+# Ranking: ordenados de mayor a menor puntuación
+ranking = sorted(candidatos.items(), key=lambda x: x[1], reverse=True)
+# → [("Carlos", 92), ("Ana", 85), ("Beatriz", 78)]
+</code></pre>
+
+<h2>Acceso rápido a la posición en la preferencia</h2>
+
+<p>
+  Para comprobar si A prefiere a B sobre C, necesitamos saber el
+  <em>índice</em> de cada uno en la lista de preferencias:
+</p>
+
+<pre><code>def prefieres(preferencias, quien, candidato_a, candidato_b):
+    """True si 'quien' prefiere a 'candidato_a' sobre 'candidato_b'"""
+    lista = preferencias[quien]
+    return lista.index(candidato_a) < lista.index(candidato_b)
+</code></pre>
+
+<div class="pista">
+  <code>list.index()</code> es O(n) — para conjuntos pequeños es perfecto.
+  Para miles de elementos convendría un diccionario índice, pero eso lo
+  veremos más adelante.
+</div>
+
+<div class="clave">
+  <strong>Resumen</strong>
+  <ul style="margin-bottom:0;">
+    <li>Las preferencias se modelan como dicts donde cada clave tiene una <strong>lista ordenada</strong></li>
+    <li>Ambos conjuntos tienen preferencias</li>
+    <li>Las puntuaciones numéricas se convierten a ranking con <code>sorted()</code> y <code>key=</code></li>
+    <li>La función <code>prefieres()</code> es la operación básica del algoritmo</li>
+  </ul>
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Genera los dos rankings desde datos brutos</h3>
+<p>
+  Tienes un proceso selectivo con 5 candidatos y 3 destinos. Cada candidato
+  tiene una puntuación y unas preferencias personales; cada destino tiene
+  una nota mínima y un número de plazas. Tu tarea: generar los dos rankings
+  (candidatos→destinos y destinos→candidatos) a partir de esos datos brutos,
+  <strong>filtrando</strong> a los candidatos que no llegan a la nota mínima
+  de cada destino.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/001-generar-ranking.py</code></p>
+<div class="pista">
+  <strong>Extra:</strong> antes de ese ejercicio, <code>ejercicios/001a-diccionarios.py</code>
+  te deja practicar sueltas las operaciones de recorrido y ordenación de
+  diccionarios que vas a necesitar.
+</div>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> vas a necesitar ordenar por varios
+  criterios a la vez (nota, luego edad, luego nombre...). Eso es
+  <a href="002-ordenacion-con-key.html">002 — Ordenación avanzada con <code>sorted()</code> y <code>lambda</code></a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <span class="nav-hueco">Anterior</span>
+    <a href="002-ordenacion-con-key.html">Siguiente: 002 — Ordenación con key →</a>
+  </span>
+</nav>
+
+</body>
+</html>

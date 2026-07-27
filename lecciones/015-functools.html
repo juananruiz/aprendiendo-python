@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 15: El módulo functools</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="014-generadores-y-evaluacion-perezosa.html">← Anterior: 014</a>
+    <a href="016-itertools.html">Siguiente: 016 — itertools →</a>
+  </span>
+</nav>
+
+<h1>El módulo <code>functools</code></h1>
+<p class="subtitle">Pista 4, lección 5 — herramientas que operan sobre funciones</p>
+
+<p>
+  <code>functools</code> es la caja de herramientas funcional de la librería
+  estándar. Todo lo que hay dentro tiene la misma forma: <strong>recibe una
+  función y devuelve algo</strong>. Son funciones de orden superior de la
+  lección 012, ya escritas y probadas por ti.
+</p>
+
+<hr>
+
+<h2><code>reduce</code> — plegar una colección en un valor</h2>
+
+<p>
+  Es la tercera pieza del trío clásico. <code>map</code> transforma N en N,
+  <code>filter</code> reduce N a M, y <code>reduce</code> colapsa N en
+  <strong>uno</strong>.
+</p>
+
+<pre><code>from functools import reduce
+
+reduce(funcion_de_dos_argumentos, iterable, valor_inicial)
+</code></pre>
+
+<p>La función recibe dos cosas: el acumulado hasta ahora y el siguiente
+elemento. Devuelve el nuevo acumulado.</p>
+
+<pre><code>reduce(lambda acc, x: acc + x, [1, 2, 3, 4], 0)
+</code></pre>
+
+<div class="output">acc=0,  x=1  →  1
+acc=1,  x=2  →  3
+acc=3,  x=3  →  6
+acc=6,  x=4  →  10</div>
+
+<p>
+  Ese ejemplo concreto no lo escribas nunca: <code>sum([1,2,3,4])</code> hace
+  lo mismo y se lee mejor. <code>reduce</code> gana cuando la operación no
+  tiene una <em>builtin</em> propia:
+</p>
+
+<pre><code># Producto (no hay builtin... salvo math.prod, que también existe)
+reduce(lambda a, b: a * b, [1, 2, 3, 4, 5], 1)     # 120
+
+# Intersección de varios conjuntos
+reduce(lambda a, b: a &amp; b, [{1,2,3}, {2,3,4}, {3,4,5}])   # {3}
+
+# Fusionar diccionarios sin mutar ninguno
+reduce(lambda a, b: {**a, **b}, [{"a":1}, {"b":2}, {"c":3}])
+
+# Aplicar una lista de funciones en cadena — ¡el componer() de la lección 012!
+reduce(lambda valor, f: f(valor), [limpiar, minusculas, sin_tildes], texto)
+</code></pre>
+
+<div class="clave">
+  Ese último ejemplo merece un segundo de atención: el acumulador no tiene por
+  qué ser un número. Aquí el acumulado es <em>el texto en curso</em> y los
+  "elementos" son <em>funciones</em>. Toda composición es un <code>reduce</code>.
+</div>
+
+<div class="pista">
+  <strong>Sobre el valor inicial.</strong> Si lo omites, <code>reduce</code>
+  usa el primer elemento como semilla — y revienta con
+  <code>TypeError</code> si el iterable está vacío. Ponlo siempre que exista un
+  neutro obvio (0 para sumar, 1 para multiplicar, <code>{}</code> para fusionar).
+</div>
+
+<div class="regla">
+  <p>
+    <strong>Guido tenía razón a medias.</strong> Van Rossum sacó
+    <code>reduce</code> de las <em>builtins</em> en Python 3 porque
+    «casi siempre un bucle explícito es más legible». En la práctica: usa
+    <code>sum</code>, <code>min</code>, <code>max</code>, <code>math.prod</code>,
+    <code>any</code>, <code>all</code> o <code>str.join</code> cuando existan.
+    Reserva <code>reduce</code> para lo que no cubren.
+  </p>
+</div>
+
+<hr>
+
+<h2><code>partial</code> — fijar argumentos</h2>
+
+<p>
+  <code>partial</code> coge una función y unos cuantos argumentos, y devuelve
+  una función nueva con esos argumentos ya puestos. Es la fábrica de closures
+  de la lección 012, sin escribir el <code>def</code> interno.
+</p>
+
+<pre><code>from functools import partial
+
+def baremar(experiencia, formacion, peso_exp, peso_form):
+    return experiencia * peso_exp + formacion * peso_form
+
+# El baremo de esta convocatoria: 70 % experiencia, 30 % formación
+baremo_2026 = partial(baremar, peso_exp=0.7, peso_form=0.3)
+
+baremo_2026(experiencia=8, formacion=6)    # 7.4
+</code></pre>
+
+<p>Compara con el closure equivalente:</p>
+
+<pre><code># A mano
+def hacer_baremo(peso_exp, peso_form):
+    def baremo(experiencia, formacion):
+        return baremar(experiencia, formacion, peso_exp, peso_form)
+    return baremo
+
+# Con partial — cuatro líneas menos, misma cosa
+baremo_2026 = partial(baremar, peso_exp=0.7, peso_form=0.3)
+</code></pre>
+
+<h3>Dónde brilla de verdad</h3>
+
+<pre><code># Adaptar una función a la firma que espera otra API
+sorted(candidatos, key=partial(distancia_a, origen="Sevilla"))
+
+# Especializar por configuración
+int_binario = partial(int, base=2)
+int_binario("1011")            # 11
+
+# Callbacks con contexto ya inyectado
+boton.on_click(partial(guardar, destino="/tmp/salida.csv"))
+</code></pre>
+
+<div class="pista">
+  <strong>Posicionales vs. nombrados.</strong> <code>partial</code> fija los
+  posicionales <em>por la izquierda</em>: <code>partial(f, 1)</code> hace que
+  el 1 sea el primer argumento, y no puedes saltarte el segundo. Si necesitas
+  fijar el de en medio, usa el nombre:
+  <code>partial(f, tercero=3)</code>.
+</div>
+
+<hr>
+
+<h2><code>lru_cache</code> — memorizar resultados</h2>
+
+<p>
+  Aquí se cobra la factura de la lección 011. Si una función es pura, su
+  resultado depende sólo de los argumentos — así que se puede guardar y
+  reutilizar. <code>@lru_cache</code> hace eso automáticamente.
+</p>
+
+<pre><code>from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n):
+    return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
+</code></pre>
+
+<p>
+  Sin caché, <code>fib(35)</code> hace unos 30 millones de llamadas y tarda
+  segundos: el árbol de recursión recalcula <code>fib(10)</code> miles de
+  veces. Con caché, cada <code>n</code> se calcula <strong>una sola vez</strong>
+  y el coste pasa de O(2<sup>n</sup>) a O(n). Es programación dinámica
+  (Pista 1) en una línea.
+</p>
+
+<pre><code>fib(100)              # instantáneo
+print(fib.cache_info())
+# CacheInfo(hits=98, misses=101, maxsize=None, currsize=101)
+
+fib.cache_clear()     # vaciar la caché
+</code></pre>
+
+<div class="regla">
+  <p><strong>Requisitos para poder cachear:</strong></p>
+  <p>
+    1. La función debe ser <strong>pura</strong>. Cachear
+    <code>obtener_saldo(cuenta)</code> te devolverá saldos obsoletos para
+    siempre.
+  </p>
+  <p>
+    2. Los argumentos deben ser <strong>hashables</strong> (lección 011). Una
+    lista como argumento da <code>TypeError: unhashable type</code>. Pásale
+    una <code>tuple</code> o un <code>frozenset</code>.
+  </p>
+</div>
+
+<div class="clave">
+  LRU = <em>Least Recently Used</em>. Con <code>maxsize=128</code> (el defecto),
+  al llenarse tira lo menos usado recientemente. Con
+  <code>maxsize=None</code> la caché crece sin límite — cómodo para recursión
+  acotada, peligroso para funciones con dominio grande, porque nada se libera
+  nunca. Desde Python 3.9 tienes <code>@cache</code>, que es exactamente
+  <code>@lru_cache(maxsize=None)</code> con un nombre más honesto.
+</div>
+
+<hr>
+
+<h2><code>wraps</code> — no perder la identidad</h2>
+
+<p>
+  Esta es pequeña pero imprescindible, y es la puerta a la lección 017. Cuando
+  envuelves una función en otra, la original desaparece de la vista:
+</p>
+
+<pre><code>def cronometrar(funcion):
+    def envoltorio(*args, **kwargs):
+        ...
+        return funcion(*args, **kwargs)
+    return envoltorio
+
+@cronometrar
+def calcular_baremo(candidato):
+    """Aplica el baremo oficial de la convocatoria."""
+    ...
+
+print(calcular_baremo.__name__)   # 'envoltorio'  😱
+print(calcular_baremo.__doc__)    # None          😱
+help(calcular_baremo)             # inútil
+</code></pre>
+
+<p>
+  El nombre, el docstring, las anotaciones de tipo — todo se ha perdido. Los
+  <em>tracebacks</em> mentirán, <code>help()</code> no servirá, y las
+  herramientas que introspeccionan (pytest, Sphinx, FastAPI) se confundirán.
+  Una línea lo arregla:
+</p>
+
+<pre><code>from functools import wraps
+
+def cronometrar(funcion):
+    @wraps(funcion)                    # ← copia __name__, __doc__, __module__…
+    def envoltorio(*args, **kwargs):
+        ...
+        return funcion(*args, **kwargs)
+    return envoltorio
+
+print(calcular_baremo.__name__)   # 'calcular_baremo' ✅
+print(calcular_baremo.__doc__)    # 'Aplica el baremo oficial…' ✅
+</code></pre>
+
+<div class="clave">
+  Regla sin excepciones: <strong>todo decorador que escribas lleva
+  <code>@wraps</code></strong>. Si se te olvida, no falla nada hoy — falla
+  dentro de tres meses, cuando un traceback te mienta sobre qué función
+  reventó.
+</div>
+
+<hr>
+
+<h2>Menciones rápidas</h2>
+
+<pre><code>from functools import cache, cached_property, singledispatch, cmp_to_key
+
+@cache                      # = lru_cache(maxsize=None), Python 3.9+
+def costoso(n): ...
+
+class Informe:
+    @cached_property        # se calcula la 1ª vez y se guarda en la instancia
+    def estadisticas(self): ...
+
+@singledispatch             # sobrecarga por tipo del primer argumento
+def formatear(valor): return str(valor)
+
+@formatear.register
+def _(valor: list): return ", ".join(map(str, valor))
+
+# cmp_to_key: adaptar una función de comparación antigua (-1/0/1) a key=
+sorted(items, key=cmp_to_key(mi_comparador))
+</code></pre>
+
+<div class="pista">
+  <code>singledispatch</code> es lo más parecido al polimorfismo de OOP que hay
+  aquí: en vez de que cada clase lleve su método, la función se ramifica según
+  el tipo. Es <em>despacho</em> sin herencia.
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>La caja de herramientas</h3>
+<p>
+  Reimplementarás <code>reduce</code> desde cero para entender qué hace por
+  dentro; usarás <code>partial</code> para configurar tres baremos distintos
+  de la misma función; medirás con <code>time</code> la diferencia real entre
+  <code>fib(32)</code> con y sin <code>@lru_cache</code>; y escribirás un
+  decorador primero sin <code>@wraps</code> y luego con él, para ver con tus
+  ojos qué se pierde.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/015-functools.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> <code>functools</code> opera sobre
+  funciones; su módulo hermano opera sobre iteradores, y es donde los
+  generadores de la 014 se vuelven de verdad potentes:
+  <a href="016-itertools.html">016 — El módulo <code>itertools</code></a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="014-generadores-y-evaluacion-perezosa.html">← Anterior: 014</a>
+    <a href="016-itertools.html">Siguiente: 016 — itertools →</a>
+  </span>
+</nav>
+
+</body>
+</html>

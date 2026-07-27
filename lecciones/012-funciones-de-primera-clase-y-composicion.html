@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 12: Funciones de primera clase y composición</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="011-funciones-puras-e-inmutabilidad.html">← Anterior: 011</a>
+    <a href="013-lambda-map-filter-y-comprehensions.html">Siguiente: 013 — lambda, map, filter →</a>
+  </span>
+</nav>
+
+<h1>Funciones de primera clase y composición</h1>
+<p class="subtitle">Pista 4, lección 2 — cuando la función es un dato más</p>
+
+<h2>La idea de "primera clase"</h2>
+
+<p>
+  Se dice que en un lenguaje las funciones son <strong>ciudadanos de primera
+  clase</strong> cuando puedes hacer con ellas exactamente lo mismo que con un
+  número o un string:
+</p>
+
+<div class="regla">
+  <p>Guardarlas en una variable · meterlas en una lista o un diccionario ·
+  pasarlas como argumento · devolverlas desde otra función · crearlas sobre la
+  marcha.</p>
+</div>
+
+<p>
+  En Python lo son, y de la forma más literal posible: <code>def</code> no es
+  una declaración mágica, es <strong>una asignación</strong>. Escribir
+  <code>def doblar(x): return x * 2</code> crea un objeto función y lo enlaza
+  al nombre <code>doblar</code>, igual que <code>doblar = 2</code> enlazaría un
+  entero.
+</p>
+
+<pre><code>def doblar(x):
+    return x * 2
+
+print(type(doblar))     # &lt;class 'function'&gt;
+print(doblar.__name__)  # 'doblar'   ← tiene atributos, es un objeto
+
+otro_nombre = doblar    # SIN paréntesis: copio la función, no la llamo
+print(otro_nombre(21))  # 42
+</code></pre>
+
+<div class="clave">
+  El detalle que lo cambia todo: <code>doblar</code> <em>es</em> la función.
+  <code>doblar()</code> es <em>el resultado de llamarla</em>. Confundir los dos
+  es el error número uno de esta lección. Si algo "no funciona" en el resto de
+  la pista, empieza siempre por preguntarte si te sobran o te faltan paréntesis.
+</div>
+
+<h3>Funciones en estructuras de datos</h3>
+
+<p>
+  Como son objetos, caben en un diccionario. Y un diccionario de funciones es
+  la alternativa funcional a una cadena de <code>if/elif</code>:
+</p>
+
+<pre><code>def por_nota(c):      return -c["nota"]
+def por_nombre(c):    return c["nombre"]
+def por_antiguedad(c): return -c["antiguedad"]
+
+CRITERIOS = {
+    "nota":       por_nota,
+    "nombre":     por_nombre,
+    "antiguedad": por_antiguedad,
+}
+
+def listar(candidatos, criterio):
+    return sorted(candidatos, key=CRITERIOS[criterio])
+</code></pre>
+
+<p>
+  Añadir un criterio nuevo es añadir una línea al diccionario, no tocar un
+  <code>if</code> de veinte ramas. En PHP resolverías esto con el patrón
+  Strategy: una interfaz, tres clases, una factoría. Aquí es un
+  <code>dict</code>.
+</p>
+
+<hr>
+
+<h2>Funciones de orden superior</h2>
+
+<p>
+  Una función es de <strong>orden superior</strong> si hace alguna de estas dos
+  cosas (o las dos): <em>recibe</em> una función como argumento, o
+  <em>devuelve</em> una función.
+</p>
+
+<h3>Recibir una función</h3>
+
+<p>Ya has usado varias sin saber que lo eran:</p>
+
+<pre><code>sorted(candidatos, key=por_nota)   # ← key es una función (lección 002)
+max(candidatos, key=por_nota)
+min(candidatos, key=por_nota)
+</code></pre>
+
+<p>Y puedes escribir las tuyas. Fíjate en cómo el parámetro
+<code>condicion</code> convierte una función rígida en una plantilla:</p>
+
+<pre><code>def aplicar_dos_veces(f, x):
+    return f(f(x))
+
+print(aplicar_dos_veces(doblar, 5))   # 20
+
+
+def contar_si(elementos, condicion):
+    """Cuenta cuántos elementos cumplen la condición."""
+    return sum(1 for e in elementos if condicion(e))
+
+aprobados = contar_si(notas, lambda n: n &gt;= 5)
+suspensos = contar_si(notas, lambda n: n &lt; 5)
+sobresalientes = contar_si(notas, lambda n: n &gt;= 9)
+</code></pre>
+
+<div class="clave">
+  El patrón de fondo: <strong>parametriza el comportamiento, no sólo los
+  datos</strong>. Antes pasabas números; ahora pasas trozos de lógica.
+</div>
+
+<h3>Devolver una función: closures</h3>
+
+<p>
+  Aquí es donde la mayoría de la gente se atasca, así que vamos despacio.
+</p>
+
+<pre><code>def multiplicador(factor):
+    def multiplicar(x):
+        return x * factor      # ← usa 'factor', que viene de la función de fuera
+    return multiplicar          # ← devuelve la función SIN llamarla
+
+doble = multiplicador(2)
+triple = multiplicador(3)
+
+print(doble(10))    # 20
+print(triple(10))   # 30
+</code></pre>
+
+<p>
+  <code>multiplicador(2)</code> no multiplica nada: <em>fabrica</em> una función
+  que multiplica por 2. Y esa función recuerda el valor <code>2</code> aunque
+  <code>multiplicador</code> ya haya terminado de ejecutarse y su marco de pila
+  haya desaparecido.
+</p>
+
+<div class="regla">
+  <p>
+    <strong>Closure</strong> (o <em>clausura</em>): una función que "captura" y
+    conserva las variables del ámbito donde fue definida. Python guarda esas
+    variables vivas mientras la función interna exista.
+  </p>
+</div>
+
+<pre><code>print(doble.__closure__[0].cell_contents)   # 2  ← ahí está, guardado
+</code></pre>
+
+<div class="pista">
+  <strong>Un closure es un objeto pobre, y un objeto es un closure rico.</strong>
+  Compara:
+  <br><br>
+  En PHP escribirías <code>class Multiplicador { private $factor;
+  __construct($f) {...} public function __invoke($x) { return $x * $this-&gt;factor; } }</code>.
+  Estado guardado en el constructor, comportamiento en un método.
+  <br><br>
+  El closure hace lo mismo: <code>factor</code> es el estado,
+  <code>multiplicar</code> es el método. Si tu clase tiene un solo método
+  además del <code>__init__</code>, probablemente quería ser un closure.
+</div>
+
+<h3>El gotcha del closure en un bucle</h3>
+
+<p>Este te va a morder alguna vez, así que mejor ahora:</p>
+
+<pre><code>funciones = []
+for i in range(3):
+    funciones.append(lambda x: x + i)
+
+print([f(10) for f in funciones])   # [12, 12, 12]  😱 esperabas [10, 11, 12]
+</code></pre>
+
+<p>
+  El closure captura <strong>la variable</strong> <code>i</code>, no su valor en
+  ese instante. Cuando por fin llamas a las funciones, el bucle ya terminó e
+  <code>i</code> vale 2 para todas. La solución idiomática es forzar la captura
+  con un argumento por defecto (que sí se evalúa en el momento de la
+  definición — es el mismo mecanismo del gotcha de la lección 011, esta vez a
+  tu favor):
+</p>
+
+<pre><code>funciones = [lambda x, i=i: x + i for i in range(3)]
+print([f(10) for f in funciones])   # [10, 11, 12] ✅
+</code></pre>
+
+<hr>
+
+<h2>Composición de funciones</h2>
+
+<p>
+  Componer es la operación básica del paradigma: si <code>f</code> transforma A
+  en B y <code>g</code> transforma B en C, entonces existe una función que
+  transforma A en C. En matemáticas se escribe <code>g ∘ f</code>.
+</p>
+
+<pre><code>def limpiar(s):     return s.strip()
+def minusculas(s):  return s.lower()
+def sin_tildes(s):
+    tabla = str.maketrans("áéíóúü", "aeiouu")
+    return s.translate(tabla)
+</code></pre>
+
+<p>Anidando a mano, se lee al revés — de dentro hacia fuera:</p>
+
+<pre><code>resultado = sin_tildes(minusculas(limpiar("  Sevilla Este  ")))
+</code></pre>
+
+<p>Con tres funciones aguanta. Con seis es ilegible. Construye la herramienta:</p>
+
+<pre><code>from functools import reduce
+
+def componer(*funciones):
+    """Devuelve una función que las aplica de izquierda a derecha."""
+    def compuesta(valor):
+        return reduce(lambda acc, f: f(acc), funciones, valor)
+    return compuesta
+
+normalizar = componer(limpiar, minusculas, sin_tildes)
+
+print(normalizar("  Sevilla Este  "))   # 'sevilla este'
+</code></pre>
+
+<div class="clave">
+  Lee la diferencia en voz alta. <code>sin_tildes(minusculas(limpiar(x)))</code>
+  se lee «sin tildes de minúsculas de limpiar de x». <code>componer(limpiar,
+  minusculas, sin_tildes)</code> se lee «limpiar, luego minúsculas, luego sin
+  tildes». La segunda es el orden en que ocurren las cosas.
+</div>
+
+<p>
+  Y fíjate en lo que has creado: <code>normalizar</code> es una función nueva,
+  con nombre propio, reutilizable, testeable — que no existía en tu código y no
+  ha requerido escribir un <code>def</code>. Ese es el músculo que esta pista
+  entrena.
+</p>
+
+<h3>Pipeline: componer sobre colecciones</h3>
+
+<pre><code>def normalizar_todos(nombres):
+    return [normalizar(n) for n in nombres]
+
+# o encadenando pasos completos:
+procesar = componer(
+    lambda ns: [n for n in ns if n.strip()],   # quitar vacíos
+    lambda ns: [normalizar(n) for n in ns],    # normalizar
+    sorted,                                    # ordenar
+)
+</code></pre>
+
+<p>
+  <code>sorted</code> entra directamente en la composición porque es una función
+  como cualquier otra. Esa uniformidad — todo es una función de una entrada a
+  una salida — es lo que hace que las piezas encajen.
+</p>
+
+<hr>
+
+<h2>Cuándo NO componer</h2>
+
+<div class="pista">
+  <p>
+    La composición se rompe en cuanto una función necesita <strong>dos</strong>
+    entradas, o devuelve <strong>dos</strong> salidas, o puede fallar. Un
+    <code>componer()</code> casero sólo encadena funciones de un argumento.
+  </p>
+  <p>
+    Cuando te encuentres retorciendo <code>lambda</code>s para que las firmas
+    encajen, para: has llegado al límite donde Python deja de ser un lenguaje
+    funcional cómodo. Un bucle explícito de cuatro líneas, ahí, es la respuesta
+    correcta. El objetivo de esta pista es criterio, no dogma.
+  </p>
+</div>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Fábrica de validadores</h3>
+<p>
+  Vas a construir un mini-sistema de validación de solicitudes de plaza usando
+  sólo funciones: closures que fabrican validadores parametrizados
+  (<code>rango_valido(0, 10)</code>, <code>longitud_minima(3)</code>), un
+  <code>componer()</code> propio, y un despachador basado en diccionario de
+  funciones en vez de <code>if/elif</code>. Al final tendrás un validador
+  compuesto que no contiene ni un solo <code>if</code>.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/012-orden-superior-y-composicion.py</code></p>
+</div>
+
+<hr>
+
+<p>
+  <strong>Siguiente lección:</strong> has escrito varios <code>lambda</code> sin
+  que nadie te los presentara formalmente. Toca hacerlo, junto a las dos
+  funciones de orden superior más famosas del paradigma:
+  <a href="013-lambda-map-filter-y-comprehensions.html">013 — lambda, map, filter y comprehensions</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="011-funciones-puras-e-inmutabilidad.html">← Anterior: 011</a>
+    <a href="013-lambda-map-filter-y-comprehensions.html">Siguiente: 013 — lambda, map, filter →</a>
+  </span>
+</nav>
+
+</body>
+</html>
