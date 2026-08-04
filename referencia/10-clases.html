@@ -1,11 +1,29 @@
-# Clases (POO básica)
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia 10: Clases (POO básica)</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
 
-## Qué es una clase
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="09-modulos.html">← Anterior: 09 — Módulos</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
 
-Una clase es una plantilla para crear objetos. Un objeto tiene **atributos** (datos) y **métodos** (funciones).
+<h1>Clases (POO básica)</h1>
+<p class="subtitle">Referencia rápida 10/10 — POO básica: class, __init__, herencia</p>
 
-```python
-class Perro:
+<h2>Qué es una clase</h2>
+
+<p>Una clase es una plantilla para crear objetos. Un objeto tiene <strong>atributos</strong> (datos) y <strong>métodos</strong> (funciones).</p>
+
+<pre><code>class Perro:
     # __init__ se ejecuta al crear un objeto
     def __init__(self, nombre, raza):
         self.nombre = nombre   # atributo de instancia
@@ -23,13 +41,11 @@ coco = Perro("Coco", "Labrador")
 
 rex.ladrar()    # "Rex dice: ¡Guau!"
 rex.nombre      # "Rex"
-print(rex)      # "Perro(Rex, Pastor Alemán)"  — usa __str__
-```
+print(rex)      # "Perro(Rex, Pastor Alemán)"  — usa __str__</code></pre>
 
-## Métodos especiales (dunder methods)
+<h2>Métodos especiales (dunder methods)</h2>
 
-```python
-class Punto:
+<pre><code>class Punto:
     def __init__(self, x, y):
         self.x = x
         self.y = y
@@ -49,13 +65,11 @@ class Punto:
 a = Punto(1, 2)
 b = Punto(3, 4)
 a + b        # Punto(4, 6)
-a == Punto(1, 2)   # True
-```
+a == Punto(1, 2)   # True</code></pre>
 
-## Atributos de clase vs de instancia
+<h2>Atributos de clase vs de instancia</h2>
 
-```python
-class Contador:
+<pre><code>class Contador:
     total = 0          # atributo de clase — compartido por todas las instancias
 
     def __init__(self, nombre):
@@ -64,13 +78,11 @@ class Contador:
 
 c1 = Contador("uno")
 c2 = Contador("dos")
-Contador.total   # 2
-```
+Contador.total   # 2</code></pre>
 
-## Herencia
+<h2>Herencia</h2>
 
-```python
-class Animal:
+<pre><code>class Animal:
     def __init__(self, nombre):
         self.nombre = nombre
 
@@ -93,13 +105,11 @@ class Gato(Animal):
 
 animales = [Perro("Rex"), Gato("Misi"), Perro("Toby")]
 for animal in animales:
-    print(animal.hablar())   # polimorfismo: cada uno responde según su clase
-```
+    print(animal.hablar())   # polimorfismo: cada uno responde según su clase</code></pre>
 
-## super()
+<h2>super()</h2>
 
-```python
-class Vehiculo:
+<pre><code>class Vehiculo:
     def __init__(self, marca, velocidad_max):
         self.marca = marca
         self.velocidad_max = velocidad_max
@@ -109,13 +119,11 @@ class Coche(Vehiculo):
         super().__init__(marca, velocidad_max)  # llama al __init__ del padre
         self.puertas = puertas
 
-c = Coche("Toyota", 200, 4)
-```
+c = Coche("Toyota", 200, 4)</code></pre>
 
-## @property — getters y setters
+<h2>@property — getters y setters</h2>
 
-```python
-class Circulo:
+<pre><code>class Circulo:
     def __init__(self, radio):
         self._radio = radio          # convención: _ indica "no acceder directamente"
 
@@ -125,7 +133,7 @@ class Circulo:
 
     @radio.setter
     def radio(self, valor):
-        if valor < 0:
+        if valor &lt; 0:
             raise ValueError("El radio no puede ser negativo")
         self._radio = valor
 
@@ -137,24 +145,41 @@ class Circulo:
 c = Circulo(5)
 c.radio        # 5         — llama al getter
 c.radio = 10   # 10        — llama al setter (valida)
-c.area         # 314.15... — calculada al vuelo
-```
+c.area         # 314.15... — calculada al vuelo</code></pre>
 
-## Cuándo NO usar clases
+<h2>Cuándo NO usar clases</h2>
 
-Las clases no siempre son la respuesta. Usa funciones simples si:
+<p>Las clases no siempre son la respuesta. Usa funciones simples si:</p>
 
-- La funcionalidad no necesita estado interno.
-- No vas a crear múltiples instancias.
-- El código es más claro sin ellas.
+<ul>
+<li>La funcionalidad no necesita estado interno.</li>
+<li>No vas a crear múltiples instancias.</li>
+<li>El código es más claro sin ellas.</li>
+</ul>
 
-```python
-# Innecesariamente complicado:
+<pre><code># Innecesariamente complicado:
 class Sumador:
     def sumar(self, a, b):
         return a + b
 
 # Mejor así:
 def sumar(a, b):
-    return a + b
-```
+    return a + b</code></pre>
+
+<hr>
+
+<p class="retoque">
+  Esto es una ficha de consulta rápida, no una lección con ejercicio. Para
+  practicar estos conceptos, ve a las <a href="../lecciones/index.html">lecciones</a>.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="09-modulos.html">← Anterior: 09 — Módulos</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+</body>
+</html>

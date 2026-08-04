@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia 07: Errores y excepciones</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="06-funciones.html">← Anterior: 06 — Funciones</a>
+    <a href="08-ficheros.html">Siguiente: 08 — Ficheros →</a>
+  </span>
+</nav>
+
+<h1>Errores y excepciones</h1>
+<p class="subtitle">Referencia rápida 07/10 — try/except, raise, excepciones comunes</p>
+
+<h2>try / except básico</h2>
+
+<pre><code>try:
+    resultado = 10 / 0
+except ZeroDivisionError:
+    print("No se puede dividir entre cero")</code></pre>
+
+<h2>Capturar el mensaje del error</h2>
+
+<pre><code>try:
+    numero = int("abc")
+except ValueError as e:
+    print(f"Error: {e}")   # Error: invalid literal for int() with base 10: 'abc'</code></pre>
+
+<h2>Múltiples excepciones</h2>
+
+<pre><code>try:
+    valor = lista[10]
+    resultado = int(valor)
+except IndexError:
+    print("Índice fuera de rango")
+except ValueError:
+    print("El valor no es un número")
+except (TypeError, KeyError):
+    print("Error de tipo o clave")   # puedes agrupar en tupla</code></pre>
+
+<h2>else y finally</h2>
+
+<pre><code>try:
+    resultado = 10 / 2
+except ZeroDivisionError:
+    print("División por cero")
+else:
+    print(f"Resultado: {resultado}")   # se ejecuta si NO hubo excepción
+finally:
+    print("Esto se ejecuta siempre")   # útil para limpiar recursos</code></pre>
+
+<h2>Lanzar excepciones con raise</h2>
+
+<pre><code>def dividir(a, b):
+    if b == 0:
+        raise ValueError("El divisor no puede ser 0")
+    return a / b
+
+# Relanzar una excepción después de loggearla
+try:
+    dividir(5, 0)
+except ValueError as e:
+    print(f"Registrado: {e}")
+    raise   # vuelve a lanzar la misma excepción</code></pre>
+
+<h2>Excepciones comunes de la stdlib</h2>
+
+<table>
+<tr><th>Excepción</th><th>Cuándo ocurre</th></tr>
+<tr><td><code>ValueError</code></td><td>Tipo correcto pero valor inválido: <code>int("abc")</code></td></tr>
+<tr><td><code>TypeError</code></td><td>Tipo incorrecto: <code>"hola" + 5</code></td></tr>
+<tr><td><code>IndexError</code></td><td>Índice fuera de rango: <code>lista[99]</code></td></tr>
+<tr><td><code>KeyError</code></td><td>Clave que no existe en dict: <code>d["foo"]</code></td></tr>
+<tr><td><code>AttributeError</code></td><td>Atributo o método que no existe: <code>None.upper()</code></td></tr>
+<tr><td><code>FileNotFoundError</code></td><td>Fichero que no existe al abrirlo</td></tr>
+<tr><td><code>ZeroDivisionError</code></td><td>División entre cero</td></tr>
+<tr><td><code>NameError</code></td><td>Variable usada antes de definirse</td></tr>
+<tr><td><code>ImportError</code></td><td>Módulo no encontrado</td></tr>
+<tr><td><code>StopIteration</code></td><td>Iterador agotado</td></tr>
+<tr><td><code>RecursionError</code></td><td>Demasiadas llamadas recursivas</td></tr>
+</table>
+
+<h2>Crear excepciones propias</h2>
+
+<pre><code>class SaldoInsuficienteError(Exception):
+    """Se lanza cuando la cuenta no tiene fondos suficientes."""
+    pass
+
+def retirar(saldo, cantidad):
+    if cantidad &gt; saldo:
+        raise SaldoInsuficienteError(f"Saldo: {saldo}, intento: {cantidad}")
+    return saldo - cantidad
+
+try:
+    retirar(100, 200)
+except SaldoInsuficienteError as e:
+    print(f"Operación rechazada: {e}")</code></pre>
+
+<h2>Jerarquía de excepciones (simplificada)</h2>
+
+<pre><code>BaseException
+ ├── SystemExit
+ ├── KeyboardInterrupt       ← Ctrl+C
+ └── Exception               ← la mayoría hereda de aquí
+      ├── ValueError
+      ├── TypeError
+      ├── LookupError
+      │    ├── IndexError
+      │    └── KeyError
+      ├── OSError
+      │    └── FileNotFoundError
+      └── ArithmeticError
+           └── ZeroDivisionError</code></pre>
+
+<div class="pista">
+<p>No uses <code>except Exception</code> a secas a menos que tengas una razón. Siempre captura la excepción más específica posible.</p>
+</div>
+
+<hr>
+
+<p class="retoque">
+  Esto es una ficha de consulta rápida, no una lección con ejercicio. Para
+  practicar estos conceptos, ve a las <a href="../lecciones/index.html">lecciones</a>.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="06-funciones.html">← Anterior: 06 — Funciones</a>
+    <a href="08-ficheros.html">Siguiente: 08 — Ficheros →</a>
+  </span>
+</nav>
+
+</body>
+</html>

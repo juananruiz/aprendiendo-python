@@ -30,7 +30,7 @@ Cuando el usuario pregunte sobre Python, prioriza:
 | `lecciones/index.html` | Portada del curso |
 | `ejercicios/` | Esqueletos de ejercicio, espejo de los módulos |
 | `ejercicios/matematicas/` | Scripts y notebooks matemáticos |
-| `REFERENCIA_PYTHON/` | Referencia rápida de sintaxis |
+| `referencia/` | Referencia rápida de sintaxis (HTML, 10 fichas + cheatsheet) |
 | `algoritmos/` | Scripts de algoritmos clásicos citados por las lecciones |
 | `assets/` | Hoja de estilos común (`estilos.css`) e imágenes |
 | `personal/` | **Solo local, en .gitignore**: MISSION, NOTES, PROGRESO y learning-records del alumno |

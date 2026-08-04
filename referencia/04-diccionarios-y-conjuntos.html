@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia 04: Diccionarios, conjuntos y tuplas</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="03-listas.html">← Anterior: 03 — Listas</a>
+    <a href="05-control-de-flujo.html">Siguiente: 05 — Control de flujo →</a>
+  </span>
+</nav>
+
+<h1>Diccionarios, conjuntos y tuplas</h1>
+<p class="subtitle">Referencia rápida 04/10 — Dicts, sets, tuplas</p>
+
+<hr>
+
+<h2>Diccionarios</h2>
+
+<p>Asocian <strong>clave → valor</strong>. Las claves deben ser únicas e inmutables.</p>
+
+<pre><code>persona = {
+    "nombre": "Ana",
+    "edad": 28,
+    "ciudad": "Madrid",
+}
+
+# Acceder
+persona["nombre"]           # "Ana"
+persona.get("email")        # None — no lanza error si no existe
+persona.get("email", "N/A") # "N/A" — valor por defecto
+
+# Añadir o modificar
+persona["email"] = "ana@example.com"
+persona["edad"] = 29
+
+# Eliminar
+del persona["ciudad"]
+valor = persona.pop("edad")   # elimina y devuelve el valor
+
+# Comprobar si existe una clave
+"nombre" in persona    # True
+
+# Iterar
+# Solo imprime las claves
+for clave in persona:
+    print(clave)
+
+
+for clave, valor in persona.items():
+    print(f"{clave}: {valor}")
+
+for valor in persona.values():
+    print(valor)</code></pre>
+
+<h3>Métodos útiles</h3>
+
+<pre><code>persona.keys()    # dict_keys(["nombre", "email"])
+persona.values()  # dict_values(["Ana", "ana@..."])
+persona.items()   # dict_items([("nombre","Ana"), ...])
+persona.update({"ciudad": "Barcelona", "edad": 30})  # actualiza varios a la vez
+{}               # diccionario vacío</code></pre>
+
+<h3>Diccionario por comprensión</h3>
+
+<pre><code>cuadrados = {x: x**2 for x in range(5)}
+# {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}</code></pre>
+
+<h3>Diccionarios anidados</h3>
+
+<pre><code>usuarios = {
+    "ana": {"edad": 28, "activo": True},
+    "luis": {"edad": 35, "activo": False},
+}
+usuarios["ana"]["edad"]   # 28</code></pre>
+
+<hr>
+
+<h2>Conjuntos (set)</h2>
+
+<p>Sin orden, sin duplicados. Útiles para operaciones de conjuntos y eliminar duplicados.</p>
+
+<pre><code>a = {1, 2, 3, 4}
+b = {3, 4, 5, 6}
+
+a | b    # {1, 2, 3, 4, 5, 6}  — unión
+a &amp; b    # {3, 4}               — intersección
+a - b    # {1, 2}               — diferencia (en a pero no en b)
+a ^ b    # {1, 2, 5, 6}         — diferencia simétrica
+
+a.add(10)
+a.remove(1)    # lanza KeyError si no existe
+a.discard(99)  # no lanza error si no existe
+
+# Eliminar duplicados de una lista
+lista = [1, 2, 2, 3, 3, 3]
+sin_dup = list(set(lista))   # [1, 2, 3] — ojo: pierde el orden</code></pre>
+
+<hr>
+
+<h2>Tuplas</h2>
+
+<p>Como listas pero <strong>inmutables</strong>. Más rápidas, usadas para datos que no deben cambiar.</p>
+
+<pre><code>punto = (3, 7)
+colores = ("rojo", "verde", "azul")
+
+colores[0]      # "rojo"
+colores[-1]     # "azul"
+len(colores)    # 3
+
+# Unpacking
+x, y = punto
+r, g, b = colores
+
+# Tupla de un solo elemento (la coma es obligatoria)
+uno = (42,)   # sin coma sería solo un int entre paréntesis</code></pre>
+
+<h3>Cuándo usar qué</h3>
+
+<table>
+<tr><th>Estructura</th><th>Mutabilidad</th><th>Orden</th><th>Duplicados</th><th>Uso típico</th></tr>
+<tr><td><code>list</code></td><td>Mutable</td><td>Sí</td><td>Sí</td><td>Colección que cambia</td></tr>
+<tr><td><code>tuple</code></td><td>Inmutable</td><td>Sí</td><td>Sí</td><td>Coordenadas, retorno múltiple</td></tr>
+<tr><td><code>set</code></td><td>Mutable</td><td>No</td><td>No</td><td>Pertenencia rápida, eliminar dup.</td></tr>
+<tr><td><code>dict</code></td><td>Mutable</td><td>Sí*</td><td>Claves: No</td><td>Mapear clave→valor</td></tr>
+</table>
+
+<div class="pista">
+<p>*Los dicts mantienen orden de inserción desde Python 3.7.</p>
+</div>
+
+<hr>
+
+<p class="retoque">
+  Esto es una ficha de consulta rápida, no una lección con ejercicio. Para
+  practicar estos conceptos, ve a las <a href="../lecciones/index.html">lecciones</a>.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="03-listas.html">← Anterior: 03 — Listas</a>
+    <a href="05-control-de-flujo.html">Siguiente: 05 — Control de flujo →</a>
+  </span>
+</nav>
+
+</body>
+</html>

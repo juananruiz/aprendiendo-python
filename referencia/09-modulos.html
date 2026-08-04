@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia 09: Módulos</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="08-ficheros.html">← Anterior: 08 — Ficheros</a>
+    <a href="10-clases.html">Siguiente: 10 — Clases (POO básica) →</a>
+  </span>
+</nav>
+
+<h1>Módulos</h1>
+<p class="subtitle">Referencia rápida 09/10 — import, módulos útiles de la stdlib</p>
+
+<h2>Importar</h2>
+
+<pre><code>import math
+import math as m        # alias
+from math import sqrt   # importar solo lo que necesitas
+from math import *      # importa todo — evitar en proyectos grandes
+
+math.sqrt(16)           # 4.0
+m.pi                    # 3.141592...
+sqrt(25)                # 5.0  (importado directamente)</code></pre>
+
+<h2>Crear tu propio módulo</h2>
+
+<p>Cualquier fichero <code>.py</code> es un módulo. Si tienes <code>utilidades.py</code>:</p>
+
+<pre><code># utilidades.py
+def saludar(nombre):
+    return f"Hola, {nombre}"
+
+PI = 3.14159</code></pre>
+
+<p>Lo importas desde otro fichero en el mismo directorio:</p>
+
+<pre><code>from utilidades import saludar, PI
+print(saludar("Ana"))</code></pre>
+
+<h2><code>__name__ == "__main__"</code></h2>
+
+<pre><code># modulo.py
+def calcular(x):
+    return x * 2
+
+if __name__ == "__main__":
+    # Este bloque SOLO se ejecuta si corres el fichero directamente:
+    # python modulo.py
+    # NO se ejecuta si lo importas desde otro módulo
+    print(calcular(5))</code></pre>
+
+<hr>
+
+<h2>Otras variables globales de módulo</h2>
+
+<p>Además de <code>__name__</code>, cada fichero <code>.py</code> tiene automáticamente otras variables especiales (los llamados <strong>dunders</strong>, por sus dobles guiones bajos):</p>
+
+<pre><code>__name__      # nombre del módulo: "__main__" si se ejecuta directamente,
+              # o el nombre del módulo si se importa (ej: "busqueda_binaria_02")
+
+__file__      # ruta del propio fichero .py
+              # ej: "/home/usuario/aprendiendo-python/algoritmos/busqueda_binaria_02.py"
+
+__doc__       # el docstring del módulo (si el fichero empieza con una cadena
+              # de documentación en la primera línea)
+
+__package__   # nombre del paquete al que pertenece (None si no está en un paquete)
+
+__loader__    # objeto interno que se usó para cargar el módulo (uso avanzado)
+
+__spec__      # objeto ModuleSpec con metadatos de importación (uso avanzado)
+
+__builtins__  # referencia al módulo de funciones incorporadas (print, len, etc.)</code></pre>
+
+<h3>Ejemplo práctico</h3>
+
+<pre><code>"""
+Este script implementa búsqueda binaria sobre una lista aleatoria.
+"""
+import random
+
+print(__name__)   # "__main__" al ejecutarlo directamente con python script.py
+print(__file__)   # la ruta completa del fichero
+print(__doc__)    # el docstring de arriba, porque el fichero lo tiene definido</code></pre>
+
+<p>Si el fichero <strong>no</strong> tiene docstring de módulo (no empieza con una cadena de texto entre <code>"""..."""</code>), <code>__doc__</code> sería <code>None</code>.</p>
+
+<h3>Las más útiles en la práctica</h3>
+
+<p>De todas ellas, en el día a día solo usarás con frecuencia:</p>
+
+<table>
+<tr><th>Variable</th><th>Para qué sirve</th></tr>
+<tr><td><code>__name__</code></td><td>Distinguir si el fichero se ejecuta directamente o se importa (patrón <code>if __name__ == "__main__":</code>)</td></tr>
+<tr><td><code>__file__</code></td><td>Construir rutas relativas al propio script (ej: <code>Path(__file__).parent / "datos.csv"</code>)</td></tr>
+<tr><td><code>__doc__</code></td><td>Documentación automática, se usa con <code>help(modulo)</code></td></tr>
+</table>
+
+<p>El resto (<code>__package__</code>, <code>__loader__</code>, <code>__spec__</code>, <code>__builtins__</code>) son mecanismos internos del sistema de importación de Python — casi nunca los tocarás salvo en código muy avanzado (frameworks, plugins dinámicos, etc.).</p>
+
+<hr>
+
+<h2>Módulos útiles de la stdlib</h2>
+
+<h3>random</h3>
+
+<pre><code>import random
+
+random.randint(1, 10)         # entero entre 1 y 10 (ambos incluidos)
+random.random()               # float entre 0.0 y 1.0
+random.choice([1, 2, 3])      # elemento aleatorio de la lista
+random.sample([1,2,3,4,5], 3) # 3 elementos sin repetición
+random.shuffle(lista)          # mezcla la lista en su lugar</code></pre>
+
+<h3>math</h3>
+
+<pre><code>import math
+
+math.sqrt(9)       # 3.0
+math.ceil(3.2)     # 4   — redondea hacia arriba
+math.floor(3.9)    # 3   — redondea hacia abajo
+math.pow(2, 8)     # 256.0
+math.log(100, 10)  # 2.0
+math.pi            # 3.14159...
+math.e             # 2.71828...
+math.inf           # infinito positivo</code></pre>
+
+<h3>datetime</h3>
+
+<pre><code>from datetime import datetime, date, timedelta
+
+hoy = date.today()               # 2024-06-25
+ahora = datetime.now()           # 2024-06-25 14:30:00.123456
+ahora.strftime("%d/%m/%Y %H:%M") # "25/06/2024 14:30"
+
+manana = hoy + timedelta(days=1)
+diferencia = date(2025, 1, 1) - hoy   # timedelta
+diferencia.days                        # número de días</code></pre>
+
+<h3>os y pathlib</h3>
+
+<pre><code>import os
+from pathlib import Path
+
+os.getcwd()                    # directorio actual
+os.listdir(".")                # lista ficheros del directorio actual
+os.path.exists("fichero.txt") # True/False
+
+# pathlib es más moderna y recomendada
+Path.cwd()                     # directorio actual
+list(Path(".").iterdir())      # lista ficheros
+(Path(".") / "sub" / "f.txt") # construir rutas</code></pre>
+
+<h3>sys</h3>
+
+<pre><code>import sys
+
+sys.argv           # ["nombre_script.py", "arg1", "arg2", ...]
+sys.exit(0)        # termina el programa (0 = éxito, 1 = error)
+sys.version        # versión de Python</code></pre>
+
+<h3>time</h3>
+
+<pre><code>import time
+
+time.time()        # segundos desde epoch (float) — útil para medir tiempos
+time.sleep(2)      # pausa 2 segundos
+
+inicio = time.time()
+# ... código ...
+print(f"Tardó {time.time() - inicio:.3f} segundos")</code></pre>
+
+<h3>collections</h3>
+
+<pre><code>from collections import Counter, defaultdict, deque
+
+# Counter — cuenta elementos
+c = Counter(["a", "b", "a", "c", "a", "b"])
+c.most_common(2)   # [("a", 3), ("b", 2)]
+
+# defaultdict — dict que no lanza KeyError
+d = defaultdict(list)
+d["clave"].append(1)   # no hace falta inicializar la clave
+
+# deque — cola eficiente para añadir/quitar por ambos extremos
+cola = deque([1, 2, 3])
+cola.appendleft(0)     # [0, 1, 2, 3]
+cola.popleft()         # quita y devuelve 0</code></pre>
+
+<hr>
+
+<p class="retoque">
+  Esto es una ficha de consulta rápida, no una lección con ejercicio. Para
+  practicar estos conceptos, ve a las <a href="../lecciones/index.html">lecciones</a>.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="08-ficheros.html">← Anterior: 08 — Ficheros</a>
+    <a href="10-clases.html">Siguiente: 10 — Clases (POO básica) →</a>
+  </span>
+</nav>
+
+</body>
+</html>

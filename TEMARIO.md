@@ -127,7 +127,7 @@ del curso. Los temas marcados son el plan de trabajo.)*
 > un "final": es la base de las otras dos, y se revisita cuando hace falta.
 
 ### Variables y tipos básicos
-- Tipos, operaciones, conversiones, f-strings — ver `REFERENCIA_PYTHON/01_tipos_y_variables.md` y `02_strings.md`
+- Tipos, operaciones, conversiones, f-strings — ver `referencia/01-tipos-y-variables.html` y `referencia/02-strings.html`
 - Mutable vs inmutable, `is` vs `==`
 
 ### Control de flujo
@@ -140,14 +140,14 @@ del curso. Los temas marcados son el plan de trabajo.)*
 - Parámetros por defecto, keyword arguments, scope *(pendiente)*
 
 ### Manejo de errores
-- `try/except/finally`, excepciones comunes, `raise` *(pendiente — la referencia `REFERENCIA_PYTHON/07_errores_y_excepciones.md` cubre la consulta rápida)*
+- `try/except/finally`, excepciones comunes, `raise` *(pendiente — la referencia `referencia/07-errores-y-excepciones.html` cubre la consulta rápida)*
 
 ### Estructuras de datos
-- Listas, tuplas, diccionarios, conjuntos: cuándo usar cada una *(lección pendiente; referencia en `REFERENCIA_PYTHON/03_listas.md` y `04_diccionarios_y_conjuntos.md`, cheatsheet visual en `REFERENCIA_PYTHON/colecciones_cheatsheet.html`)*
+- Listas, tuplas, diccionarios, conjuntos: cuándo usar cada una *(lección pendiente; referencia en `referencia/03-listas.html` y `referencia/04-diccionarios-y-conjuntos.html`, cheatsheet visual en `referencia/colecciones-cheatsheet.html`)*
 - Ejercicios de consolidación *(pendientes)*: agenda de contactos con diccionarios; inventario con listas de diccionarios
 
 ### Módulos y entorno
-- Imports, `venv`, `pip` y `requirements.txt`, `__name__ == "__main__"` — ver `REFERENCIA_PYTHON/09_modulos.md`
+- Imports, `venv`, `pip` y `requirements.txt`, `__name__ == "__main__"` — ver `referencia/09-modulos.html`
 
 ### Programación orientada a objetos *(pendiente)*
 - Clases, `__init__`, métodos, `__str__`/`__repr__`, herencia, `@property`/`@staticmethod`, y cuándo NO usar clases (YAGNI)

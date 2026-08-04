@@ -32,8 +32,8 @@ ni de machine learning, ni prepara ninguna certificación.
 - **Práctica**: casi toda lección tiene un esqueleto en `ejercicios/` para
   teclear tú — con `assert`s de autoverificación: si pasan, el tema está
   superado. Ningún ejercicio viene resuelto.
-- **Consulta**: `REFERENCIA_PYTHON/` es una referencia rápida de sintaxis
-  para no ir a Google a mitad de ejercicio.
+- **Consulta**: `referencia/` es una referencia rápida de sintaxis para no
+  ir a Google a mitad de ejercicio.
 - **Un consejo**: usa un asistente de IA como profesor. Pídele que te
   explique un concepto de otra forma, que revise tu solución o que te ponga
   un ejercicio extra — pero teclea tú el código.
@@ -47,7 +47,7 @@ ni de machine learning, ni prepara ninguna certificación.
 | `lecciones/matching/` | Módulo 3 — proyecto integrador: Gale-Shapley paso a paso |
 | `lecciones/funcional/` | Módulo 4 — programación funcional completa |
 | `ejercicios/` | Esqueletos de ejercicio, espejo de los módulos de lecciones |
-| `REFERENCIA_PYTHON/` | Referencia rápida de sintaxis (11 fichas + cheatsheet) |
+| `referencia/` | Referencia rápida de sintaxis (10 fichas + cheatsheet) |
 | `algoritmos/` | Scripts de algoritmos clásicos que las lecciones citan |
 | `TEMARIO.md` | El plan completo del curso, con lo hecho y lo pendiente |
 

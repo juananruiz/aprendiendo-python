@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia 05: Control de flujo</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="04-diccionarios-y-conjuntos.html">← Anterior: 04 — Diccionarios, conjuntos y tuplas</a>
+    <a href="06-funciones.html">Siguiente: 06 — Funciones →</a>
+  </span>
+</nav>
+
+<h1>Control de flujo</h1>
+<p class="subtitle">Referencia rápida 05/10 — if/elif/else, for, while, break, continue</p>
+
+<h2>if / elif / else</h2>
+
+<pre><code>edad = 18
+
+if edad &lt; 13:
+    print("niño")
+elif edad &lt; 18:
+    print("adolescente")
+elif edad == 18:
+    print("recién mayor")
+else:
+    print("adulto")</code></pre>
+
+<h3>Expresión condicional (ternario)</h3>
+
+<pre><code>estado = "mayor" if edad &gt;= 18 else "menor"</code></pre>
+
+<hr>
+
+<h2>for</h2>
+
+<p>Itera sobre cualquier iterable (lista, string, rango, diccionario...).</p>
+
+<pre><code>for i in range(5):         # 0, 1, 2, 3, 4
+    print(i)
+
+for i in range(1, 6):      # 1, 2, 3, 4, 5
+    print(i)
+
+for i in range(0, 10, 2):  # 0, 2, 4, 6, 8  — paso 2
+    print(i)
+
+for letra in "Python":     # itera caracteres
+    print(letra)</code></pre>
+
+<h3>break, continue, pass</h3>
+
+<pre><code># break — sale del bucle completamente
+for i in range(10):
+    if i == 5:
+        break
+    print(i)   # imprime 0, 1, 2, 3, 4
+
+# continue — salta a la siguiente iteración
+for i in range(10):
+    if i % 2 == 0:
+        continue
+    print(i)   # imprime solo impares: 1, 3, 5, 7, 9
+
+# pass — no hace nada, sirve de placeholder
+for i in range(5):
+    pass   # útil cuando la sintaxis exige un bloque pero aún no tienes código</code></pre>
+
+<h3>for / else</h3>
+
+<p>El bloque <code>else</code> se ejecuta si el bucle terminó <strong>sin</strong> <code>break</code>.</p>
+
+<pre><code>numeros = [1, 3, 5, 7]
+for n in numeros:
+    if n % 2 == 0:
+        print("Encontré un par")
+        break
+else:
+    print("No hay ningún número par")  # se ejecuta este</code></pre>
+
+<hr>
+
+<h2>while</h2>
+
+<p>Repite mientras la condición sea verdadera.</p>
+
+<pre><code>contador = 0
+while contador &lt; 5:
+    print(contador)
+    contador += 1
+
+# Bucle infinito controlado con break
+while True:
+    entrada = input("Escribe 'salir' para terminar: ")
+    if entrada == "salir":
+        break</code></pre>
+
+<hr>
+
+<h2>Valores que Python trata como False</h2>
+
+<pre><code># Todos estos son "falsy":
+bool(0)        # False
+bool(0.0)      # False
+bool("")       # False
+bool([])       # False
+bool({})       # False
+bool(None)     # False
+
+# Útil para comprobar si algo está vacío:
+lista = []
+if not lista:
+    print("La lista está vacía")</code></pre>
+
+<hr>
+
+<h2>Comparar con <code>in</code></h2>
+
+<pre><code>frutas = ["manzana", "pera", "uva"]
+
+if "pera" in frutas:
+    print("hay pera")
+
+if "kiwi" not in frutas:
+    print("no hay kiwi")</code></pre>
+
+<hr>
+
+<p class="retoque">
+  Esto es una ficha de consulta rápida, no una lección con ejercicio. Para
+  practicar estos conceptos, ve a las <a href="../lecciones/index.html">lecciones</a>.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="04-diccionarios-y-conjuntos.html">← Anterior: 04 — Diccionarios, conjuntos y tuplas</a>
+    <a href="06-funciones.html">Siguiente: 06 — Funciones →</a>
+  </span>
+</nav>
+
+</body>
+</html>

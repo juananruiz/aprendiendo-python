@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia 01: Tipos y variables</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <span class="nav-hueco">Anterior</span>
+    <a href="02-strings.html">Siguiente: 02 — Strings →</a>
+  </span>
+</nav>
+
+<h1>Tipos y variables</h1>
+<p class="subtitle">Referencia rápida 01/10 — Tipos básicos, conversiones, operadores</p>
+
+<h2>Tipos básicos</h2>
+
+<pre><code>entero   = 42
+decimal  = 3.14
+texto    = "hola"
+booleano = True       # también False
+nada     = None       # ausencia de valor</code></pre>
+
+<h2>Comprobar el tipo</h2>
+
+<pre><code>type(42)        # &lt;class 'int'&gt;
+type("hola")    # &lt;class 'str'&gt;
+isinstance(42, int)   # True
+isinstance(42, float) # False</code></pre>
+
+<h2>Conversión de tipos</h2>
+
+<pre><code>int("42")       # 42     — falla si el string no es número
+int(3.9)        # 3      — trunca, no redondea
+float("3.14")   # 3.14
+str(100)        # "100"
+bool(0)         # False  — también es False: None, "", [], {}, 0.0
+bool(1)         # True   — cualquier otro valor es True</code></pre>
+
+<h2>Números: detalles que sorprenden</h2>
+
+<pre><code>un_millon = 1_000_000    # los guiones bajos son solo visuales, ayudan a leer
+1_000_000 == 1000000     # True
+
+2e3       # 2000.0  — notación científica (2 × 10³), siempre float
+1.5e-2    # 0.015
+
+7 // 2    # 3    división entera
+-7 // 2   # -4   ¡ojo! floor redondea hacia abajo, no hacia cero</code></pre>
+
+<div class="pista">
+<p><strong>Error frecuente</strong>: los <code>float</code> no son exactos. Se guardan en binario y algunos decimales no tienen representación finita:</p>
+<pre><code>0.1 + 0.2          # 0.30000000000000004  ¡no es 0.3!
+0.1 + 0.2 == 0.3   # False
+round(0.1 + 0.2, 2) == 0.3   # True — compara redondeando</code></pre>
+<p>Para dinero o precisión exacta, usa <code>decimal.Decimal</code> en vez de <code>float</code>. Ya te topaste con esto en <code>algoritmos/babylonian_square_root.py</code>: ahí no comparas con <code>==</code>, sino con <code>math.isclose(guess, better_guess)</code>, exactamente por este motivo.</p>
+</div>
+
+<h2>Redondear vs truncar</h2>
+
+<pre><code>int(3.9)      # 3    — trunca (tira la parte decimal)
+round(3.9)    # 4    — redondea al entero más cercano
+round(3.14159, 2)  # 3.14  — a 2 decimales
+round(2.5)    # 2    — ¡redondeo bancario! .5 va al par más cercano
+round(3.5)    # 4</code></pre>
+
+<h2>Operadores aritméticos</h2>
+
+<pre><code>7 + 2    # 9    suma
+7 - 2    # 5    resta
+7 * 2    # 14   multiplicación
+7 / 2    # 3.5  división (siempre float)
+7 // 2   # 3    división entera (floor)
+7 % 2    # 1    módulo (resto)
+7 ** 2   # 49   potencia</code></pre>
+
+<h2>Operadores de comparación</h2>
+
+<pre><code>5 == 5    # True   igual
+5 != 4    # True   distinto
+5 &gt; 3     # True   mayor
+5 &lt; 3     # False  menor
+5 &gt;= 5    # True   mayor o igual
+5 &lt;= 4    # False  menor o igual</code></pre>
+
+<h2>Operadores lógicos</h2>
+
+<pre><code>True and False   # False
+True or False    # True
+not True         # False</code></pre>
+
+<h2>Asignación múltiple y unpacking</h2>
+
+<pre><code>a = b = 0             # ambas valen 0
+a, b = 1, 2           # a=1, b=2
+a, b = b, a           # intercambio sin variable temporal
+x, *resto = [1,2,3,4] # x=1, resto=[2,3,4]</code></pre>
+
+<h2>Variables: convenciones de nombre</h2>
+
+<pre><code>nombre_de_variable = 1    # snake_case — convención Python
+CONSTANTE = 3.14159       # mayúsculas para constantes (por convención, no es forzado)
+_privado = "interno"      # guion bajo inicial = señal de "no tocar desde fuera"</code></pre>
+
+<h2>Igualdad (<code>==</code>) vs identidad (<code>is</code>)</h2>
+
+<pre><code>a = [1, 2, 3]
+b = [1, 2, 3]
+c = a
+
+a == b   # True  — ¿tienen el mismo contenido?
+a is b   # False — ¿son el MISMO objeto en memoria? No, son dos listas distintas
+a is c   # True  — c y a apuntan al mismo objeto</code></pre>
+
+<p>Regla práctica: usa <code>==</code> para comparar valores. Reserva <code>is</code> <strong>solo</strong> para comparar con <code>None</code>:</p>
+
+<pre><code>if x is None:      # ✅ correcto
+if x == None:      # funciona, pero no es idiomático</code></pre>
+
+<h2>Mutable vs inmutable</h2>
+
+<p>Algunos tipos se pueden modificar en su sitio (<strong>mutables</strong>) y otros no (<strong>inmutables</strong>). Es la causa de muchos errores sutiles.</p>
+
+<table>
+<tr><th>Inmutables</th><th>Mutables</th></tr>
+<tr><td><code>int</code>, <code>float</code>, <code>bool</code>, <code>str</code>, <code>tuple</code></td><td><code>list</code>, <code>dict</code>, <code>set</code></td></tr>
+</table>
+
+<pre><code># Inmutable: cada "cambio" crea un objeto nuevo
+s = "hola"
+s.upper()   # devuelve "HOLA", pero s SIGUE siendo "hola"
+
+# Mutable: se modifica el objeto original
+lista = [1, 2]
+lista.append(3)   # lista ahora es [1, 2, 3], no se creó nada nuevo</code></pre>
+
+<div class="pista">
+<p><strong>Error frecuente</strong>: como una variable es solo una etiqueta que apunta a un objeto, dos etiquetas pueden apuntar al mismo objeto mutable:</p>
+<pre><code>a = [1, 2, 3]
+b = a          # b NO es una copia, es la misma lista
+b.append(4)
+a              # [1, 2, 3, 4]  ¡a también cambió!
+
+b = a.copy()   # ahora sí, b es una copia independiente</code></pre>
+</div>
+
+<div class="pista">
+<p><strong>Error frecuente</strong>: confundir <code>=</code> (asignación) con <code>==</code> (comparación).</p>
+</div>
+
+<hr>
+
+<p class="retoque">
+  Esto es una ficha de consulta rápida, no una lección con ejercicio. Para
+  practicar estos conceptos, ve a las <a href="../lecciones/index.html">lecciones</a>.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <span class="nav-hueco">Anterior</span>
+    <a href="02-strings.html">Siguiente: 02 — Strings →</a>
+  </span>
+</nav>
+
+</body>
+</html>
