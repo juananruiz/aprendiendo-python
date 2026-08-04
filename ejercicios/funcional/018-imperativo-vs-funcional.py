@@ -2,7 +2,7 @@
 Ejercicio 18 — PROYECTO INSIGNIA de la Pista 4
 Contraste imperativo vs. funcional
 
-Tres partes, tal como las pide el ROADMAP:
+Tres partes, tal como las pide el TEMARIO:
 
   A) Reescribir dos algoritmos ya hechos en estilo funcional puro
   B) Montar un pipeline de datos sin variables mutables intermedias
@@ -319,7 +319,7 @@ if __name__ == "__main__":
 #
 #    ...
 #
-# 5. Vuelves el lunes a tu trabajo con PHP y OOP. Nombra TRES cosas
+# 5. Vuelves el lunes a un proyecto OOP (PHP, Java...). Nombra TRES cosas
 #    concretas de esta pista que vas a usar allí, y una que no.
 #
 #    ...

@@ -185,7 +185,7 @@ if __name__ == "__main__":
 #    devuelve ['Ana', 'Carlos']? ¿En qué momento exacto se crea esa lista?
 # 2. top_n() copia la lista entera para devolver 3 elementos. ¿En qué tamaño
 #    de datos empezaría eso a importarte de verdad? Estímalo, no lo adivines.
-# 3. ¿Qué funciones de tus scripts anteriores (orden_burbuja.py,
+# 3. ¿Qué funciones de los scripts de algoritmos/ (orden_burbuja.py,
 #    busqueda_binaria_01.py) son puras y cuáles no? ¿Por qué?
-# 4. En PHP usas objetos con setters. ¿Qué pierdes al pasar a
+# 4. En OOP clásico se usan objetos con setters. ¿Qué pierdes al pasar a
 #    @dataclass(frozen=True)? ¿Y qué ganas?

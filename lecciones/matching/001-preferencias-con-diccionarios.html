@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lección 1: Preferencias modeladas con diccionarios</title>
-<link rel="stylesheet" href="../assets/estilos.css">
+<link rel="stylesheet" href="../../assets/estilos.css">
 </head>
 <body>
 
 <nav class="nav-lecciones">
-  <a href="index.html">← Índice de lecciones</a>
+  <a href="../index.html">← Índice de lecciones</a>
   <span class="nav-central">
     <span class="nav-hueco">Anterior</span>
     <a href="002-ordenacion-con-key.html">Siguiente: 002 — Ordenación con key →</a>
@@ -59,7 +59,7 @@
 <h2>De puntuaciones a preferencias</h2>
 
 <p>
-  En tu caso real no hay preferencias declaradas: tienes
+  En un caso real muchas veces no hay preferencias declaradas: hay
   <strong>puntuaciones</strong>. La preferencia de un destino por un
   candidato es directamente su nota. La preferencia del candidato por los
   destinos puede calcularse combinando sus intereses personales con la nota
@@ -118,9 +118,9 @@ ranking = sorted(candidatos.items(), key=lambda x: x[1], reverse=True)
   <strong>filtrando</strong> a los candidatos que no llegan a la nota mínima
   de cada destino.
 </p>
-<p>Esqueleto para teclear: <code>ejercicios/001-generar-ranking.py</code></p>
+<p>Esqueleto para teclear: <code>ejercicios/matching/001-generar-ranking.py</code></p>
 <div class="pista">
-  <strong>Extra:</strong> antes de ese ejercicio, <code>ejercicios/001a-diccionarios.py</code>
+  <strong>Extra:</strong> antes de ese ejercicio, <code>ejercicios/matching/001a-diccionarios.py</code>
   te deja practicar sueltas las operaciones de recorrido y ordenación de
   diccionarios que vas a necesitar.
 </div>
@@ -137,11 +137,12 @@ ranking = sorted(candidatos.items(), key=lambda x: x[1], reverse=True)
 <hr>
 
 <p class="retoque">
-  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
 </p>
 
 <nav class="nav-lecciones">
-  <a href="index.html">← Índice de lecciones</a>
+  <a href="../index.html">← Índice de lecciones</a>
   <span class="nav-central">
     <span class="nav-hueco">Anterior</span>
     <a href="002-ordenacion-con-key.html">Siguiente: 002 — Ordenación con key →</a>

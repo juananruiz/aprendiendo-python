@@ -1,16 +1,13 @@
 """ 
 Ordenamiento por selección
-autor: Juanan Ruiz
-versión: 01
-fecha: 02/07/2026
 ---
-Sonnet: Tu implementación es correcta, con un matiz
+Nota didáctica: esta implementación es correcta, con un matiz
 
 Funciona bien, pero usa una variante ligeramente distinta a la clásica:
 - **Clásica**: intercambias el mínimo con la posición actual dentro de la misma lista (`lista[i], lista[j] = lista[j], lista[i]`), sin crear una lista nueva.
-- **Tuya**: extraes el mínimo con `pop()` y lo vas acumulando en `lista_ordenada`, una lista nueva.
+- **Esta versión**: extrae el mínimo con `pop()` y lo vas acumulando en `lista_ordenada`, una lista nueva.
 
-Ambas son válidas y correctas, la tuya es más fácil de entender pero tiene un coste extra: `list.pop(j)` en una posición que no es el final es **O(n)** (tiene que desplazar los elementos), así que tu versión es ligeramente menos eficiente que la clásica, aunque la complejidad total sigue siendo **O(n²)** en ambos casos.
+Ambas son válidas y correctas; esta es más fácil de entender pero tiene un coste extra: `list.pop(j)` en una posición que no es el final es **O(n)** (tiene que desplazar los elementos), así que es ligeramente menos eficiente que la clásica, aunque la complejidad total sigue siendo **O(n²)** en ambos casos.
 """
 
 frutas = ["pera", "sandia", "melón", "naranja", "plátano", "manzana", "piña", "melocotón", "albaricoque", "fresa"]

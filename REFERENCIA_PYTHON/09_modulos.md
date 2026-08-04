@@ -57,7 +57,7 @@ __name__      # nombre del módulo: "__main__" si se ejecuta directamente,
               # o el nombre del módulo si se importa (ej: "busqueda_binaria_02")
 
 __file__      # ruta del propio fichero .py
-              # ej: "/Users/juananruiz/dev/aprendiendo-python/busqueda_binaria_02.py"
+              # ej: "/home/usuario/aprendiendo-python/algoritmos/busqueda_binaria_02.py"
 
 __doc__       # el docstring del módulo (si el fichero empieza con una cadena
               # de documentación en la primera línea)

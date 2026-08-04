@@ -1,0 +1,68 @@
+# Aprendiendo Python
+
+Un curso práctico de Python en español, nacido de un cuaderno de aprendizaje
+personal y reorganizado para que cualquiera pueda seguirlo.
+
+**Empieza aquí → [`lecciones/index.html`](lecciones/index.html)** (ábrelo en
+tu navegador; funciona en local, sin servidor). El plan completo, incluidas
+las partes aún en construcción, está en el [TEMARIO](TEMARIO.md).
+
+## Filosofía
+
+Este curso persigue cuatro objetivos, en este orden de importancia:
+
+1. **Implementar y entender algoritmos clásicos**, siguiendo el libro
+   *Comprender los algoritmos* de Aditya Y. Bhargava — no copiando el código,
+   sino reescribiéndolo desde cero y midiendo su comportamiento real.
+2. **Automatizar tareas del día a día** — Python como herramienta de
+   propósito general, deliberadamente lejos del desarrollo web.
+3. **Construir una base sólida** de Python idiomático, con criterio para
+   elegir la estructura de datos correcta.
+4. **Entrenar el pensamiento funcional** — un cambio de aires deliberado
+   para quien trabaja a diario en modo OOP.
+
+Y tres no-objetivos igual de importantes: no es un curso de desarrollo web,
+ni de machine learning, ni prepara ninguna certificación.
+
+## Cómo funciona
+
+- **Teoría**: cada lección es un HTML autocontenido en `lecciones/`, con
+  ejemplos verificados con código real (cuando una lección afirma "esto tarda
+  124.750 comparaciones", ese número se midió de verdad).
+- **Práctica**: casi toda lección tiene un esqueleto en `ejercicios/` para
+  teclear tú — con `assert`s de autoverificación: si pasan, el tema está
+  superado. Ningún ejercicio viene resuelto.
+- **Consulta**: `REFERENCIA_PYTHON/` es una referencia rápida de sintaxis
+  para no ir a Google a mitad de ejercicio.
+- **Un consejo**: usa un asistente de IA como profesor. Pídele que te
+  explique un concepto de otra forma, que revise tu solución o que te ponga
+  un ejercicio extra — pero teclea tú el código.
+
+## Estructura
+
+| Carpeta | Contenido |
+|---------|-----------|
+| `lecciones/fundamentos/` | Módulo 1 — fundamentos a fondo (bucles, slicing...) |
+| `lecciones/algoritmos/` | Módulo 2 — capítulos del libro de Bhargava |
+| `lecciones/matching/` | Módulo 3 — proyecto integrador: Gale-Shapley paso a paso |
+| `lecciones/funcional/` | Módulo 4 — programación funcional completa |
+| `ejercicios/` | Esqueletos de ejercicio, espejo de los módulos de lecciones |
+| `REFERENCIA_PYTHON/` | Referencia rápida de sintaxis (11 fichas + cheatsheet) |
+| `algoritmos/` | Scripts de algoritmos clásicos que las lecciones citan |
+| `TEMARIO.md` | El plan completo del curso, con lo hecho y lo pendiente |
+
+Para tu **seguimiento personal**, copia el TEMARIO a una carpeta `personal/`
+(está en el `.gitignore`) y marca ahí tu progreso — el curso es de todos,
+tu avance es tuyo.
+
+## Requisitos
+
+Python 3.10 o superior. Sin dependencias para casi todo el curso; algunos
+scripts sueltos usan SymPy, matplotlib, SQLAlchemy o Flet (se indican en el
+propio fichero).
+
+## Licencia
+
+[CC BY-SA 4.0](LICENSE.md) — puedes usar, compartir y adaptar este material,
+incluso comercialmente, citando la fuente y manteniendo la misma licencia en
+las obras derivadas.

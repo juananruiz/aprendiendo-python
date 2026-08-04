@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. producto() y maximo_con_reduce() ya existen como math.prod() y max().
-#    ¿En qué caso real de tu trabajo usarías reduce en vez de una builtin?
+#    ¿En qué caso real de tu entorno usarías reduce en vez de una builtin?
 # 2. partial(baremar, peso_exp=0.7) y hacer_baremo_a_mano(0.7, ...) hacen
 #    lo mismo. ¿Cuál prefieres leer? ¿Y cuál prefieres depurar?
 # 3. distancia() se cachea sin problema, pero obtener_saldo(cuenta) no

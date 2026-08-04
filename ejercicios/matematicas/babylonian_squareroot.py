@@ -23,4 +23,6 @@ def babylonian_squareroot(n):
         guess = better_guess
 
 if __name__ == "__main__":
-    print(babylonian_squareroot(25))
+    print("Ingrese un número para calcular su raíz cuadrada:")
+    user_number = float(input())
+    print(babylonian_squareroot(user_number))

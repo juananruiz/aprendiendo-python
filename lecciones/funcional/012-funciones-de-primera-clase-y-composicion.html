@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lección 12: Funciones de primera clase y composición</title>
-<link rel="stylesheet" href="../assets/estilos.css">
+<link rel="stylesheet" href="../../assets/estilos.css">
 </head>
 <body>
 
 <nav class="nav-lecciones">
-  <a href="index.html">← Índice de lecciones</a>
+  <a href="../index.html">← Índice de lecciones</a>
   <span class="nav-central">
     <a href="011-funciones-puras-e-inmutabilidad.html">← Anterior: 011</a>
     <a href="013-lambda-map-filter-y-comprehensions.html">Siguiente: 013 — lambda, map, filter →</a>
@@ -81,7 +81,7 @@ def listar(candidatos, criterio):
 
 <p>
   Añadir un criterio nuevo es añadir una línea al diccionario, no tocar un
-  <code>if</code> de veinte ramas. En PHP resolverías esto con el patrón
+  <code>if</code> de veinte ramas. En OOP resolverías esto con el patrón
   Strategy: una interfaz, tres clases, una factoría. Aquí es un
   <code>dict</code>.
 </p>
@@ -168,7 +168,7 @@ print(triple(10))   # 30
   <strong>Un closure es un objeto pobre, y un objeto es un closure rico.</strong>
   Compara:
   <br><br>
-  En PHP escribirías <code>class Multiplicador { private $factor;
+  En un lenguaje OOP escribirías <code>class Multiplicador { private $factor;
   __construct($f) {...} public function __invoke($x) { return $x * $this-&gt;factor; } }</code>.
   Estado guardado en el constructor, comportamiento en un método.
   <br><br>
@@ -303,7 +303,7 @@ procesar = componer(
   funciones en vez de <code>if/elif</code>. Al final tendrás un validador
   compuesto que no contiene ni un solo <code>if</code>.
 </p>
-<p>Esqueleto para teclear: <code>ejercicios/012-orden-superior-y-composicion.py</code></p>
+<p>Esqueleto para teclear: <code>ejercicios/funcional/012-orden-superior-y-composicion.py</code></p>
 </div>
 
 <hr>
@@ -318,11 +318,12 @@ procesar = componer(
 <hr>
 
 <p class="retoque">
-  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
 </p>
 
 <nav class="nav-lecciones">
-  <a href="index.html">← Índice de lecciones</a>
+  <a href="../index.html">← Índice de lecciones</a>
   <span class="nav-central">
     <a href="011-funciones-puras-e-inmutabilidad.html">← Anterior: 011</a>
     <a href="013-lambda-map-filter-y-comprehensions.html">Siguiente: 013 — lambda, map, filter →</a>

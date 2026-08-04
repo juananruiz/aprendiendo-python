@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lección 11: Funciones puras e inmutabilidad</title>
-<link rel="stylesheet" href="../assets/estilos.css">
+<link rel="stylesheet" href="../../assets/estilos.css">
 </head>
 <body>
 
 <nav class="nav-lecciones">
-  <a href="index.html">← Índice de lecciones</a>
+  <a href="../index.html">← Índice de lecciones</a>
   <span class="nav-central">
-    <a href="index.html">Pista 4 — inicio</a>
+    <a href="../index.html">Pista 4 — inicio</a>
     <a href="012-funciones-de-primera-clase-y-composicion.html">Siguiente: 012 — Primera clase y composición →</a>
   </span>
 </nav>
@@ -37,7 +37,8 @@
 <h2>Por qué estás aquí</h2>
 
 <p>
-  En PHP trabajas en modo objeto: creas un <code>$empleado</code>, le cambias
+  En OOP clásico (PHP, Java...) trabajas en modo objeto: creas un
+  <code>$empleado</code>, le cambias
   el estado con <code>$empleado-&gt;setDestino(...)</code>, y el objeto
   <em>recuerda</em> lo que le ha pasado. Ese es el mundo de Turing: hay una
   cinta, y la vas modificando.
@@ -261,7 +262,7 @@ c2 = replace(c, nota=9.0)         # ✅ devuelve un Candidato NUEVO
 </code></pre>
 
 <p>
-  Compáralo con lo que harías en PHP: una clase con <code>private $nota</code>
+  Compáralo con lo que harías en un lenguaje OOP como PHP: una clase con <code>private $nota</code>
   y un <code>setNota()</code>. Aquí no hay <em>setter</em> porque no hay nada
   que <em>setear</em>: hay una fábrica de versiones nuevas.
 </p>
@@ -340,7 +341,7 @@ print(registrar("Carlos"))  # ['Ana', 'Carlos']  😱 ¿de dónde sale Ana?
   un mini-baremo con <code>@dataclass(frozen=True)</code> y comprobarás que
   el original nunca cambia.
 </p>
-<p>Esqueleto para teclear: <code>ejercicios/011-funciones-puras.py</code></p>
+<p>Esqueleto para teclear: <code>ejercicios/funcional/011-funciones-puras.py</code></p>
 </div>
 
 <hr>
@@ -355,13 +356,14 @@ print(registrar("Carlos"))  # ['Ana', 'Carlos']  😱 ¿de dónde sale Ana?
 <hr>
 
 <p class="retoque">
-  ¿Algo no ha quedado claro? Pregúntame — este agente es tu profesor.
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
 </p>
 
 <nav class="nav-lecciones">
-  <a href="index.html">← Índice de lecciones</a>
+  <a href="../index.html">← Índice de lecciones</a>
   <span class="nav-central">
-    <a href="index.html">Pista 4 — inicio</a>
+    <a href="../index.html">Pista 4 — inicio</a>
     <a href="012-funciones-de-primera-clase-y-composicion.html">Siguiente: 012 — Primera clase y composición →</a>
   </span>
 </nav>

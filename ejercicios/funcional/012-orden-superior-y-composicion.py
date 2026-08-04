@@ -193,7 +193,7 @@ if __name__ == "__main__":
 #        fs = [lambda x: x + i for i in range(3)]
 #        print([f(10) for f in fs])
 #    ¿Cómo lo arreglarías?
-# 3. REGLAS es un dict de funciones. En PHP habrías usado el patrón
+# 3. REGLAS es un dict de funciones. En OOP habrías usado el patrón
 #    Strategy con una interfaz y tres clases. ¿Qué se pierde al no tener
 #    esa interfaz? ¿Cuándo echarías de menos el tipado?
 # 4. componer() sólo encadena funciones de UN argumento. Busca un caso de

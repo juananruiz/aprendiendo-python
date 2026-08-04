@@ -231,7 +231,7 @@ if __name__ == "__main__":
     # 4
     assert "saludar" in TAREAS
     assert saludar("Ana") == "Hola, Ana", "el registro NO debe envolver"
-    assert ejecutar_tarea("saludar", "Juanan") == "Hola, Juanan"
+    assert ejecutar_tarea("saludar", "Marta") == "Hola, Marta"
     try:
         ejecutar_tarea("inexistente")
         raise AssertionError("debía lanzar KeyError")

@@ -197,6 +197,6 @@ if __name__ == "__main__":
 # 3. mejor_de_cada_cuerpo() probablemente te ha salido fea con
 #    comprehensions. Guárdala: en la lección 016 la reescribirás con
 #    itertools.groupby y podrás comparar.
-# 4. Busca en tus scripts anteriores (orden_burbuja.py, cuadrado_magico.py)
+# 4. Busca en los scripts de algoritmos/ (orden_burbuja.py, cuadrado_magico.py)
 #    un bucle que sea sólo "transformar" o sólo "filtrar". Reescríbelo.
 #    ¿Cuántos NO se dejan reescribir, y por qué?
