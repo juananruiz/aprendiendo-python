@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 34: Errores y excepciones</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="033-funciones-a-fondo.html">← Anterior: 033 — Funciones a fondo</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+<h1>Errores y excepciones</h1>
+<p class="subtitle">Fallar bien: capturar lo justo, protestar pronto y no esconder nunca un problema</p>
+
+<p>
+  Hasta ahora tus scripts han vivido en un mundo amable: los datos llegaban
+  bien y los ficheros existían. En cuanto automatices algo de verdad — leer
+  un CSV que alguien editó a mano, llamar a una API que a veces no responde —
+  el manejo de errores deja de ser teoría. Esta lección va de eso.
+</p>
+
+<div class="clave">
+  La tentación al aprender excepciones es envolverlo todo en un
+  <code>try</code> gigante para que «no pete». Eso no arregla nada: solo
+  convierte un error ruidoso en un dato corrupto silencioso. El objetivo es
+  el contrario — <strong>capturar solo lo que sabes manejar</strong>.
+</div>
+
+<hr>
+
+<h2>1. El esqueleto completo</h2>
+
+<pre><code>try:
+    numero = int(entrada)
+except ValueError:
+    print("Eso no es un número")
+else:
+    print(f"Perfecto: {numero}")     # solo si NO hubo excepción
+finally:
+    print("Esto se ejecuta siempre") # haya ido bien o mal
+</code></pre>
+
+<p>El orden real de ejecución, comprobado paso a paso:</p>
+
+<table>
+<tr><th>Situación</th><th>Bloques que se ejecutan</th></tr>
+<tr><td>No hay error</td><td><code>try</code> → <code>else</code> → <code>finally</code></td></tr>
+<tr><td>Hay error capturado</td><td><code>try</code> → <code>except</code> → <code>finally</code></td></tr>
+</table>
+
+<p>
+  <code>finally</code> se ejecuta <strong>siempre</strong>: incluso si dentro
+  del <code>try</code> hay un <code>return</code>, o si la excepción no se
+  captura y el programa va a morir. Por eso es el sitio de cerrar ficheros y
+  soltar recursos.
+</p>
+
+<div class="pista">
+  <strong>¿Para qué sirve <code>else</code>?</strong> Para dejar en el
+  <code>try</code> <em>solo</em> la línea que puede fallar. Si metes también
+  el código de después, podrías capturar sin querer un
+  <code>ValueError</code> que venga de otro sitio y creer que fue la
+  conversión.
+</div>
+
+<hr>
+
+<h2>2. Captura lo específico, no lo que pilles</h2>
+
+<pre><code># ❌ Esconde cualquier problema, incluidos tus propios bugs
+try:
+    procesar(datos)
+except:
+    pass
+
+# ❌ Casi igual de malo: capturas errores que no sabes manejar
+except Exception:
+    pass
+
+# ✅ Dices exactamente qué esperas que pueda fallar
+except (ValueError, KeyError) as e:
+    print(f"Dato inválido: {e}")
+</code></pre>
+
+<p>
+  Además, el <strong>orden importa</strong>: Python prueba los
+  <code>except</code> de arriba abajo y se queda con el primero que encaje.
+  Si pones el genérico primero, los específicos de debajo no se ejecutan
+  nunca:
+</p>
+
+<pre><code>try:
+    config["puerto"]
+except Exception:      # ← este captura TODO
+    ...
+except KeyError:       # ← muerto: nunca se llega aquí
+    ...
+</code></pre>
+
+<div class="regla">
+  Regla: <strong>del más específico al más general</strong>, siempre.
+</div>
+
+<h3>Por qué <code>except:</code> a secas es peor que <code>except Exception:</code></h3>
+
+<p>Comprobado en el intérprete:</p>
+
+<pre><code>issubclass(KeyboardInterrupt, Exception)      # False
+issubclass(KeyboardInterrupt, BaseException)  # True
+</code></pre>
+
+<p>
+  <code>Ctrl+C</code> lanza <code>KeyboardInterrupt</code>, que
+  <strong>no</strong> hereda de <code>Exception</code>. Por eso
+  <code>except Exception</code> te deja cancelar el programa, mientras que
+  un <code>except:</code> desnudo también se traga tu <code>Ctrl+C</code> y
+  deja el script inmortal.
+</p>
+
+<hr>
+
+<h2>3. La jerarquía (y cómo aprovecharla)</h2>
+
+<p>Las excepciones son clases que heredan unas de otras. Verificado:</p>
+
+<pre><code>KeyError          → LookupError    → Exception → BaseException
+IndexError        → LookupError    → Exception → BaseException
+FileNotFoundError → OSError        → Exception → BaseException
+ZeroDivisionError → ArithmeticError→ Exception → BaseException
+ValueError                         → Exception → BaseException
+</code></pre>
+
+<p>
+  Esto no es trivia: capturar el padre captura a todos sus hijos. Como
+  <code>KeyError</code> e <code>IndexError</code> comparten
+  <code>LookupError</code>, un solo <code>except</code> los cubre a ambos:
+</p>
+
+<pre><code>try:
+    valor = datos[clave]     # da igual si datos es dict o lista
+except LookupError:
+    valor = None
+</code></pre>
+
+<hr>
+
+<h2>4. Lanzar tus propios errores con <code>raise</code></h2>
+
+<pre><code>def dividir(a, b):
+    if b == 0:
+        raise ValueError("El divisor no puede ser 0")
+    return a / b
+</code></pre>
+
+<p>
+  Fallar pronto y con un mensaje claro es un favor a tu yo futuro. Un
+  <code>ValueError</code> con contexto en la línea 3 es infinitamente mejor
+  que un <code>NaN</code> propagándose hasta el informe final.
+</p>
+
+<h3>Excepciones propias</h3>
+
+<pre><code>class SaldoInsuficienteError(Exception):
+    """La cuenta no tiene fondos suficientes."""
+
+def retirar(saldo, cantidad):
+    if cantidad > saldo:
+        raise SaldoInsuficienteError(f"saldo {saldo}, intento {cantidad}")
+    return saldo - cantidad
+</code></pre>
+
+<p>
+  Merece la pena cuando quien llama necesita distinguir <em>tu</em> error de
+  los genéricos del lenguaje para reaccionar distinto.
+</p>
+
+<h3><code>raise ... from</code>: no borres la pista original</h3>
+
+<pre><code>def leer_config(config):
+    try:
+        return config["puerto"]
+    except KeyError as e:
+        raise ValueError("falta la clave 'puerto' en la config") from e
+</code></pre>
+
+<p>
+  El <code>from e</code> conserva la excepción original en
+  <code>__cause__</code>, y el traceback muestra ambas. Sin él, pierdes la
+  causa real del problema justo cuando más falta te hace.
+</p>
+
+<hr>
+
+<h2>5. EAFP: el estilo de Python</h2>
+
+<p>
+  Hay dos filosofías para el código que puede fallar, y Python tiene una
+  preferida:
+</p>
+
+<table>
+<tr><th>LBYL — <em>mira antes de saltar</em></th><th>EAFP — <em>pide perdón, no permiso</em></th></tr>
+<tr>
+<td><pre><code>if "puerto" in config:
+    p = config["puerto"]
+else:
+    p = 8080</code></pre></td>
+<td><pre><code>try:
+    p = config["puerto"]
+except KeyError:
+    p = 8080</code></pre></td>
+</tr>
+</table>
+
+<p>
+  <strong>EAFP</strong> (<em>Easier to Ask Forgiveness than Permission</em>)
+  es el estilo idiomático en Python, y no es solo gusto: entre el
+  <code>if</code> y el uso, las cosas pueden cambiar (un fichero que existe
+  al comprobarlo y desaparece al abrirlo). Con <code>try</code> no hay
+  hueco.
+</p>
+
+<div class="pista">
+  Para el caso concreto del diccionario, además, ya conoces el atajo:
+  <code>config.get("puerto", 8080)</code>. La built-in gana a las dos
+  versiones — otra vez la <a href="031-funciones-builtin.html">lección
+  031</a>.
+</div>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Cuándo se ejecuta el bloque <code>else</code> de un <code>try</code>?</summary>
+  <p>
+    Únicamente cuando el bloque <code>try</code> terminó sin lanzar ninguna
+    excepción. Sirve para separar el código que puede fallar del que solo
+    debe correr si todo fue bien, evitando capturar por accidente errores
+    que vengan de otras líneas.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué <code>except:</code> desnudo es peor que <code>except Exception:</code>?</summary>
+  <p>
+    Porque captura también las que heredan directamente de
+    <code>BaseException</code>, como el <code>KeyboardInterrupt</code> que
+    lanza <code>Ctrl+C</code>. El resultado es un programa que ni siquiera
+    puedes cancelar a mano, además de esconder cualquier fallo real.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué aporta escribir <code>raise ValueError(...) from e</code>?</summary>
+  <p>
+    Conserva la excepción original como causa en el atributo
+    <code>__cause__</code>, de modo que el traceback muestra ambos errores
+    encadenados. Sin ese <code>from</code>, se pierde la pista de qué falló
+    realmente por debajo.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué significa que Python prefiera EAFP frente a LBYL?</summary>
+  <p>
+    Que resulta más idiomático intentar la operación y capturar el fallo que
+    comprobar antes todas las condiciones. Evita además la ventana temporal
+    en la que el estado puede cambiar entre la comprobación previa y el uso
+    real del recurso.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Ocho formas de fallar bien</h3>
+<p>
+  Conversión segura con <code>try/except</code>, uso correcto de
+  <code>else</code> y <code>finally</code>, arreglar un <code>except</code>
+  demasiado goloso que esconde bugs, validar con <code>raise</code>, crear
+  una excepción propia, encadenar con <code>from</code> y reescribir código
+  LBYL en estilo EAFP.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/fundamentos/034-errores-y-excepciones.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong>
+  <a href="https://docs.python.org/es/3/tutorial/errors.html">Errores y
+  excepciones — tutorial oficial de Python</a>. La lista completa de
+  excepciones y su jerarquía está en
+  <a href="https://docs.python.org/es/3/library/exceptions.html">Excepciones
+  incorporadas</a>. Ficha de consulta:
+  <a href="../../referencia/07-errores-y-excepciones.html">07 — Errores y
+  excepciones</a>.
+</p>
+
+<p>
+  <strong>Siguiente paso natural:</strong> con esto cierras los fundamentos
+  imprescindibles para atacar la <em>Pista 2 — Automatización</em>, donde
+  los errores dejan de ser un ejercicio y empiezan a ser el día a día:
+  ficheros que no existen, CSV mal formados y APIs que no responden.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="033-funciones-a-fondo.html">← Anterior: 033 — Funciones a fondo</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+</body>
+</html>

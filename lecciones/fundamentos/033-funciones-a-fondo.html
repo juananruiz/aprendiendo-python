@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 33: Funciones a fondo</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="032-elegir-estructura-de-datos.html">← Anterior: 032 — Estructuras de datos</a>
+    <a href="034-errores-y-excepciones.html">Siguiente: 034 — Errores y excepciones →</a>
+  </span>
+</nav>
+
+<h1>Funciones a fondo</h1>
+<p class="subtitle">Parámetros, argumentos y el scope — todo lo que va entre los paréntesis</p>
+
+<p>
+  Escribes funciones desde tu primer script. Esta lección va de la mitad que
+  no se suele enseñar: cómo se pasan de verdad los argumentos, por qué a
+  veces una variable «no se deja modificar», y el error más famoso de
+  Python — que no es un error del lenguaje, sino de expectativas.
+</p>
+
+<hr>
+
+<h2>1. Argumentos posicionales y por nombre</h2>
+
+<pre><code>def crear_usuario(nombre, edad, ciudad):
+    return {"nombre": nombre, "edad": edad, "ciudad": ciudad}
+
+crear_usuario("Ana", 28, "Sevilla")                    # posicionales: el orden manda
+crear_usuario(ciudad="Sevilla", nombre="Ana", edad=28) # por nombre: el orden da igual
+crear_usuario("Ana", ciudad="Sevilla", edad=28)        # mezcla: posicionales primero
+</code></pre>
+
+<div class="pista">
+  <strong>Cuándo usar cada uno.</strong> Si al leer la llamada no se
+  entiende qué significa un argumento, ponle nombre.
+  <code>dividir(7, 2, True)</code> no dice nada;
+  <code>dividir(7, 2, redondear=True)</code> se lee solo. Es el mismo
+  criterio que aplicas al nombrar variables.
+</div>
+
+<h2>2. Valores por defecto</h2>
+
+<pre><code>def saludar(nombre, saludo="Hola"):
+    return f"{saludo}, {nombre}"
+
+saludar("Ana")                  # 'Hola, Ana'
+saludar("Ana", "Buenos días")   # 'Buenos días, Ana'
+</code></pre>
+
+<p>Los parámetros con valor por defecto van <strong>siempre al final</strong>: si no, Python no sabría qué argumento corresponde a cuál.</p>
+
+<hr>
+
+<h2>3. El error más famoso de Python</h2>
+
+<p>Este merece su propia sección. Léelo despacio:</p>
+
+<pre><code>def registrar(nombre, historial=[]):     # ❌ TRAMPA
+    historial.append(nombre)
+    return historial
+
+registrar("Ana")      # ['Ana']
+registrar("Carlos")   # ['Ana', 'Carlos']   😱 ¿de dónde sale Ana?
+</code></pre>
+
+<div class="regla">
+  El valor por defecto se evalúa <strong>una sola vez</strong>, cuando
+  Python <em>define</em> la función — no cada vez que la llamas. Esa lista es
+  un único objeto compartido por todas las llamadas.
+</div>
+
+<p>Puedes comprobarlo tú mismo, porque el objeto está ahí, a la vista:</p>
+
+<pre><code>registrar.__defaults__     # (['Ana', 'Carlos'],)  ← el defecto ha cambiado
+</code></pre>
+
+<p>La solución es el idioma estándar de Python:</p>
+
+<pre><code>def registrar(nombre, historial=None):   # ✅
+    if historial is None:
+        historial = []
+    historial.append(nombre)
+    return historial
+</code></pre>
+
+<div class="pista">
+  Solo pasa con valores por defecto <strong>mutables</strong> (listas,
+  diccionarios, conjuntos). Con <code>0</code>, <code>""</code>,
+  <code>None</code> o una tupla no hay problema, porque no se pueden
+  modificar. Es la misma frontera mutable/inmutable de la
+  <a href="032-elegir-estructura-de-datos.html">lección anterior</a>.
+</div>
+
+<hr>
+
+<h2>4. <code>*args</code> y <code>**kwargs</code>: número variable de argumentos</h2>
+
+<pre><code>def inspeccionar(*args, **kwargs):
+    return f"args={args} kwargs={kwargs}"
+
+inspeccionar(1, 2, a=3)
+# args=(1, 2) kwargs={'a': 3}
+</code></pre>
+
+<p>
+  <code>*args</code> recoge los posicionales sobrantes <strong>en una
+  tupla</strong>; <code>**kwargs</code> recoge los que vienen con nombre
+  <strong>en un diccionario</strong>. Los nombres son pura convención — lo
+  que hace la magia son el <code>*</code> y el <code>**</code>.
+</p>
+
+<h3>Y al revés: desempaquetar al llamar</h3>
+
+<pre><code>def coordenadas(x, y, z):
+    return (x, y, z)
+
+punto = [1, 2, 3]
+coordenadas(*punto)         # (1, 2, 3)  — reparte la lista en los 3 parámetros
+
+datos = {"x": 9, "y": 8, "z": 7}
+coordenadas(**datos)        # (9, 8, 7)  — reparte el dict por nombre
+</code></pre>
+
+<hr>
+
+<h2>5. Forzar que se use el nombre: el <code>*</code> solitario</h2>
+
+<pre><code>def dividir(a, b, *, redondear=False):
+    resultado = a / b
+    return round(resultado) if redondear else resultado
+
+dividir(7, 2, redondear=True)   # 4   ✅
+dividir(7, 2, True)             # ❌ TypeError: takes 2 positional arguments but 3 were given
+</code></pre>
+
+<p>
+  Todo lo que va <strong>después</strong> del <code>*</code> solo se puede
+  pasar por nombre. Es la técnica que usan las propias built-ins que viste
+  en la <a href="031-funciones-builtin.html">lección 031</a>:
+  <code>sorted(datos, key=...)</code> o <code>zip(a, b, strict=True)</code>
+  te obligan a nombrarlos precisamente por esto — para que la llamada siga
+  siendo legible dentro de un año.
+</p>
+
+<hr>
+
+<h2>6. El scope: dónde vive cada variable</h2>
+
+<p>
+  Cuando Python encuentra un nombre, lo busca en cuatro sitios, en este
+  orden — la regla <strong>LEGB</strong>:
+</p>
+
+<div class="regla">
+  <p><strong>L</strong>ocal → dentro de la función actual</p>
+  <p><strong>E</strong>nclosing → en la función que la contiene</p>
+  <p><strong>G</strong>lobal → a nivel del módulo</p>
+  <p style="margin-bottom:0;"><strong>B</strong>uilt-in → las funciones de la lección 031</p>
+</div>
+
+<pre><code>x = "global"
+
+def externa():
+    x = "encerrada"
+    def interna():
+        return x          # encuentra la de 'externa' antes que la global
+    return interna()
+
+externa()      # 'encerrada'
+</code></pre>
+
+<h3>Leer sí, escribir no</h3>
+
+<p>Desde dentro de una función puedes <em>leer</em> una variable global, pero en cuanto intentas <em>asignarle</em> algo, Python la considera local:</p>
+
+<pre><code>contador = 0
+
+def incrementar():
+    contador += 1     # ❌ UnboundLocalError: cannot access local variable
+                      #    'contador' where it is not associated with a value
+</code></pre>
+
+<p>Las dos salidas, según lo que necesites:</p>
+
+<pre><code>def incrementar():
+    global contador       # modifica la del módulo
+    contador += 1
+
+def hacer_contador():
+    n = 0
+    def sumar():
+        nonlocal n        # modifica la de la función que la envuelve
+        n += 1
+        return n
+    return sumar
+
+c = hacer_contador()
+c(), c(), c()             # 1, 2, 3   — cada llamada recuerda su propio n
+</code></pre>
+
+<div class="clave">
+  Ese último ejemplo es un <strong>closure</strong>: una función que recuerda
+  el entorno donde nació. Lo trabajaste a fondo en la
+  <a href="../funcional/012-funciones-de-primera-clase-y-composicion.html">lección
+  012</a>. Aquí solo se trata de ver de dónde sale la regla.
+</div>
+
+<div class="pista">
+  <strong>Sobre <code>global</code>:</strong> funciona, pero casi siempre es
+  señal de mal diseño. Una función que modifica estado de fuera es
+  impredecible y difícil de testear — justo lo contrario de las funciones
+  puras de la <a href="../funcional/011-funciones-puras-e-inmutabilidad.html">lección
+  011</a>. Antes de escribir <code>global</code>, pregúntate si no deberías
+  <em>devolver</em> el valor.
+</div>
+
+<hr>
+
+<h2>7. Devolver varias cosas</h2>
+
+<pre><code>def minmax(numeros):
+    return min(numeros), max(numeros)    # esto es una TUPLA
+
+minimo, maximo = minmax([3, 1, 4])       # unpacking al recibir
+type(minmax([3, 1, 4]))                  # &lt;class 'tuple'&gt;
+</code></pre>
+
+<p>
+  No hay sintaxis especial: Python devuelve una tupla y tú la desempaquetas.
+  Es la misma tupla-como-registro de la lección anterior.
+</p>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Por qué <code>def f(x, lista=[])</code> arrastra datos entre llamadas?</summary>
+  <p>
+    Porque el valor por defecto se evalúa una única vez, en el momento de
+    definir la función, no en cada llamada. Todas las invocaciones comparten
+    exactamente el mismo objeto lista, así que las modificaciones se
+    acumulan entre llamadas sucesivas.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué recoge <code>*args</code>, y en qué tipo lo guarda?</summary>
+  <p>
+    Recoge todos los argumentos posicionales sobrantes que no encajaron en
+    los parámetros declarados, y los agrupa en una tupla. Su hermano
+    <code>**kwargs</code> hace lo propio con los pasados por nombre, pero
+    los guarda en un diccionario.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué significa el <code>*</code> solitario en <code>def f(a, *, b)</code>?</summary>
+  <p>
+    Que todo parámetro escrito después de él solo puede pasarse por nombre,
+    nunca por posición. Sirve para obligar a que las llamadas sean legibles,
+    y es la técnica que usan built-ins como <code>sorted</code> con su
+    parámetro <code>key</code>.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué falla asignar a una variable global sin declararla?</summary>
+  <p>
+    Porque en cuanto Python ve una asignación a ese nombre dentro de la
+    función, la trata como variable local en todo el cuerpo. Al intentar
+    leerla antes de darle valor lanza <code>UnboundLocalError</code>. Para
+    modificar la de fuera hace falta <code>global</code> o
+    <code>nonlocal</code>.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Ocho funciones que casi funcionan</h3>
+<p>
+  Empiezas arreglando el bug del argumento mutable (y comprobando con
+  <code>__defaults__</code> que lo has entendido de verdad), y sigues con
+  <code>*args</code>, <code>**kwargs</code>, desempaquetado,
+  <em>keyword-only</em>, <code>nonlocal</code> y retorno múltiple.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/fundamentos/033-funciones-a-fondo.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong>
+  <a href="https://docs.python.org/es/3/tutorial/controlflow.html#defining-functions">Definir
+  funciones — tutorial oficial de Python</a>, especialmente la sección
+  «Más sobre definición de funciones». Ficha de consulta:
+  <a href="../../referencia/06-funciones.html">06 — Funciones</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="032-elegir-estructura-de-datos.html">← Anterior: 032 — Estructuras de datos</a>
+    <a href="034-errores-y-excepciones.html">Siguiente: 034 — Errores y excepciones →</a>
+  </span>
+</nav>
+
+</body>
+</html>

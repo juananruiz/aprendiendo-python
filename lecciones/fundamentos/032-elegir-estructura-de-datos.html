@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 32: Elegir la estructura de datos correcta</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="031-funciones-builtin.html">← Anterior: 031 — Funciones built-in</a>
+    <a href="033-funciones-a-fondo.html">Siguiente: 033 — Funciones a fondo →</a>
+  </span>
+</nav>
+
+<h1>Elegir la estructura de datos correcta</h1>
+<p class="subtitle">Lista, tupla, diccionario o conjunto — la decisión que cambia tu código de 516 ms a 0,02 ms</p>
+
+<p>
+  Python te da cuatro estructuras básicas y casi siempre puedes resolver el
+  problema con cualquiera de ellas. Por eso es fácil coger siempre la lista
+  y seguir adelante. Esta lección va de lo contrario: de tener
+  <strong>criterio</strong> para elegir a conciencia, porque la diferencia
+  no es estética — es de varios órdenes de magnitud.
+</p>
+
+<hr>
+
+<h2>1. Las cuatro, en una tabla</h2>
+
+<table>
+<tr><th>Estructura</th><th>Sintaxis</th><th>¿Mutable?</th><th>¿Ordenada?</th><th>¿Duplicados?</th><th>Para qué</th></tr>
+<tr><td><code>list</code></td><td><code>[1, 2, 3]</code></td><td>Sí</td><td>Sí</td><td>Sí</td><td>Secuencia que cambia</td></tr>
+<tr><td><code>tuple</code></td><td><code>(1, 2, 3)</code></td><td>No</td><td>Sí</td><td>Sí</td><td>Registro fijo, clave de dict</td></tr>
+<tr><td><code>dict</code></td><td><code>{"a": 1}</code></td><td>Sí</td><td>Sí*</td><td>Claves no</td><td>Buscar por clave</td></tr>
+<tr><td><code>set</code></td><td><code>{1, 2, 3}</code></td><td>Sí</td><td>No</td><td>No</td><td>Pertenencia, deduplicar</td></tr>
+</table>
+
+<p class="referencia">
+  * Los diccionarios conservan el orden de inserción desde Python 3.7
+  (<a href="https://docs.python.org/es/3/whatsnew/3.7.html">nota oficial</a>).
+  Los conjuntos <strong>no</strong> conservan ningún orden.
+</p>
+
+<hr>
+
+<h2>2. La pregunta que decide casi todo: «¿está ahí dentro?»</h2>
+
+<p>
+  Comprobar si un elemento pertenece a una colección es lo más frecuente que
+  vas a hacer. Y es donde lista y conjunto se separan brutalmente.
+</p>
+
+<pre><code># Lista: Python recorre elemento a elemento hasta encontrarlo → O(n)
+objetivo in lista
+
+# Conjunto: Python calcula el hash y va directo al sitio → O(1)
+objetivo in conjunto
+</code></pre>
+
+<p>
+  No te fíes de la teoría: esto es medido en Python 3.14, buscando el
+  <em>último</em> elemento (el peor caso para la lista), 1.000 veces:
+</p>
+
+<table>
+<tr><th>Tamaño</th><th>En una lista</th><th>En un conjunto</th><th>Diferencia</th></tr>
+<tr><td class="num">1.000</td><td class="num">5,3 ms</td><td class="num">0,025 ms</td><td class="num">210× más rápido</td></tr>
+<tr><td class="num">100.000</td><td class="num">516,4 ms</td><td class="num">0,023 ms</td><td class="num">22.493× más rápido</td></tr>
+</table>
+
+<div class="clave">
+  Fíjate en la columna del conjunto: <strong>no cambia</strong> al multiplicar
+  por 100 el tamaño. Eso es lo que significa O(1). La lista, en cambio,
+  tarda 100 veces más — eso es O(n). Es exactamente el contraste que viste
+  en <a href="../algoritmos/020-quicksort.html">Quicksort</a>, pero aquí lo
+  ganas gratis solo con elegir bien el tipo.
+</div>
+
+<h3>Pero nada es gratis: la memoria</h3>
+
+<table>
+<tr><th>100.000 enteros en...</th><th>Memoria</th></tr>
+<tr><td><code>list</code></td><td class="num">800.056 bytes</td></tr>
+<tr><td><code>tuple</code></td><td class="num">800.048 bytes</td></tr>
+<tr><td><code>set</code></td><td class="num">4.194.520 bytes (≈5×)</td></tr>
+</table>
+
+<p>
+  El conjunto paga con memoria la velocidad de búsqueda: necesita espacio
+  libre para que la tabla hash funcione bien. Es el compromiso clásico
+  <em>tiempo contra espacio</em>.
+</p>
+
+<div class="pista">
+  <strong>Regla práctica:</strong> si vas a preguntar «¿está?» muchas veces
+  sobre los mismos datos, convierte una vez a <code>set</code> y consulta
+  mil. Si solo preguntas una o dos veces, no compensa ni el tiempo de
+  construirlo.
+</div>
+
+<hr>
+
+<h2>3. Tuplas: no son «listas de segunda»</h2>
+
+<p>
+  La tupla no es una lista capada. Es una estructura distinta que comunica
+  algo al que lee: <strong>esto no va a cambiar</strong>.
+</p>
+
+<pre><code>punto = (3, 7)              # un registro: x e y juntos tienen sentido
+colores = ["rojo", "azul"]  # una colección: podrían ser 2 o 200
+
+x, y = punto                # unpacking: se lee muy bien
+</code></pre>
+
+<p>Y tienen una capacidad que las listas no pueden tener:</p>
+
+<pre><code># Solo lo inmutable puede ser clave de un dict o elemento de un set
+distancias = {("Sevilla", "Cádiz"): 125}    # ✅ tupla como clave
+distancias = {["Sevilla", "Cádiz"]: 125}    # ❌ TypeError: unhashable type
+</code></pre>
+
+<div class="clave">
+  No es un capricho: si la clave pudiera cambiar después de guardarla, el
+  diccionario ya no sabría en qué cajón la metió. Por eso solo lo inmutable
+  es <em>hashable</em>. Lo viste en la
+  <a href="../funcional/011-funciones-puras-e-inmutabilidad.html">lección 011</a>
+  desde el ángulo funcional; aquí es la consecuencia práctica.
+</div>
+
+<hr>
+
+<h2>4. Conjuntos: el álgebra que te ahorra bucles anidados</h2>
+
+<pre><code>aptos    = {"Ana", "Carlos", "Lucía"}
+inscritos = {"Carlos", "Lucía", "Jorge"}
+
+aptos & inscritos    # {'Carlos', 'Lucía'}  — en ambos (intersección)
+aptos | inscritos    # los cuatro           — en alguno (unión)
+aptos - inscritos    # {'Ana'}              — aptos que NO se inscribieron
+aptos ^ inscritos    # {'Ana', 'Jorge'}     — en uno pero no en el otro
+</code></pre>
+
+<p>
+  Cada una de esas líneas sustituye un bucle anidado con condiciones. Si
+  alguna vez escribes <code>for a in lista1: for b in lista2: if a ==
+  b:</code>, párate: eso es una intersección.
+</p>
+
+<h3>El precio del conjunto: pierde el orden</h3>
+
+<pre><code>datos = [3, 1, 3, 2, 1, 5]
+
+list(set(datos))            # [1, 2, 3, 5]  ← deduplica pero DESORDENA
+list(dict.fromkeys(datos))  # [3, 1, 2, 5]  ← deduplica y CONSERVA el orden
+</code></pre>
+
+<div class="pista">
+  Ese <code>dict.fromkeys()</code> es el idioma estándar para deduplicar
+  conservando el orden de aparición. Funciona porque las claves de un dict
+  son únicas y, desde 3.7, ordenadas.
+</div>
+
+<hr>
+
+<h2>5. Diccionarios: cuando los datos tienen nombre</h2>
+
+<p>
+  Si te encuentras recordando que «la posición 0 es el nombre y la 2 es la
+  nota», necesitas un diccionario:
+</p>
+
+<pre><code>candidato = ["Ana", 28, 88]        # ¿qué era el 28? ¿la edad? ¿el orden?
+candidato["nota"]                   # esto se lee solo
+</code></pre>
+
+<p>Y el patrón más frecuente, contar cosas:</p>
+
+<pre><code>from collections import Counter
+Counter(["a", "b", "a"]).most_common(1)    # [('a', 2)]
+
+# defaultdict: agrupar sin comprobar si la clave existe
+from collections import defaultdict
+por_destino = defaultdict(list)
+por_destino["Sevilla"].append("Ana")   # no hace falta inicializar la clave
+</code></pre>
+
+<hr>
+
+<h2>Cómo decidir, en cuatro preguntas</h2>
+
+<div class="regla">
+  <p><strong>1.</strong> ¿Los datos tienen <em>nombre</em> (clave → valor)? → <code>dict</code></p>
+  <p><strong>2.</strong> ¿Solo me importa <em>si están</em>, y no quiero duplicados? → <code>set</code></p>
+  <p><strong>3.</strong> ¿Es un registro fijo, o lo necesito como clave? → <code>tuple</code></p>
+  <p style="margin-bottom:0;"><strong>4.</strong> Para todo lo demás → <code>list</code></p>
+</div>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Por qué buscar en un <code>set</code> no se ralentiza al crecer?</summary>
+  <p>
+    Porque calcula el hash del elemento y salta directamente a la posición
+    donde debería estar, en lugar de recorrer los elementos uno por uno. El
+    tiempo no depende de cuántos elementos haya guardados: eso es lo que
+    significa la notación O(1).
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué una lista no puede ser clave de un diccionario?</summary>
+  <p>
+    Porque las listas son mutables y el diccionario localiza cada clave por
+    su hash. Si la clave cambiara después de guardarla, su hash cambiaría y
+    el valor quedaría perdido en un cajón equivocado. Solo lo inmutable es
+    <em>hashable</em>.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué se pierde al hacer <code>list(set(datos))</code> para deduplicar?</summary>
+  <p>
+    Se pierde el orden original de aparición de los elementos, porque los
+    conjuntos no conservan ninguna ordenación. Si necesitas conservarlo, el
+    idioma correcto es <code>list(dict.fromkeys(datos))</code>, que aprovecha
+    que las claves son únicas y ordenadas.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Elige bien, y mídelo</h3>
+<p>
+  Siete funciones donde la estructura elegida es la equivocada: bucles
+  anidados que son intersecciones, listas usadas como índices de búsqueda,
+  deduplicaciones que destrozan el orden. Reescríbelas eligiendo la
+  estructura correcta — y al final, mide tú mismo la diferencia.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/fundamentos/032-elegir-estructura-de-datos.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong>
+  <a href="https://docs.python.org/es/3/tutorial/datastructures.html">Estructuras
+  de datos — tutorial oficial de Python</a>. Para los costes exactos de cada
+  operación, la referencia de la comunidad es
+  <a href="https://wiki.python.org/moin/TimeComplexity">TimeComplexity en la
+  wiki de Python</a>.
+</p>
+
+<p>
+  Fichas de consulta rápida:
+  <a href="../../referencia/03-listas.html">03 — Listas</a>,
+  <a href="../../referencia/04-diccionarios-y-conjuntos.html">04 — Diccionarios,
+  conjuntos y tuplas</a> y la
+  <a href="../../referencia/colecciones-cheatsheet.html">cheatsheet visual de
+  colecciones</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="031-funciones-builtin.html">← Anterior: 031 — Funciones built-in</a>
+    <a href="033-funciones-a-fondo.html">Siguiente: 033 — Funciones a fondo →</a>
+  </span>
+</nav>
+
+</body>
+</html>
