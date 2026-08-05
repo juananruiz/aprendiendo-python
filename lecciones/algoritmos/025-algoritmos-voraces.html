@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 25: Algoritmos voraces</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="024-grafos-y-bfs.html">← Anterior: 024 — Grafos y BFS</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+<h1>Algoritmos voraces</h1>
+<p class="subtitle">Coger siempre lo que mejor pinta ahora — cuándo funciona, cuándo falla y por qué usarlos igual</p>
+
+<p>
+  Un algoritmo <strong>voraz</strong> (o <em>greedy</em>) toma en cada paso
+  la decisión que parece mejor <em>en ese momento</em>, sin mirar atrás ni
+  planificar. Es la estrategia más simple que existe. A veces da la solución
+  óptima; a veces no. Y lo interesante de esta lección es aprender a
+  distinguir los dos casos — y por qué a menudo compensa usarla aunque falle.
+</p>
+
+<hr>
+
+<h2>1. El ejemplo donde sí funciona: el cambio de monedas</h2>
+
+<pre><code>def dar_cambio(cantidad, monedas):
+    resultado = []
+    for moneda in sorted(monedas, reverse=True):    # de mayor a menor
+        while cantidad >= moneda:
+            resultado.append(moneda)
+            cantidad -= moneda
+    return resultado if cantidad == 0 else None
+</code></pre>
+
+<p>
+  Con el sistema de monedas europeo funciona perfectamente: para devolver 30
+  céntimos con monedas de 1, 5, 10 y 25, coge el 25 y luego el 5. Dos
+  monedas, que es lo óptimo.
+</p>
+
+<h2>2. El ejemplo donde falla estrepitosamente</h2>
+
+<div class="clave">
+  Con monedas de <strong>1, 3 y 4</strong>, para devolver <strong>6</strong>:
+  <br><br>
+  El voraz coge el 4 (lo más grande que cabe), y luego necesita dos monedas
+  de 1: resultado <code>[4, 1, 1]</code> — <strong>tres monedas</strong>.
+  <br><br>
+  La solución óptima es <code>[3, 3]</code> — <strong>dos monedas</strong>.
+</div>
+
+<p>
+  El algoritmo voraz no se equivoca por estar mal escrito: se equivoca porque
+  su estrategia es miope por diseño. Al coger el 4 se cierra la puerta a la
+  única solución buena, y nunca reconsidera esa decisión.
+</p>
+
+<div class="pista">
+  Que el voraz funcione con las monedas europeas <strong>no es casualidad ni
+  suerte</strong>: los sistemas monetarios reales están diseñados
+  (históricamente) para que la estrategia intuitiva funcione. Con un sistema
+  arbitrario, la garantía desaparece.
+</div>
+
+<hr>
+
+<h2>3. El ejemplo clásico: cobertura de conjuntos</h2>
+
+<p>
+  Este es el problema del capítulo 8 del libro. Tienes que emitir en varias
+  provincias y cada emisora cubre unas cuantas. ¿Cuál es el mínimo número de
+  emisoras que cubre todas?
+</p>
+
+<pre><code>emisoras = {
+    "E1": {"Sevilla", "Cádiz", "Huelva"},
+    "E2": {"Cádiz", "Málaga"},
+    "E3": {"Huelva", "Badajoz"},
+    "E4": {"Málaga", "Granada"},
+    "E5": {"Sevilla", "Granada"},
+}
+provincias = {"Sevilla", "Cádiz", "Huelva", "Málaga", "Granada", "Badajoz"}
+</code></pre>
+
+<p>
+  Resolverlo <strong>exactamente</strong> exige probar todas las
+  combinaciones de emisoras: 2ⁿ posibilidades. Con 5 emisoras son 32; con 100
+  emisoras, más combinaciones que átomos en la galaxia. Inviable — el mismo
+  muro que encontraste con el N! de
+  <a href="../matching/005-el-problema-de-los-matrimonios-estables.html">los
+  matrimonios estables</a>.
+</p>
+
+<p>La aproximación voraz es de una simplicidad casi ofensiva:</p>
+
+<pre><code>def cobertura_voraz(provincias, emisoras):
+    pendientes = set(provincias)
+    elegidas = []
+
+    while pendientes:
+        # la emisora que cubre MÁS provincias de las que aún faltan
+        mejor = max(emisoras, key=lambda e: len(emisoras[e] &amp; pendientes))
+        if not (emisoras[mejor] &amp; pendientes):
+            break                      # ninguna aporta nada: imposible cubrir
+        elegidas.append(mejor)
+        pendientes -= emisoras[mejor]  # tachar las ya cubiertas
+
+    return elegidas
+</code></pre>
+
+<p>
+  Resultado: <code>['E1', 'E4', 'E3']</code> — tres emisoras que cubren las
+  seis provincias.
+</p>
+
+<div class="pista">
+  Fíjate en cuánto de este código son cosas que ya sabes: <code>max()</code>
+  con <code>key=</code> de la
+  <a href="../fundamentos/031-funciones-builtin.html">lección 031</a>, el
+  operador <code>&amp;</code> de intersección y <code>-=</code> de diferencia
+  de la <a href="../fundamentos/032-elegir-estructura-de-datos.html">lección
+  032</a>, y el <code>while</code> con condición de la
+  <a href="../fundamentos/030-el-bucle-while.html">030</a>. El algoritmo
+  entero son ocho líneas porque eligió las estructuras correctas.
+</div>
+
+<hr>
+
+<h2>4. La pregunta importante: ¿es esto aceptable?</h2>
+
+<p>
+  El voraz de cobertura de conjuntos <strong>no garantiza el óptimo</strong>.
+  Pero tiene dos virtudes que lo hacen la elección correcta en la práctica:
+</p>
+
+<table>
+<tr><th></th><th>Solución exacta</th><th>Voraz</th></tr>
+<tr><td>Complejidad</td><td class="num">O(2ⁿ)</td><td class="num">O(n²)</td></tr>
+<tr><td>Con 100 emisoras</td><td>inviable</td><td>instantáneo</td></tr>
+<tr><td>Calidad</td><td>óptima</td><td>demostrablemente buena</td></tr>
+</table>
+
+<p>
+  Y ese «demostrablemente buena» tiene nombre técnico: para la cobertura de
+  conjuntos, el voraz nunca usa más de <strong>ln(n)</strong> veces el número
+  óptimo de conjuntos. No es una esperanza: es una cota demostrada. A un
+  algoritmo con garantía de calidad se le llama
+  <strong>algoritmo de aproximación</strong>.
+</p>
+
+<div class="clave">
+  La lección profunda: cuando un problema es intratable, la pregunta deja de
+  ser <em>«¿cuál es la solución perfecta?»</em> y pasa a ser
+  <em>«¿cuál es la mejor solución que puedo permitirme?»</em>. Una respuesta
+  buena hoy vale más que la perfecta el año que viene.
+</div>
+
+<hr>
+
+<h2>5. Cómo saber si el voraz te sirve</h2>
+
+<div class="regla">
+  <p><strong>Pregunta 1 — ¿La decisión localmente óptima lleva a la global?</strong>
+  Si al elegir lo mejor ahora nunca te cierras una puerta mejor después, el
+  voraz da el óptimo. (Sistema de monedas europeo: sí. Monedas 1-3-4: no.)</p>
+  <p style="margin-bottom:0;"><strong>Pregunta 2 — ¿Puedo permitirme la solución exacta?</strong>
+  Si el problema es pequeño o hay algoritmo eficiente, úsalo. Si es
+  exponencial y los datos son grandes, el voraz es tu mejor opción realista.</p>
+</div>
+
+<h3>Voraces famosos que sí garantizan el óptimo</h3>
+
+<ul>
+  <li><strong>Dijkstra</strong> — camino más corto con pesos (siempre que no haya pesos negativos)</li>
+  <li><strong>Huffman</strong> — compresión de datos; está dentro de los ZIP y los JPEG</li>
+  <li><strong>Kruskal y Prim</strong> — árbol de recubrimiento mínimo</li>
+  <li><strong>Selección de actividades</strong> — cuántas reuniones caben en una sala sin solaparse</li>
+</ul>
+
+<p>
+  Y uno que ya conoces bien: <strong>Gale-Shapley</strong> tiene alma voraz —
+  cada proponente va siempre a por su mejor opción disponible sin planificar
+  — y sin embargo el resultado tiene garantías demostradas, como probaste en
+  la <a href="../matching/007-por-que-funciona.html">lección 007</a>.
+</p>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Por qué falla el voraz con monedas de 1, 3 y 4 para devolver 6?</summary>
+  <p>
+    Porque al coger primero la moneda más grande que cabe se queda con el
+    cuatro y descarta la única combinación buena, que son dos treses. La
+    estrategia nunca reconsidera una elección ya tomada, así que no puede
+    recuperarse de ese callejón.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué es un algoritmo de aproximación?</summary>
+  <p>
+    Uno que renuncia a garantizar la solución perfecta a cambio de ser
+    rápido, pero con una cota demostrada de lo mucho que puede alejarse del
+    óptimo. Se usa cuando resolver el problema de forma exacta resultaría
+    computacionalmente inviable.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué la cobertura exacta de conjuntos es inviable con 100 emisoras?</summary>
+  <p>
+    Porque habría que evaluar todos los subconjuntos posibles, y su número
+    crece como dos elevado a la cantidad de emisoras. Con cien conjuntos esa
+    cifra supera cualquier capacidad de cálculo real, por mucho que mejoren
+    los ordenadores.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Cuándo gana y cuándo pierde</h3>
+<p>
+  Implementas el cambio de monedas voraz y <strong>demuestras con código</strong>
+  que falla con el sistema 1-3-4, comparándolo contra una solución exacta por
+  fuerza bruta. Después resuelves la cobertura de conjuntos, la selección de
+  actividades (un voraz que sí es óptimo) y el problema de la mochila
+  fraccionaria.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/algoritmos/025-algoritmos-voraces.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong> el <strong>capítulo 8</strong> de
+  <em>Comprender los algoritmos</em> (Bhargava), que usa exactamente el
+  ejemplo de las emisoras de radio e introduce los problemas NP-completos.
+</p>
+
+<p>
+  <strong>Hacia dónde sigue esto:</strong> cuando el voraz no basta y el
+  problema tiene subproblemas que se repiten, la técnica que toma el relevo
+  es la <strong>programación dinámica</strong> — el siguiente capítulo del
+  libro, y el candidato natural para la próxima lección de este módulo.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="024-grafos-y-bfs.html">← Anterior: 024 — Grafos y BFS</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+</body>
+</html>

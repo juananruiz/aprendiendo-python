@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 24: Grafos y búsqueda en anchura</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="023-hash-tables.html">← Anterior: 023 — Hash tables</a>
+    <a href="025-algoritmos-voraces.html">Siguiente: 025 — Algoritmos voraces →</a>
+  </span>
+</nav>
+
+<h1>Grafos y búsqueda en anchura</h1>
+<p class="subtitle">El algoritmo que hay detrás de «personas que quizá conozcas» y del GPS</p>
+
+<p>
+  Esta lección junta tres cosas que ya sabes por separado: los
+  <a href="../fundamentos/032-elegir-estructura-de-datos.html">diccionarios y
+  conjuntos</a> para representar el grafo, la
+  <a href="../matching/003-deque-y-colas.html"><code>deque</code></a> como
+  cola de pendientes, y el
+  <a href="../fundamentos/030-el-bucle-while.html">bucle <code>while</code></a>
+  que las procesa. El resultado es uno de los algoritmos más útiles que
+  existen.
+</p>
+
+<hr>
+
+<h2>1. Qué es un grafo</h2>
+
+<p>
+  Un grafo es simplemente un conjunto de <strong>nodos</strong> conectados
+  por <strong>aristas</strong>. Nada más. Con esa idea tan simple se modelan
+  redes sociales, mapas de carreteras, dependencias entre tareas, rutas de
+  vuelo o el propio enlazado de esta web.
+</p>
+
+<p>
+  En Python se representa de la forma más natural posible: un diccionario
+  donde cada clave es un nodo y su valor es la lista de vecinos. Se llama
+  <strong>lista de adyacencia</strong>:
+</p>
+
+<pre><code>grafo = {
+    "Ana":   ["Bruno", "Clara"],
+    "Bruno": ["Diego"],
+    "Clara": ["Diego", "Elena"],
+    "Diego": ["Fran"],
+    "Elena": ["Fran"],
+    "Fran":  [],
+}
+</code></pre>
+
+<div class="pista">
+  Este grafo es <strong>dirigido</strong>: que Ana conozca a Bruno no implica
+  que Bruno conozca a Ana. Para uno no dirigido (una amistad mutua, una
+  carretera de doble sentido) basta con añadir la arista en ambas
+  direcciones.
+</div>
+
+<hr>
+
+<h2>2. La idea de la búsqueda en anchura</h2>
+
+<p>
+  <strong>BFS</strong> (<em>Breadth-First Search</em>) responde a dos
+  preguntas:
+</p>
+
+<div class="regla">
+  <p><strong>1.</strong> ¿Hay camino de A a B?</p>
+  <p style="margin-bottom:0;"><strong>2.</strong> ¿Cuál es el camino
+  <em>más corto</em> de A a B?</p>
+</div>
+
+<p>
+  Y lo hace explorando <strong>por capas</strong>: primero todos los vecinos
+  directos, luego los vecinos de esos, luego los siguientes. Como la onda que
+  se expande al tirar una piedra al agua. Por eso el primer camino que
+  encuentra hasta el destino es, necesariamente, el más corto en número de
+  saltos.
+</p>
+
+<h3>La pieza clave: la cola</h3>
+
+<p>
+  Lo que hace que la exploración sea «por capas» es usar una
+  <strong>cola FIFO</strong>: el primero que entra es el primero que sale. Si
+  usaras una pila (LIFO), el algoritmo se lanzaría en profundidad por una
+  rama antes de mirar las demás — eso sería DFS, otro algoritmo distinto.
+</p>
+
+<pre><code>from collections import deque      # la de la lección 003
+
+cola = deque(["Ana"])
+cola.append("Bruno")     # entra por la derecha
+cola.popleft()           # sale por la izquierda: "Ana"  → O(1)
+</code></pre>
+
+<hr>
+
+<h2>3. El algoritmo</h2>
+
+<pre><code>from collections import deque
+
+def distancias_desde(grafo, inicio):
+    """Devuelve {nodo: nº de saltos desde inicio} para todo lo alcanzable."""
+    distancias = {inicio: 0}
+    cola = deque([inicio])
+
+    while cola:
+        nodo = cola.popleft()
+        for vecino in grafo.get(nodo, []):
+            if vecino not in distancias:      # ← el dict hace de "visitados"
+                distancias[vecino] = distancias[nodo] + 1
+                cola.append(vecino)
+
+    return distancias
+</code></pre>
+
+<p>Sobre el grafo de arriba, partiendo de Ana:</p>
+
+<pre><code>{'Ana': 0, 'Bruno': 1, 'Clara': 1, 'Diego': 2, 'Elena': 2, 'Fran': 3}
+</code></pre>
+
+<p>
+  Se lee solo: Bruno y Clara están a un salto (capa 1), Diego y Elena a dos,
+  Fran a tres.
+</p>
+
+<h3>Recuperar el camino, no solo la distancia</h3>
+
+<pre><code>def camino_mas_corto(grafo, inicio, destino):
+    if inicio == destino:
+        return [inicio]
+    cola = deque([[inicio]])          # la cola guarda CAMINOS, no nodos
+    visitados = {inicio}
+
+    while cola:
+        camino = cola.popleft()
+        for vecino in grafo.get(camino[-1], []):
+            if vecino == destino:
+                return camino + [vecino]
+            if vecino not in visitados:
+                visitados.add(vecino)
+                cola.append(camino + [vecino])
+
+    return None                       # no hay camino
+</code></pre>
+
+<pre><code>camino_mas_corto(grafo, "Ana", "Fran")   # ['Ana', 'Bruno', 'Diego', 'Fran']
+camino_mas_corto(grafo, "Fran", "Ana")   # None  — el grafo es dirigido
+</code></pre>
+
+<hr>
+
+<h2>4. El detalle que rompe el algoritmo si lo olvidas</h2>
+
+<div class="clave">
+  El conjunto <code>visitados</code> <strong>no es una optimización</strong>:
+  es lo que impide que el algoritmo entre en un bucle infinito. Si el grafo
+  tiene un ciclo (A→B→A, tan común en una red social), sin él estarías dando
+  vueltas para siempre.
+</div>
+
+<p>
+  Y fíjate en por qué es un <code>set</code> y no una lista: la comprobación
+  <code>vecino not in visitados</code> se ejecuta una vez por cada arista del
+  grafo. Con un <code>set</code> es O(1); con una lista sería O(n), y el
+  algoritmo entero pasaría de O(V+A) a O(V·A). Es exactamente el «coste
+  escondido» de la <a href="021-notacion-big-o.html">lección 021</a>.
+</p>
+
+<h3>Complejidad</h3>
+
+<table>
+<tr><th>Concepto</th><th>Coste</th><th>Por qué</th></tr>
+<tr><td>Tiempo</td><td class="num">O(V + A)</td><td>cada nodo entra en la cola una vez; cada arista se mira una vez</td></tr>
+<tr><td>Memoria</td><td class="num">O(V)</td><td>la cola y el conjunto de visitados</td></tr>
+</table>
+
+<p class="referencia">V = número de vértices (nodos), A = número de aristas.</p>
+
+<hr>
+
+<h2>5. Dónde se usa esto de verdad</h2>
+
+<ul>
+  <li><strong>Redes sociales:</strong> «personas que quizá conozcas» son los nodos a distancia 2</li>
+  <li><strong>Grados de separación:</strong> el número de Erdős, los seis grados de Kevin Bacon</li>
+  <li><strong>Rutas:</strong> el camino con menos transbordos en el metro</li>
+  <li><strong>Juegos:</strong> el número mínimo de movimientos para resolver un puzle</li>
+  <li><strong>Rastreadores web:</strong> explorar enlaces por niveles de profundidad</li>
+</ul>
+
+<div class="pista">
+  <strong>El límite de BFS:</strong> cuenta <em>saltos</em>, no distancias.
+  Encuentra la ruta con menos transbordos, pero no la más rápida si cada
+  tramo tiene una duración distinta. Para eso hace falta que las aristas
+  tengan peso — y ese es el algoritmo de <strong>Dijkstra</strong>, la
+  continuación natural de esta lección.
+</div>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Por qué BFS encuentra siempre el camino más corto en saltos?</summary>
+  <p>
+    Porque explora el grafo por capas completas: agota todos los nodos a un
+    salto antes de pasar a los de dos. Cuando alcanza el destino por primera
+    vez, ninguna ruta más corta puede quedar sin explorar, así que la
+    encontrada es mínima.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué pasaría si quitaras el conjunto de visitados?</summary>
+  <p>
+    En cuanto el grafo tuviera un ciclo, el algoritmo volvería a encolar
+    nodos ya explorados una y otra vez, sin terminar nunca. No es una mejora
+    de rendimiento sino la condición que garantiza que la búsqueda termine.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué una cola FIFO y no una pila?</summary>
+  <p>
+    Porque la cola obliga a procesar los nodos en el orden en que fueron
+    descubiertos, completando cada capa antes de avanzar. Con una pila se
+    exploraría primero una rama entera hasta el fondo, que es justamente el
+    comportamiento de la búsqueda en profundidad.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Construye el grafo y recórrelo</h3>
+<p>
+  Construyes un grafo no dirigido desde una lista de relaciones, implementas
+  BFS para distancias y para caminos, resuelves los «grados de separación» y
+  encuentras los amigos-de-amigos. Y compruebas qué ocurre <em>de verdad</em>
+  al quitar el conjunto de visitados en un grafo con ciclos — con una guarda
+  para que no se te cuelgue el intérprete.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/algoritmos/024-grafos-y-bfs.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong> el <strong>capítulo 6</strong> de
+  <em>Comprender los algoritmos</em> (Bhargava), que explica BFS con el
+  ejemplo de buscar un vendedor de mangos en tu red de contactos.
+  Documentación de la cola que usarás:
+  <a href="https://docs.python.org/es/3/library/collections.html#collections.deque">collections.deque</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="023-hash-tables.html">← Anterior: 023 — Hash tables</a>
+    <a href="025-algoritmos-voraces.html">Siguiente: 025 — Algoritmos voraces →</a>
+  </span>
+</nav>
+
+</body>
+</html>

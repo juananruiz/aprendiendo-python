@@ -22,14 +22,14 @@ muchos con `assert`s de autoverificación: si pasan, el tema está superado.
 ### El libro, capítulo a capítulo
 
 - Introducción a Big O — la búsqueda binaria como primer ejemplo (`algoritmos/busqueda_binaria_01.py`, `busqueda_binaria_02.py`)
-- Notación Big O a fondo: O(1), O(log n), O(n), O(n log n), O(n²) *(pendiente)*
+- Notación Big O a fondo: O(1), O(log n), O(n), O(n log n), O(n²) — `lecciones/algoritmos/021-notacion-big-o.html`, `ejercicios/algoritmos/021-notacion-big-o.py`
 - Selection sort (`algoritmos/orden_seleccion_01.py`)
 - Recursión: caso base, caso recursivo, la pila de llamadas (`algoritmos/factorial_recursivo.py`, `algoritmos/cuadrar_parcela.py`)
 - Quicksort: divide y vencerás, partición — `lecciones/algoritmos/020-quicksort.html`, `ejercicios/algoritmos/020-quicksort.py`
-- Hash tables: cómo funciona un `dict` por dentro, colisiones *(pendiente)*
-- Grafos y búsqueda en anchura (BFS) *(pendiente)*
+- Hash tables: cómo funciona un `dict` por dentro, colisiones — `lecciones/algoritmos/023-hash-tables.html`, `ejercicios/algoritmos/023-hash-tables.py`
+- Grafos y búsqueda en anchura (BFS) — `lecciones/algoritmos/024-grafos-y-bfs.html`, `ejercicios/algoritmos/024-grafos-y-bfs.py`
 - Algoritmo de Dijkstra (caminos más cortos con peso) *(pendiente)*
-- Algoritmos voraces (greedy) y una primera idea de problemas NP-completos *(pendiente)*
+- Algoritmos voraces (greedy) y una primera idea de problemas NP-completos — `lecciones/algoritmos/025-algoritmos-voraces.html`, `ejercicios/algoritmos/025-algoritmos-voraces.py`
 - Programación dinámica *(pendiente)*
 - K-nearest neighbors (KNN) *(pendiente)*
 - *(opcional)* Otros algoritmos del libro: árboles, MapReduce, filtros de Bloom
@@ -38,10 +38,10 @@ muchos con `assert`s de autoverificación: si pasan, el tema está superado.
 
 - Búsqueda lineal
 - Ordenamiento burbuja (`algoritmos/orden_burbuja.py`)
-- Ordenamiento por inserción *(pendiente)*
+- Ordenamiento por inserción, y qué significa que una ordenación sea estable — `lecciones/algoritmos/022-ordenacion-por-insercion.html`, `ejercicios/algoritmos/022-ordenacion-por-insercion.py`
 - Cuadrado mágico — verificación (`algoritmos/cuadrado_magico.py`)
 - Diferencia diagonal en matrices (`ejercicios/matematicas/ejercicio-diferencia-diagonal.py`)
-- Comparar algoritmos midiendo tiempo real con el módulo `time` *(pendiente)*
+- Comparar algoritmos midiendo tiempo real (cubierto en los ejercicios 021 y 022 con `timeit`)
 
 ### Proyecto insignia — el algoritmo del amor (Gale-Shapley)
 

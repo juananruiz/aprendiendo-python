@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 22: Ordenación por inserción</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="021-notacion-big-o.html">← Anterior: 021 — Notación Big O</a>
+    <a href="023-hash-tables.html">Siguiente: 023 — Hash tables →</a>
+  </span>
+</nav>
+
+<h1>Ordenación por inserción</h1>
+<p class="subtitle">La que usas al ordenar cartas en la mano — y por qué a veces gana a quicksort</p>
+
+<p>
+  Ya conoces tres formas de ordenar: burbuja, selección y quicksort. Esta
+  cuarta parece la más humilde de todas — es O(n²), como las dos primeras —
+  pero tiene una propiedad que la hace aparecer dentro de las librerías
+  estándar de medio mundo, incluida la de Python.
+</p>
+
+<hr>
+
+<h2>1. La idea: como ordenar cartas</h2>
+
+<p>
+  Cuando repartes cartas y las vas colocando en la mano, no ordenas todo el
+  mazo: coges cada carta nueva y la <strong>insertas</strong> en su sitio
+  entre las que ya tienes ordenadas. Eso es exactamente el algoritmo.
+</p>
+
+<div class="regla">
+  <p style="margin:0;">
+    La lista se divide mentalmente en dos partes: la <strong>izquierda ya
+    ordenada</strong> y la <strong>derecha por ordenar</strong>. En cada paso
+    coges el primer elemento de la derecha y lo desplazas hacia la izquierda
+    hasta que encuentre su hueco.
+  </p>
+</div>
+
+<h3>Trazado a mano</h3>
+
+<pre><code>[5, 2, 9, 1]     ← la parte ordenada es solo [5]
+
+Paso 1: coger el 2. ¿Es menor que 5? Sí → desplazar el 5 a la derecha
+[5, _, 9, 1] → [2, 5, 9, 1]     ordenada: [2, 5]
+
+Paso 2: coger el 9. ¿Es menor que 5? No → ya está en su sitio
+[2, 5, 9, 1]                    ordenada: [2, 5, 9]
+
+Paso 3: coger el 1. Menor que 9, que 5 y que 2 → desplazar los tres
+[2, 5, _, 9] → [2, _, 5, 9] → [_, 2, 5, 9] → [1, 2, 5, 9]
+
+Resultado: [1, 2, 5, 9]
+</code></pre>
+
+<h2>2. El código</h2>
+
+<pre><code>def insercion(lista):
+    lista = list(lista)                  # copia: no mutamos la entrada
+    for i in range(1, len(lista)):       # empezamos en 1: el [0] ya está "ordenado"
+        actual = lista[i]
+        j = i - 1
+        # desplazar a la derecha todo lo que sea mayor que 'actual'
+        while j >= 0 and lista[j] > actual:
+            lista[j + 1] = lista[j]
+            j -= 1
+        lista[j + 1] = actual            # aquí es donde encaja
+    return lista
+</code></pre>
+
+<p>
+  Fíjate en que el <code>while</code> interior es exactamente el
+  <strong>patrón centinela</strong> de la
+  <a href="../fundamentos/030-el-bucle-while.html">lección 030</a>: dos
+  condiciones con <code>and</code>, y el orden importa
+  (<code>j >= 0</code> tiene que ir primero, o accederías a
+  <code>lista[-1]</code> sin querer).
+</p>
+
+<hr>
+
+<h2>3. Su superpoder: los datos casi ordenados</h2>
+
+<p>
+  Aquí está la razón de ser de esta lección. Inserción es O(n²) en el caso
+  medio, igual que burbuja. Pero su <strong>mejor caso es O(n)</strong>: si
+  la lista ya está ordenada, el <code>while</code> interior no se ejecuta ni
+  una vez.
+</p>
+
+<p>Medido con listas de 800 elementos:</p>
+
+<table>
+<tr><th>Entrada</th><th>Inserción</th><th>Burbuja</th><th>Diferencia</th></tr>
+<tr><td>Aleatoria</td><td class="num">3,5 ms</td><td class="num">8,3 ms</td><td class="num">2,4× más rápida</td></tr>
+<tr><td>Casi ordenada (2 elementos fuera)</td><td class="num">0,1 ms</td><td class="num">4,4 ms</td><td class="num">44× más rápida</td></tr>
+</table>
+
+<p>
+  Y contando comparaciones sobre una lista de 100 elementos <strong>ya
+  ordenada</strong>: inserción hace <strong>99</strong>. Es decir, n−1:
+  recorre una vez y confirma que todo está en su sitio. Eso es O(n) puro.
+</p>
+
+<div class="clave">
+  Esta es la propiedad que hace que inserción siga viva en 2026: los datos
+  del mundo real rara vez llegan en orden aleatorio. Suelen venir
+  <em>casi</em> ordenados — un fichero de log, una lista a la que se han
+  añadido unos pocos elementos, resultados que ya venían ordenados por otro
+  criterio parecido.
+</div>
+
+<h3>Dónde la usa Python de verdad</h3>
+
+<p>
+  El <code>sorted()</code> de Python usa <strong>Timsort</strong>, un
+  algoritmo híbrido inventado por Tim Peters en 2002 para CPython. Timsort
+  busca tramos ya ordenados y usa <strong>inserción binaria</strong> para los
+  trozos pequeños, combinándolos después. Por eso <code>sorted()</code> es
+  extraordinariamente rápido con datos parcialmente ordenados: dentro lleva
+  la idea que acabas de aprender.
+</p>
+
+<hr>
+
+<h2>4. Las cuatro ordenaciones, cara a cara</h2>
+
+<table>
+<tr><th>Algoritmo</th><th>Mejor</th><th>Medio</th><th>Peor</th><th>¿Estable?</th><th>Memoria extra</th></tr>
+<tr><td>Burbuja</td><td>O(n)*</td><td>O(n²)</td><td>O(n²)</td><td>Sí</td><td>O(1)</td></tr>
+<tr><td>Selección</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>No</td><td>O(1)</td></tr>
+<tr><td><strong>Inserción</strong></td><td><strong>O(n)</strong></td><td>O(n²)</td><td>O(n²)</td><td>Sí</td><td>O(1)</td></tr>
+<tr><td>Quicksort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>No</td><td>O(log n)</td></tr>
+</table>
+
+<p class="referencia">
+  * Solo si la implementación lleva la bandera de «no hubo intercambios»,
+  como la tuya de <code>algoritmos/orden_burbuja.py</code>.
+</p>
+
+<div class="pista">
+  <strong>¿Qué es «estable»?</strong> Que dos elementos con la misma clave
+  conservan su orden relativo original. Importa cuando ordenas por varios
+  criterios encadenados: si ordenas por nombre y luego por nota, un
+  algoritmo estable mantiene el orden alfabético dentro de cada nota. Es
+  justo el truco que viste en la
+  <a href="../matching/002-ordenacion-con-key.html">lección 002</a>.
+  <code>sorted()</code> de Python <strong>es estable</strong>, y eso está
+  garantizado por la documentación del lenguaje.
+</div>
+
+<hr>
+
+<h2>5. Cuándo elegir cuál</h2>
+
+<div class="regla">
+  <p><strong>En producción:</strong> <code>sorted()</code>. Siempre. Está
+  escrito en C, es estable y usa Timsort. No vas a ganarle.</p>
+  <p><strong>Inserción</strong> si implementas a mano y los datos vienen casi
+  ordenados, o son muy pocos (menos de ~20 elementos).</p>
+  <p><strong>Quicksort</strong> si implementas a mano y los datos son
+  grandes y desordenados.</p>
+  <p style="margin-bottom:0;"><strong>Burbuja y selección:</strong> valor
+  didáctico. En la práctica, inserción les gana casi siempre.</p>
+</div>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Por qué el mejor caso de inserción es O(n) y el de selección no?</summary>
+  <p>
+    Porque inserción se detiene en cuanto encuentra la posición correcta: si
+    la lista ya está ordenada nunca entra en el bucle interior. Selección, en
+    cambio, siempre recorre todo el subconjunto restante para hallar el
+    mínimo, ordenados o no los datos.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué significa que un algoritmo de ordenación sea estable?</summary>
+  <p>
+    Que los elementos con clave equivalente conservan entre sí el orden que
+    tenían originalmente. Resulta esencial al ordenar por criterios
+    encadenados, porque permite aplicar una ordenación tras otra sin
+    destruir el resultado de la anterior.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué la condición <code>j >= 0</code> va antes de <code>lista[j] > actual</code>?</summary>
+  <p>
+    Porque Python evalúa el operador <code>and</code> de izquierda a derecha
+    y se detiene en cuanto algo es falso. Si estuvieran al revés, al llegar
+    al principio de la lista se accedería al índice negativo, leyendo el
+    último elemento en lugar de parar.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Impleméntala y demuestra su superpoder</h3>
+<p>
+  Escribes inserción desde cero, la versión que cuenta operaciones, y
+  después <strong>demuestras con números</strong> lo que dice la teoría: que
+  sobre datos casi ordenados aplasta a burbuja, y que en una lista ya
+  ordenada hace exactamente n−1 comparaciones. Terminas comprobando qué
+  significa «estable» con un caso real.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/algoritmos/022-ordenacion-por-insercion.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong> el <strong>capítulo 2</strong> de
+  <em>Comprender los algoritmos</em> (Bhargava) cubre selección; inserción es
+  su pariente cercano. Para entender Timsort, el documento de referencia es
+  <a href="https://github.com/python/cpython/blob/main/Objects/listsort.txt">listsort.txt</a>,
+  las notas del propio Tim Peters en el código de CPython.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="021-notacion-big-o.html">← Anterior: 021 — Notación Big O</a>
+    <a href="023-hash-tables.html">Siguiente: 023 — Hash tables →</a>
+  </span>
+</nav>
+
+</body>
+</html>

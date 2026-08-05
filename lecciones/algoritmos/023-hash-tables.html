@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 23: Hash tables — el dict por dentro</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="022-ordenacion-por-insercion.html">← Anterior: 022 — Inserción</a>
+    <a href="024-grafos-y-bfs.html">Siguiente: 024 — Grafos y BFS →</a>
+  </span>
+</nav>
+
+<h1>Hash tables: el <code>dict</code> por dentro</h1>
+<p class="subtitle">Por qué buscar en un diccionario cuesta lo mismo con diez elementos que con diez millones</p>
+
+<p>
+  En la <a href="../fundamentos/032-elegir-estructura-de-datos.html">lección
+  032</a> mediste algo que parecía magia: buscar en un <code>set</code> de
+  100.000 elementos tardaba lo mismo que en uno de 1.000 — 22.493 veces más
+  rápido que la lista. Esta lección explica cómo está hecho ese truco. Y no
+  es magia: es una idea muy elegante con un precio muy concreto.
+</p>
+
+<hr>
+
+<h2>1. El problema que resuelve</h2>
+
+<p>
+  Para encontrar algo en una lista hay que mirar elemento por elemento: O(n).
+  La pregunta de la que nace la tabla hash es descarada:
+</p>
+
+<div class="clave">
+  ¿Y si en vez de <em>buscar</em> dónde está algo, pudiéramos
+  <strong>calcular</strong> dónde tiene que estar?
+</div>
+
+<h2>2. La función hash</h2>
+
+<p>
+  Una <strong>función hash</strong> convierte cualquier objeto en un número.
+  Python la tiene incorporada:
+</p>
+
+<pre><code>hash(42)              # 42
+hash("Ana")           # un entero enorme, p.ej. -2155106213085494282
+hash(("Sevilla", 3))  # también funciona: las tuplas son hashables
+hash(["Ana"])         # TypeError: unhashable type: 'list'
+</code></pre>
+
+<p>Con ese número se calcula la posición con un simple resto:</p>
+
+<pre><code>indice = hash(clave) % numero_de_cubos
+</code></pre>
+
+<p>
+  Y ya está. Sabiendo la clave, sabes la posición <strong>sin buscar</strong>.
+  Eso es O(1).
+</p>
+
+<div class="pista">
+  <strong>Un detalle que sorprende:</strong> <code>hash("Ana")</code> da un
+  número <em>distinto en cada ejecución</em> de Python. Compruébalo:
+  <code>python3 -c "print(hash('Ana'))"</code> dos veces. Es intencionado —
+  se llama <em>hash randomization</em> y protege frente a ataques que
+  provocan colisiones a propósito (Python usa el algoritmo <em>siphash13</em>).
+  Los enteros, en cambio, siempre se hashean a sí mismos:
+  <code>hash(42)</code> es <code>42</code> siempre. Por eso
+  <strong>nunca guardes un hash en disco</strong> esperando encontrarlo igual
+  mañana.
+</div>
+
+<hr>
+
+<h2>3. Las colisiones</h2>
+
+<p>
+  Dos claves distintas pueden dar el mismo índice. Es inevitable: hay
+  infinitas claves posibles y un número finito de cubos. A eso se le llama
+  <strong>colisión</strong>, y hay que resolverlo.
+</p>
+
+<p>
+  La técnica más simple es el <strong>encadenamiento</strong>: cada cubo
+  guarda una pequeña lista, y si hay colisión se añade a esa lista. Aquí
+  está una tabla hash completa en veinte líneas:
+</p>
+
+<pre><code>class TablaHash:
+    def __init__(self, n_cubos=8):
+        self.n = n_cubos
+        self.cubos = [[] for _ in range(n_cubos)]
+
+    def _indice(self, clave):
+        return hash(clave) % self.n           # ← aquí está toda la magia
+
+    def poner(self, clave, valor):
+        cubo = self.cubos[self._indice(clave)]
+        for i, (k, v) in enumerate(cubo):
+            if k == clave:
+                cubo[i] = (clave, valor)      # actualizar si ya existía
+                return
+        cubo.append((clave, valor))
+
+    def obtener(self, clave):
+        for k, v in self.cubos[self._indice(clave)]:
+            if k == clave:
+                return v
+        raise KeyError(clave)
+</code></pre>
+
+<p>
+  Metiendo cinco nombres en ocho cubos, esta es la distribución real que se
+  obtiene:
+</p>
+
+<pre><code>[0, 1, 0, 1, 1, 0, 2, 0]     ← cinco elementos repartidos; un cubo tiene dos
+</code></pre>
+
+<h3>El peor caso: cuando todo colisiona</h3>
+
+<p>
+  Si todas las claves caen en el mismo cubo, la tabla hash se convierte
+  en... una lista. Y buscar vuelve a ser <strong>O(n)</strong>:
+</p>
+
+<pre><code>t = TablaHash(n_cubos=1)      # un único cubo: todo colisiona
+# distribución: [3]  ← los tres elementos en el mismo sitio
+</code></pre>
+
+<table>
+<tr><th>Operación</th><th>Caso medio</th><th>Peor caso</th></tr>
+<tr><td>Buscar</td><td class="num">O(1)</td><td class="num">O(n)</td></tr>
+<tr><td>Insertar</td><td class="num">O(1)</td><td class="num">O(n)</td></tr>
+<tr><td>Borrar</td><td class="num">O(1)</td><td class="num">O(n)</td></tr>
+</table>
+
+<div class="clave">
+  Por eso el <code>set</code> de la lección 032 ocupaba <strong>5 veces más
+  memoria</strong> que la lista: para que las colisiones sean raras, la tabla
+  necesita cubos de sobra. Python mantiene la ocupación por debajo de dos
+  tercios y, cuando se pasa, crea una tabla más grande y recoloca todo
+  (<em>rehashing</em>). Ese es el precio del O(1).
+</div>
+
+<hr>
+
+<h2>4. Por qué las claves deben ser inmutables</h2>
+
+<p>
+  Ya sabías <em>que</em> una lista no puede ser clave de un diccionario.
+  Ahora ya sabes <strong>por qué</strong>:
+</p>
+
+<div class="regla">
+  <p style="margin:0;">
+    La posición de una clave se calcula <strong>a partir de su contenido</strong>.
+    Si el contenido cambiara después de guardarla, su hash cambiaría, y el
+    valor quedaría archivado en un cubo donde nadie lo va a buscar jamás.
+  </p>
+</div>
+
+<p>
+  De ahí la regla del lenguaje: solo lo <em>hashable</em> —lo inmutable—
+  puede ser clave. Números, strings, tuplas y <code>frozenset</code> sí;
+  listas, diccionarios y conjuntos, no.
+</p>
+
+<hr>
+
+<h2>5. Los tres usos que te vas a encontrar</h2>
+
+<pre><code># 1. Índice de búsqueda: de O(n) a O(1)
+por_nombre = {c["nombre"]: c for c in candidatos}
+por_nombre["Ana"]                      # instantáneo
+
+# 2. Eliminar duplicados / pertenencia
+vistos = set()
+if elemento not in vistos:             # O(1)
+    vistos.add(elemento)
+
+# 3. Contar y agrupar
+from collections import Counter, defaultdict
+Counter(palabras).most_common(3)
+</code></pre>
+
+<p>
+  El caso 2 es el que vas a usar en la
+  <a href="024-grafos-y-bfs.html">siguiente lección</a>: el conjunto de nodos
+  ya visitados en una búsqueda en anchura es una tabla hash, y de ahí sale
+  buena parte de su eficiencia.
+</p>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Cómo consigue una tabla hash localizar algo sin recorrer nada?</summary>
+  <p>
+    Porque calcula la posición directamente a partir de la clave: aplica una
+    función hash y toma el resto entre el número de cubos. En lugar de
+    buscar dónde está el dato, deduce dónde tiene que estar, y salta ahí de
+    una vez.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué es una colisión y cuándo degrada el rendimiento a O(n)?</summary>
+  <p>
+    Ocurre cuando dos claves distintas producen el mismo índice de cubo. Si
+    son raras, apenas cuestan; pero si casi todas las claves caen en el mismo
+    sitio, cada cubo se convierte en una lista larga y buscar vuelve a exigir
+    recorrerla entera.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué <code>hash("Ana")</code> cambia entre ejecuciones?</summary>
+  <p>
+    Porque Python aleatoriza la semilla del hash de cadenas al arrancar,
+    como defensa frente a ataques que provocarían colisiones masivas
+    deliberadas. Es la razón de que jamás debas almacenar un hash de texto
+    esperando reproducirlo en otra sesión.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Construye tu propia tabla hash</h3>
+<p>
+  Implementas la tabla completa (poner, obtener, borrar, contains), observas
+  la distribución en cubos, provocas colisiones a propósito para ver cómo se
+  degrada a O(n), y terminas midiendo tu tabla contra el <code>dict</code>
+  nativo de Python — que hace lo mismo pero escrito en C.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/algoritmos/023-hash-tables.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong> el <strong>capítulo 5</strong> de
+  <em>Comprender los algoritmos</em> (Bhargava), dedicado íntegramente a las
+  tablas hash. Para el detalle de la implementación real de CPython:
+  <a href="https://github.com/python/cpython/blob/main/Objects/dictobject.c">dictobject.c</a>
+  y su comentario inicial. Ficha de consulta:
+  <a href="../../referencia/04-diccionarios-y-conjuntos.html">04 —
+  Diccionarios, conjuntos y tuplas</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="022-ordenacion-por-insercion.html">← Anterior: 022 — Inserción</a>
+    <a href="024-grafos-y-bfs.html">Siguiente: 024 — Grafos y BFS →</a>
+  </span>
+</nav>
+
+</body>
+</html>

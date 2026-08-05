@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 21: La notación Big O</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="020-quicksort.html">← Anterior: 020 — Quicksort</a>
+    <a href="022-ordenacion-por-insercion.html">Siguiente: 022 — Inserción →</a>
+  </span>
+</nav>
+
+<h1>La notación Big O</h1>
+<p class="subtitle">Medir algoritmos sin cronómetro — el lenguaje con el que se habla de rendimiento</p>
+
+<p>
+  Ya has visto Big O tres veces sin que nadie te la explicara del todo: en
+  <a href="020-quicksort.html">Quicksort</a> (O(n log n) frente a O(n²)), en
+  <a href="../fundamentos/032-elegir-estructura-de-datos.html">elegir la
+  estructura de datos</a> (el <code>set</code> que no se ralentiza al crecer)
+  y en <a href="../matching/003-deque-y-colas.html">las colas</a>
+  (<code>pop(0)</code> contra <code>popleft()</code>). Toca formalizarlo.
+</p>
+
+<div class="clave">
+  Big O no mide <strong>cuánto tarda</strong> un algoritmo. Mide
+  <strong>cómo empeora</strong> cuando le das más datos. Por eso un
+  algoritmo O(n²) puede ser más rápido que uno O(n log n) con 10 elementos
+  — y desastroso con 10.000.
+</div>
+
+<hr>
+
+<h2>1. La idea, sin matemáticas</h2>
+
+<p>
+  Imagina que buscas un nombre en la guía telefónica. Dos estrategias:
+</p>
+
+<table>
+<tr><th>Estrategia</th><th>Con 100 nombres</th><th>Con 200 nombres</th><th>Notación</th></tr>
+<tr><td>Página a página, desde el principio</td><td>hasta 100 pasos</td><td>hasta 200 pasos (<strong>el doble</strong>)</td><td>O(n)</td></tr>
+<tr><td>Abrir por la mitad y descartar (binaria)</td><td>~7 pasos</td><td>~8 pasos (<strong>uno más</strong>)</td><td>O(log n)</td></tr>
+</table>
+
+<p>
+  Eso es todo lo que dice Big O: <em>si doblo los datos, ¿qué le pasa al
+  trabajo?</em> Y por eso se ignoran las constantes: da igual que cada paso
+  tarde 2 ms o 5 ms, lo que importa es la <strong>forma de la curva</strong>.
+</p>
+
+<hr>
+
+<h2>2. Las cinco que vas a encontrarte</h2>
+
+<table>
+<tr><th>Notación</th><th>Nombre</th><th>Al doblar n...</th><th>Ejemplo que ya conoces</th></tr>
+<tr><td><code>O(1)</code></td><td>Constante</td><td>no cambia</td><td><code>lista[0]</code>, <code>x in conjunto</code></td></tr>
+<tr><td><code>O(log n)</code></td><td>Logarítmica</td><td>+1 paso</td><td>búsqueda binaria</td></tr>
+<tr><td><code>O(n)</code></td><td>Lineal</td><td>×2</td><td><code>x in lista</code>, recorrer una vez</td></tr>
+<tr><td><code>O(n log n)</code></td><td>Casi lineal</td><td>×2 y pico</td><td><code>sorted()</code>, quicksort medio</td></tr>
+<tr><td><code>O(n²)</code></td><td>Cuadrática</td><td>×4</td><td>burbuja, dos bucles anidados</td></tr>
+</table>
+
+<h3>Comprobado, no recitado</h3>
+
+<p>
+  Estos son tiempos reales medidos en Python 3.14, ejecutando cada
+  algoritmo con n=500, n=1.000 y n=2.000:
+</p>
+
+<table>
+<tr><th>Algoritmo</th><th>n=500</th><th>n=1.000</th><th>n=2.000</th><th>Factor al doblar</th></tr>
+<tr><td><code>lista[0]</code> — O(1)</td><td class="num">0,0 µs</td><td class="num">0,0 µs</td><td class="num">0,0 µs</td><td class="num">×1,1</td></tr>
+<tr><td>Búsqueda binaria — O(log n)</td><td class="num">0,4 µs</td><td class="num">0,4 µs</td><td class="num">0,5 µs</td><td class="num">×1,0</td></tr>
+<tr><td>Búsqueda lineal — O(n)</td><td class="num">6,0 µs</td><td class="num">12,3 µs</td><td class="num">26,1 µs</td><td class="num">×2,1</td></tr>
+<tr><td>Dos bucles anidados — O(n²)</td><td class="num">1.261 µs</td><td class="num">4.936 µs</td><td class="num">18.820 µs</td><td class="num">×3,8</td></tr>
+</table>
+
+<div class="clave">
+  Mira solo la última columna: <strong>×1,0 · ×2,1 · ×3,8</strong>. La teoría
+  predice ×1, ×2 y ×4. Big O no es una abstracción académica — es una
+  predicción que se cumple.
+</div>
+
+<hr>
+
+<h2>3. Cómo calcularla mirando el código</h2>
+
+<div class="regla">
+  <p><strong>Regla 1 — Cuenta los bucles anidados.</strong> Un bucle sobre n
+  elementos es O(n). Dos anidados, O(n²). Tres, O(n³).</p>
+  <p><strong>Regla 2 — Los bucles seguidos se suman, no se multiplican.</strong>
+  Dos bucles uno detrás de otro son O(n) + O(n) = O(2n) = <strong>O(n)</strong>.</p>
+  <p><strong>Regla 3 — Quédate con el término dominante.</strong>
+  O(n² + n + 100) es simplemente O(n²): con n grande, lo demás no se nota.</p>
+  <p style="margin-bottom:0;"><strong>Regla 4 — Las constantes se van.</strong>
+  O(3n) es O(n). No porque den igual en la práctica, sino porque Big O habla
+  de la <em>forma</em> del crecimiento.</p>
+</div>
+
+<pre><code># O(n) — un bucle
+for x in datos:
+    print(x)
+
+# O(n²) — dos anidados
+for a in datos:
+    for b in datos:
+        print(a, b)
+
+# O(n) — dos seguidos, NO anidados: n + n = 2n → O(n)
+for x in datos: print(x)
+for x in datos: print(x)
+
+# O(1) — no depende del tamaño
+print(datos[0], len(datos))
+</code></pre>
+
+<div class="pista">
+  <strong>Cuidado con los costes escondidos.</strong> Este bucle
+  <em>parece</em> O(n), pero es O(n²):
+  <pre><code>for x in datos:
+    if x in otra_lista:    # ← esto ya es O(n) por dentro
+        ...</code></pre>
+  Buscar en una lista es O(n), y lo estás haciendo n veces. Cambiando
+  <code>otra_lista</code> por un <code>set</code> vuelve a ser O(n) —
+  exactamente lo que mediste en la
+  <a href="../fundamentos/032-elegir-estructura-de-datos.html">lección 032</a>.
+</div>
+
+<hr>
+
+<h2>4. Peor caso, caso medio, mejor caso</h2>
+
+<p>
+  Un algoritmo no tiene <em>una</em> complejidad: tiene tres, según la suerte
+  que tengan sus datos de entrada.
+</p>
+
+<table>
+<tr><th>Algoritmo</th><th>Mejor caso</th><th>Caso medio</th><th>Peor caso</th></tr>
+<tr><td>Búsqueda lineal</td><td>O(1) — está el primero</td><td>O(n)</td><td>O(n) — está el último o no está</td></tr>
+<tr><td>Quicksort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²) — pivote pésimo</td></tr>
+<tr><td>Ordenación por inserción</td><td>O(n) — ya ordenada</td><td>O(n²)</td><td>O(n²)</td></tr>
+</table>
+
+<p>
+  Cuando alguien dice «quicksort es O(n log n)» se refiere al caso medio.
+  Ya lo comprobaste en la <a href="020-quicksort.html">lección 020</a>: con
+  una lista ya ordenada y pivote fijo, se desploma a 124.750 comparaciones
+  en vez de 5.012.
+</p>
+
+<div class="pista">
+  <strong>Por defecto, se habla del peor caso.</strong> Es lo prudente: te
+  dice qué es lo peor que puede pasarte. Pero cuando el caso medio es muy
+  distinto (quicksort) o el mejor caso es alcanzable en la práctica
+  (inserción sobre datos casi ordenados), merece la pena conocer los tres.
+</div>
+
+<hr>
+
+<h2>5. Por qué importa de verdad</h2>
+
+<p>
+  Suponiendo un millón de operaciones por segundo, esto es lo que tarda cada
+  complejidad según el tamaño del problema:
+</p>
+
+<table>
+<tr><th>n</th><th>O(log n)</th><th>O(n)</th><th>O(n log n)</th><th>O(n²)</th></tr>
+<tr><td class="num">100</td><td class="num">7 ops</td><td class="num">100 ops</td><td class="num">664 ops</td><td class="num">10.000 ops</td></tr>
+<tr><td class="num">1.000</td><td class="num">10 ops</td><td class="num">1.000 ops</td><td class="num">9.966 ops</td><td class="num">1 millón</td></tr>
+<tr><td class="num">1.000.000</td><td class="num">20 ops</td><td class="num">1 millón</td><td class="num">20 millones</td><td class="num">1 <strong>billón</strong></td></tr>
+</table>
+
+<p>
+  Con un millón de elementos, la búsqueda binaria necesita
+  <strong>20 pasos</strong> (log₂ de un millón ≈ 19,9). El algoritmo
+  cuadrático necesitaría un billón de operaciones: unos 11 días. Esa es la
+  diferencia entre un programa que funciona y uno que no.
+</p>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<details class="quiz">
+  <summary>¿Qué complejidad tienen dos bucles seguidos (no anidados)?</summary>
+  <p>
+    Sigue siendo lineal, O(n). Los bucles consecutivos suman su trabajo, no
+    lo multiplican: recorrer n elementos dos veces son 2n operaciones, y las
+    constantes se descartan porque Big O describe la forma del crecimiento,
+    no el tiempo exacto.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué <code>for x in datos: if x in lista</code> es O(n²)?</summary>
+  <p>
+    Porque el operador <code>in</code> sobre una lista recorre sus elementos
+    uno a uno, y eso ya cuesta O(n) por dentro. Al repetirlo dentro de un
+    bucle que también recorre n elementos, el coste total se multiplica y
+    resulta cuadrático.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>Si al doblar n el tiempo se multiplica por cuatro, ¿qué complejidad es?</summary>
+  <p>
+    Es cuadrática, O(n²). Al doblar la entrada el trabajo se cuadruplica
+    porque depende del cuadrado del tamaño. Si solo se hubiera duplicado
+    sería lineal, y si apenas hubiera cambiado sería logarítmica o
+    constante.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Analiza, predice y comprueba</h3>
+<p>
+  Primero clasificas siete funciones mirando su código. Después
+  <strong>mides</strong> si acertaste, con un cronómetro real: si tu
+  predicción decía O(n²) y el tiempo se multiplica por cuatro al doblar n,
+  enhorabuena. Y terminas arreglando un O(n²) escondido.
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/algoritmos/021-notacion-big-o.py</code></p>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria:</strong> el <strong>capítulo 1</strong> de
+  <em>Comprender los algoritmos</em> (Bhargava), que introduce Big O con la
+  guía telefónica. Para los costes exactos de cada operación de Python, la
+  referencia es
+  <a href="https://wiki.python.org/moin/TimeComplexity">TimeComplexity en la
+  wiki oficial</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="020-quicksort.html">← Anterior: 020 — Quicksort</a>
+    <a href="022-ordenacion-por-insercion.html">Siguiente: 022 — Inserción →</a>
+  </span>
+</nav>
+
+</body>
+</html>
