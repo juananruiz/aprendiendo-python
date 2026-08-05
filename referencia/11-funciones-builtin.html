@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia 11: Funciones built-in</title>
+<link rel="stylesheet" href="../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="10-clases.html">← Anterior: 10 — Clases (POO básica)</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+<h1>Funciones built-in</h1>
+<p class="subtitle">Referencia rápida 11/11 — las funciones siempre disponibles, sin ningún import</p>
+
+<h2>Descubrirlas en tu propia versión</h2>
+
+<pre><code>import builtins
+print(sorted(n for n in dir(builtins)
+             if callable(getattr(builtins, n)) and not n.startswith("_")))
+
+help(divmod)     # qué hace cualquiera de ellas, sin salir de Python
+</code></pre>
+
+<h2>El bucle que te ahorras</h2>
+
+<table>
+<tr><th>Cuando quieres...</th><th>Escribe</th></tr>
+<tr><td>¿Alguno cumple?</td><td><code>any(cond(x) for x in datos)</code></td></tr>
+<tr><td>¿Todos cumplen?</td><td><code>all(cond(x) for x in datos)</code></td></tr>
+<tr><td>Mayor / menor según criterio</td><td><code>max(datos, key=criterio)</code></td></tr>
+<tr><td>Sin reventar si está vacío</td><td><code>min(datos, default=algo)</code></td></tr>
+<tr><td>Contar cuántos cumplen</td><td><code>sum(cond(x) for x in datos)</code></td></tr>
+<tr><td>Sumar desde un valor inicial</td><td><code>sum(datos, inicial)</code></td></tr>
+<tr><td>Emparejar dos listas con seguridad</td><td><code>zip(a, b, strict=True)</code></td></tr>
+<tr><td>Índice y valor a la vez</td><td><code>enumerate(datos, start=1)</code></td></tr>
+<tr><td>Cociente y resto juntos</td><td><code>divmod(a, b)</code></td></tr>
+<tr><td>Al revés, sin copiar</td><td><code>reversed(datos)</code></td></tr>
+</table>
+
+<h2><code>any()</code> y <code>all()</code></h2>
+
+<pre><code>notas = [88, 72, 95]
+any(n >= 50 for n in notas)    # True  — ¿alguno?
+all(n >= 50 for n in notas)    # True  — ¿todos?
+
+# Se paran en cuanto lo saben (short-circuit):
+any([False, True, False])      # lee 2 elementos y para
+all([True, False, True])       # lee 2 elementos y para
+</code></pre>
+
+<div class="pista">
+  <strong>El caso vacío:</strong> <code>any([])</code> →
+  <code>False</code>; <code>all([])</code> → <code>True</code>
+  (<em>verdad vacua</em>: no hay ninguno que incumpla). Si la colección
+  vacía significa un problema en tu código, comprueba aparte:
+  <code>if datos and all(...)</code>.
+</div>
+
+<h2><code>min()</code> / <code>max()</code></h2>
+
+<pre><code>max(["sol", "ventana", "mar"], key=len)     # 'ventana'
+
+candidatos = {"Ana": 88, "Lucía": 95}
+max(candidatos, key=candidatos.get)          # 'Lucía' (la clave, no el valor)
+
+min([], default="sin datos")                 # 'sin datos'
+min([])                                      # ValueError
+</code></pre>
+
+<p>En caso de empate gana el <strong>primero</strong> que aparece.</p>
+
+<h2><code>sum()</code></h2>
+
+<pre><code>sum([1, 2, 3])                  # 6
+sum([1, 2, 3], 10)              # 16   — segundo argumento = valor inicial
+sum(n >= 80 for n in notas)     # 2    — cuenta: True vale 1, False vale 0
+</code></pre>
+
+<div class="pista">
+  No uses <code>sum()</code> para concatenar listas: es O(n²). Usa
+  <code>itertools.chain()</code>.
+</div>
+
+<h2><code>zip()</code> — el bug silencioso</h2>
+
+<pre><code>list(zip(["a","b","c"], [1,2]))                # [('a',1), ('b',2)] ← pierde 'c'
+list(zip(["a","b","c"], [1,2], strict=True))   # ValueError
+
+# strict= existe desde Python 3.10 (PEP 618)
+</code></pre>
+
+<h2>Numéricas y de secuencia</h2>
+
+<pre><code>abs(-7)                  # 7
+pow(2, 10)               # 1024      — igual que 2 ** 10
+pow(2, 10, 1000)         # 24        — (2**10) % 1000 en un paso
+divmod(17, 5)            # (3, 2)    — cociente y resto
+round(2.675, 2)          # ojo: redondeo bancario, ver ficha 01
+
+list(enumerate(["a","b"], start=1))   # [(1,'a'), (2,'b')]
+list(reversed([1, 2, 3]))             # [3, 2, 1]  — iterador perezoso
+[1, 2, 3][::-1]                       # [3, 2, 1]  — copia en memoria
+sorted(datos, key=..., reverse=True)  # lista nueva; estable en empates
+</code></pre>
+
+<h2>Tipos e introspección</h2>
+
+<pre><code>len(x)  list(x)  dict(x)  set(x)  tuple(x)  str(x)  int(x)  float(x)  bool(x)
+
+isinstance(42, int)      # True   — preferible a type(x) == int
+type(42).__name__        # 'int'
+callable(print)          # True
+dir(objeto)              # qué atributos/métodos tiene
+help(objeto)             # su documentación
+</code></pre>
+
+<hr>
+
+<p class="retoque">
+  Referencia completa y autorizada:
+  <a href="https://docs.python.org/es/3/library/functions.html">Funciones
+  incorporadas — documentación oficial de Python</a>. Lección asociada:
+  <a href="../lecciones/fundamentos/031-funciones-builtin.html">031 — Las
+  funciones built-in</a>.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="index.html">← Índice de referencia</a>
+  <span class="nav-central">
+    <a href="10-clases.html">← Anterior: 10 — Clases (POO básica)</a>
+    <span class="nav-hueco">Siguiente</span>
+  </span>
+</nav>
+
+</body>
+</html>

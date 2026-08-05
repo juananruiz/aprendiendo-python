@@ -277,6 +277,32 @@ hr {
   font-style: italic;
 }
 
+/* --- Quiz de autoevaluación (retrieval practice) --- */
+.quiz {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.9rem 1.2rem;
+  margin: 1rem 0;
+}
+
+.quiz summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent-dark);
+}
+
+.quiz summary:hover { text-decoration: underline; }
+
+.quiz[open] summary {
+  margin-bottom: 0.7rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.quiz p { margin-bottom: 0; }
+
 /* --- Navegación entre lecciones --- */
 .nav-lecciones {
   display: flex;

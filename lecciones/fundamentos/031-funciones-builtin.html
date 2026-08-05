@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lección 31: Las funciones built-in</title>
+<link rel="stylesheet" href="../../assets/estilos.css">
+</head>
+<body>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="030-el-bucle-while.html">← Anterior: 030 — El bucle while</a>
+    <a href="032-elegir-estructura-de-datos.html">Siguiente: 032 — Estructuras de datos →</a>
+  </span>
+</nav>
+
+<h1>Las funciones <em>built-in</em></h1>
+<p class="subtitle">El bucle que no tenías que escribir — unas setenta funciones que ya están ahí, sin importar nada</p>
+
+<p>
+  En la <a href="030-el-bucle-while.html">lección anterior</a> dominaste el
+  bucle <code>while</code> de arriba abajo. Esta lección es su contrapunto
+  deliberado: muchos de los bucles que sabes escribir
+  <strong>no hay que escribirlos</strong>. Python trae de fábrica un puñado
+  de funciones que ya los llevan dentro — más rápidas, más cortas y, sobre
+  todo, más fáciles de leer.
+</p>
+
+<div class="clave">
+  <strong>El objetivo de esta lección</strong> no es memorizar setenta
+  funciones. Es entrenar un reflejo: cuando estés a punto de escribir un
+  bucle, preguntarte <em>«¿existe ya una función que haga esto?»</em>. Casi
+  siempre, sí.
+</div>
+
+<hr>
+
+<h2>1. Qué son, y cómo descubrirlas tú mismo</h2>
+
+<p>
+  Las <em>built-in functions</em> son las que están disponibles
+  <strong>siempre</strong>, sin escribir un solo <code>import</code>. Ya usas
+  varias sin pensarlo: <code>print()</code>, <code>len()</code>,
+  <code>range()</code>, <code>sorted()</code>.
+</p>
+
+<p>
+  No te fíes de ninguna lista que te den (tampoco de esta). Compruébalo tú
+  mismo en tu propio intérprete:
+</p>
+
+<pre><code>import builtins
+
+# Todas las funciones siempre disponibles, en orden alfabético
+funciones = [n for n in dir(builtins)
+             if callable(getattr(builtins, n)) and not n.startswith("_")]
+print(len(funciones))
+print(sorted(funciones))
+
+# Y para saber qué hace cualquiera de ellas, sin salir de Python:
+help(divmod)
+</code></pre>
+
+<div class="pista">
+  <strong>Un detalle honesto sobre el número.</strong> Verás citado por ahí
+  «Python tiene 71 funciones built-in», pero el número depende de cómo
+  cuentes: algunas (<code>help</code>, <code>exit</code>,
+  <code>quit</code>...) no son del lenguaje, las añade el módulo
+  <code>site</code> al arrancar el intérprete interactivo. Ejecutando el
+  código de arriba con <code>python3 -S</code> (que no carga
+  <code>site</code>) salen <strong>69</strong> en Python 3.14. La
+  <a href="https://docs.python.org/es/3/library/functions.html">documentación
+  oficial</a> es deliberadamente vaga: dice «una serie de funciones», sin dar
+  cifra. Lección de fondo: <em>verifica en tu versión, no en la memoria de
+  nadie</em>.
+</div>
+
+<hr>
+
+<h2>2. <code>any()</code> y <code>all()</code>: la estrella de esta lección</h2>
+
+<p>
+  Si solo te llevas dos funciones de aquí, que sean estas. Responden a las
+  dos preguntas más frecuentes sobre una colección:
+  <strong>¿alguno cumple?</strong> y <strong>¿todos cumplen?</strong>
+</p>
+
+<pre><code>notas = [88, 72, 95]
+
+# El bucle que ya NO escribes:
+alguno_aprobado = False
+for n in notas:
+    if n >= 50:
+        alguno_aprobado = True
+        break
+
+# La versión con built-in:
+alguno_aprobado = any(n >= 50 for n in notas)   # True
+todos_aprobados = all(n >= 50 for n in notas)   # True
+</code></pre>
+
+<p>
+  Fíjate en lo que va dentro del paréntesis: <code>n >= 50 for n in
+  notas</code> es una <strong>expresión generadora</strong> — produce
+  <code>True</code>/<code>False</code> uno a uno, sin construir ninguna lista
+  intermedia. Es el mismo mecanismo perezoso de la
+  <a href="../funcional/014-generadores-y-evaluacion-perezosa.html">lección 014</a>.
+</p>
+
+<h3>Se paran en cuanto lo saben (<em>short-circuit</em>)</h3>
+
+<p>
+  <code>any()</code> deja de mirar en cuanto encuentra el primer
+  <code>True</code>; <code>all()</code>, en cuanto encuentra el primer
+  <code>False</code>. No recorren el resto. Comprobado espiando qué elementos
+  llegan a leer de verdad:
+</p>
+
+<table>
+<tr><th>Llamada</th><th>Elementos que llega a leer</th><th>Resultado</th></tr>
+<tr><td><code>any([False, True, False, False])</code></td><td><code>[False, True]</code> — y para</td><td class="num"><code>True</code></td></tr>
+<tr><td><code>all([True, False, True, True])</code></td><td><code>[True, False]</code> — y para</td><td class="num"><code>False</code></td></tr>
+</table>
+
+<p>
+  Esto importa de verdad cuando cada elemento cuesta caro de calcular: una
+  consulta a base de datos, una llamada a una API, o una comprobación sobre
+  un fichero enorme.
+</p>
+
+<h3>El caso vacío, que sorprende a todo el mundo</h3>
+
+<div class="regla">
+  <p style="margin:0;">
+    <code>any([])</code> devuelve <strong><code>False</code></strong>.<br>
+    <code>all([])</code> devuelve <strong><code>True</code></strong>.
+  </p>
+</div>
+
+<p>
+  El primero es intuitivo: en una lista vacía no hay <em>ninguno</em> que
+  cumpla. El segundo desconcierta, pero es lógicamente correcto y tiene
+  nombre propio en lógica: <em>verdad vacua</em>. La pregunta que responde
+  <code>all()</code> es «¿hay algún elemento que <strong>incumpla</strong>?».
+  Si no hay elementos, no hay ninguno que incumpla → <code>True</code>.
+</p>
+
+<div class="pista">
+  <strong>Dónde te va a morder esto.</strong> Si escribes
+  <code>if all(candidato_es_valido(c) for c in candidatos):</code> y la lista
+  <code>candidatos</code> llega vacía por un error previo, tu código dirá
+  alegremente que «todos son válidos» y seguirá adelante. Cuando el caso
+  vacío signifique un problema, compruébalo aparte:
+  <code>if candidatos and all(...)</code>.
+</div>
+
+<h3>Conectándolo con tu curso</h3>
+
+<p>
+  En el <a href="../matching/004-estabilidad-y-pares-bloqueantes.html">Módulo 3
+  (lección 004)</a> escribiste <code>es_matching_estable()</code> recorriendo
+  todas las parejas en busca de un par bloqueante. Ese bucle es exactamente
+  un <code>any()</code> disfrazado:
+</p>
+
+<pre><code># "Es estable si NO existe ningún par bloqueante"
+def es_matching_estable(prefs_p, prefs_r, matching):
+    return not any(es_par_bloqueante(prefs_p, prefs_r, matching, p, r)
+                   for p in matching
+                   for r in prefs_r
+                   if matching[p] != r)
+</code></pre>
+
+<hr>
+
+<h2>3. <code>min()</code> y <code>max()</code>: <code>key</code> y <code>default</code></h2>
+
+<p>
+  Ya los usas para números. Sus dos parámetros extra son los que casi nadie
+  conoce y los que te ahorran el bucle:
+</p>
+
+<pre><code>palabras = ["sol", "ventana", "mar"]
+max(palabras, key=len)              # 'ventana' — la más larga
+
+candidatos = {"Ana": 88, "Carlos": 72, "Lucía": 95}
+max(candidatos, key=candidatos.get) # 'Lucía' — la clave con mayor valor
+
+# 'default' evita el error con colecciones vacías
+min([], default="sin datos")        # 'sin datos'
+min([])                             # ValueError: min() iterable argument is empty
+</code></pre>
+
+<p>
+  <code>key</code> es la misma idea que aprendiste en la
+  <a href="../matching/002-ordenacion-con-key.html">lección 002</a> con
+  <code>sorted()</code>: una función que dice <em>por qué criterio</em>
+  comparar. Y como allí, <strong>en caso de empate gana el primero que
+  aparece</strong>.
+</p>
+
+<hr>
+
+<h2>4. <code>sum()</code> y su tercer uso inesperado</h2>
+
+<pre><code>sum([1, 2, 3])          # 6
+sum([1, 2, 3], 10)      # 16  — el 2º argumento es el valor inicial
+
+# Contar cuántos cumplen una condición, sin bucle ni contador:
+notas = [88, 72, 95]
+sum(n >= 80 for n in notas)     # 2  — porque True vale 1 y False vale 0
+</code></pre>
+
+<p>
+  Ese último idioma es muy usado: como <code>bool</code> es una subclase de
+  <code>int</code> en Python, sumar booleanos cuenta cuántos son verdaderos.
+</p>
+
+<div class="pista">
+  <code>sum()</code> también concatena listas
+  (<code>sum([[1,2],[3]], [])</code> → <code>[1, 2, 3]</code>), pero
+  <strong>no lo hagas</strong>: es O(n²) porque crea una lista nueva en cada
+  paso. Para eso está
+  <code>itertools.chain()</code>, que viste en la
+  <a href="../funcional/016-itertools.html">lección 016</a>.
+</div>
+
+<hr>
+
+<h2>5. <code>zip(strict=True)</code>: el bug silencioso</h2>
+
+<p>
+  <code>zip()</code> empareja elementos de dos colecciones. El problema es
+  qué hace cuando no miden lo mismo: <strong>trunca sin avisar</strong>.
+</p>
+
+<pre><code>nombres = ["Ana", "Carlos", "Lucía"]
+notas   = [88, 72]                     # ¡falta una!
+
+list(zip(nombres, notas))
+# [('Ana', 88), ('Carlos', 72)]        ← Lucía desaparece EN SILENCIO
+
+list(zip(nombres, notas, strict=True))
+# ValueError: zip() argument 2 is shorter than argument 1
+</code></pre>
+
+<div class="clave">
+  Cuando las dos colecciones <em>deberían</em> medir lo mismo (candidatos y
+  sus notas, claves y valores...), usa siempre
+  <strong><code>strict=True</code></strong>. Convierte un bug que se
+  descubre semanas después en un error que salta al instante. Disponible
+  desde Python 3.10
+  (<a href="https://peps.python.org/pep-0618/">PEP 618</a>).
+</div>
+
+<hr>
+
+<h2>6. El resto del kit imprescindible</h2>
+
+<pre><code># enumerate con inicio distinto de 0 — para listados humanos
+list(enumerate(["Ana", "Carlos"], start=1))
+# [(1, 'Ana'), (2, 'Carlos')]
+
+# divmod: cociente y resto de una vez (devuelve una tupla)
+divmod(17, 5)        # (3, 2)   — 17 = 3*5 + 2
+minutos, segundos = divmod(125, 60)    # (2, 5) → "2 min 5 s"
+
+# abs y pow
+abs(-7)              # 7
+pow(2, 10)           # 1024  — igual que 2 ** 10
+pow(2, 10, 1000)     # 24    — (2**10) % 1000, en un solo paso eficiente
+
+# reversed: al revés, pero SIN copiar la lista
+list(reversed([1, 2, 3]))   # [3, 2, 1]
+[1, 2, 3][::-1]             # [3, 2, 1] — mismo resultado, pero crea una copia
+</code></pre>
+
+<div class="pista">
+  <strong><code>reversed()</code> vs <code>[::-1]</code>:</strong> el
+  <em>slicing</em> construye una lista nueva completa en memoria;
+  <code>reversed()</code> devuelve un iterador perezoso que no copia nada.
+  Para tres elementos da igual; para tres millones, no. Si solo vas a
+  recorrerla una vez, <code>reversed()</code>.
+</div>
+
+<hr>
+
+<h2>Tabla resumen: el bucle que te ahorras</h2>
+
+<table>
+<tr><th>Cuando quieres...</th><th>En vez de un bucle, escribe</th></tr>
+<tr><td>¿Alguno cumple la condición?</td><td><code>any(cond(x) for x in datos)</code></td></tr>
+<tr><td>¿Todos cumplen la condición?</td><td><code>all(cond(x) for x in datos)</code></td></tr>
+<tr><td>El mayor / menor según un criterio</td><td><code>max(datos, key=criterio)</code></td></tr>
+<tr><td>Evitar el error si está vacío</td><td><code>min(datos, default=algo)</code></td></tr>
+<tr><td>Sumar / contar cuántos cumplen</td><td><code>sum(cond(x) for x in datos)</code></td></tr>
+<tr><td>Emparejar dos listas con seguridad</td><td><code>zip(a, b, strict=True)</code></td></tr>
+<tr><td>Índice y valor a la vez</td><td><code>enumerate(datos, start=1)</code></td></tr>
+<tr><td>Cociente y resto juntos</td><td><code>divmod(a, b)</code></td></tr>
+<tr><td>Recorrer al revés sin copiar</td><td><code>reversed(datos)</code></td></tr>
+</table>
+
+<hr>
+
+<h2>Compruébate antes de seguir</h2>
+
+<p>
+  Responde <strong>mentalmente</strong> antes de desplegar cada respuesta —
+  el esfuerzo de recordar es lo que fija el conocimiento, mucho más que
+  releer.
+</p>
+
+<details class="quiz">
+  <summary>¿Qué devuelve <code>all([])</code>, y por qué?</summary>
+  <p>
+    Devuelve <code>True</code>. La pregunta que responde <code>all()</code>
+    es si existe algún elemento que incumpla la condición; en una colección
+    vacía no existe ninguno que incumpla, así que la respuesta es
+    afirmativa. Se llama <em>verdad vacua</em>.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Cuántos elementos lee <code>any()</code> sobre <code>[False, True, False]</code>?</summary>
+  <p>
+    Dos. Se detiene en cuanto encuentra el primer valor verdadero, sin
+    llegar a evaluar el tercer elemento. Es el comportamiento llamado
+    <em>short-circuit</em>, y ahorra trabajo cuando cada elemento es costoso.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Qué pasa con <code>zip(["a","b","c"], [1,2])</code> sin <code>strict</code>?</summary>
+  <p>
+    Trunca silenciosamente al más corto y devuelve dos pares, perdiendo el
+    tercer elemento sin avisar de nada. Con <code>strict=True</code>, en
+    cambio, lanza un <code>ValueError</code> inmediato indicando que un
+    argumento es más corto.
+  </p>
+</details>
+
+<details class="quiz">
+  <summary>¿Por qué <code>reversed(x)</code> gasta menos memoria que <code>x[::-1]</code>?</summary>
+  <p>
+    Porque devuelve un iterador perezoso que recorre la secuencia original
+    de atrás hacia delante, sin construir nada. El <em>slicing</em>, en
+    cambio, materializa en memoria una lista nueva completa con todos los
+    elementos copiados.
+  </p>
+</details>
+
+<hr>
+
+<h2>Ejercicio práctico</h2>
+
+<div class="ejercicio">
+<h3>Sustituye nueve bucles por built-ins</h3>
+<p>
+  Te doy nueve funciones ya escritas con bucles explícitos, todas correctas y
+  funcionando. Tu trabajo no es arreglar bugs: es reescribir cada una
+  usando la built-in adecuada, sin cambiar su comportamiento — incluidos
+  los casos límite (colecciones vacías incluidas, que es donde está la
+  gracia).
+</p>
+<p>Esqueleto para teclear: <code>ejercicios/fundamentos/031-funciones-builtin.py</code></p>
+<div class="pista">
+  El ejercicio termina con un reto: detectar el bug silencioso de
+  <code>zip()</code> en una función que <em>parece</em> correcta.
+</div>
+</div>
+
+<hr>
+
+<h2>Para leer después</h2>
+
+<p>
+  <strong>Fuente primaria recomendada:</strong>
+  <a href="https://docs.python.org/es/3/library/functions.html">Funciones
+  incorporadas — documentación oficial de Python (en español)</a>. Es la
+  referencia completa y autorizada de las setenta funciones, en orden
+  alfabético. No la leas entera de un tirón: úsala como diccionario cuando
+  te preguntes «¿esto ya existirá?».
+</p>
+
+<p>
+  Ficha de consulta rápida de esta lección:
+  <a href="../../referencia/11-funciones-builtin.html">referencia 11 —
+  Funciones built-in</a>.
+</p>
+
+<hr>
+
+<p class="retoque">
+  ¿Algo no ha quedado claro? Usa un asistente de IA como profesor:
+  pídele que te lo explique de otra forma o que revise tu código.
+</p>
+
+<nav class="nav-lecciones">
+  <a href="../index.html">← Índice de lecciones</a>
+  <span class="nav-central">
+    <a href="030-el-bucle-while.html">← Anterior: 030 — El bucle while</a>
+    <a href="032-elegir-estructura-de-datos.html">Siguiente: 032 — Estructuras de datos →</a>
+  </span>
+</nav>
+
+</body>
+</html>
