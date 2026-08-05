@@ -47,7 +47,7 @@ ni de machine learning, ni prepara ninguna certificación.
 | `lecciones/matching/` | Módulo 3 — proyecto integrador: Gale-Shapley paso a paso |
 | `lecciones/funcional/` | Módulo 4 — programación funcional completa |
 | `ejercicios/` | Esqueletos de ejercicio, espejo de los módulos de lecciones |
-| `referencia/` | Referencia rápida de sintaxis (10 fichas + cheatsheet) |
+| `referencia/` | Referencia rápida de sintaxis (11 fichas + cheatsheet) |
 | `algoritmos/` | Scripts de algoritmos clásicos que las lecciones citan |
 | `TEMARIO.md` | El plan completo del curso, con lo hecho y lo pendiente |
 

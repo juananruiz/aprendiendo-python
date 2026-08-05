@@ -133,18 +133,19 @@ del curso. Los temas marcados son el plan de trabajo.)*
 ### Control de flujo
 - `if/elif/else`, `for` con `range()`
 - El bucle `while` a fondo (contador, centinela, bandera, `while True` + `break`, `while/else`, bucles infinitos) — `lecciones/fundamentos/030-el-bucle-while.html`, `ejercicios/fundamentos/030-el-bucle-while.py`
-- Slicing, `enumerate()`, `for/else`, `break`/`continue` — `lecciones/fundamentos/0001-slicing-enumerate-y-control-de-bucles.html`
+- Las funciones built-in: `any`/`all`, `min`/`max` con `key` y `default`, `sum`, `zip(strict=)`, `divmod`, `reversed` — `lecciones/fundamentos/031-funciones-builtin.html`, `ejercicios/fundamentos/031-funciones-builtin.py`
+- Slicing, `enumerate()`, `for/else`, `break`/`continue` — `lecciones/fundamentos/0001-slicing-enumerate-y-control-de-bucles.html`, `ejercicios/fundamentos/0001-slicing-enumerate-y-control-de-bucles.py`
 
 ### Funciones
 - `def`, parámetros, retorno, recursión básica — ver Pista 1
-- Parámetros por defecto, keyword arguments, scope *(pendiente)*
+- Parámetros por defecto, keyword arguments, `*args`/`**kwargs`, *keyword-only* y scope (LEGB, `global`, `nonlocal`) — `lecciones/fundamentos/033-funciones-a-fondo.html`, `ejercicios/fundamentos/033-funciones-a-fondo.py`
 
 ### Manejo de errores
-- `try/except/finally`, excepciones comunes, `raise` *(pendiente — la referencia `referencia/07-errores-y-excepciones.html` cubre la consulta rápida)*
+- `try/except/else/finally`, jerarquía de excepciones, `raise ... from`, excepciones propias y estilo EAFP — `lecciones/fundamentos/034-errores-y-excepciones.html`, `ejercicios/fundamentos/034-errores-y-excepciones.py`
 
 ### Estructuras de datos
-- Listas, tuplas, diccionarios, conjuntos: cuándo usar cada una *(lección pendiente; referencia en `referencia/03-listas.html` y `referencia/04-diccionarios-y-conjuntos.html`, cheatsheet visual en `referencia/colecciones-cheatsheet.html`)*
-- Ejercicios de consolidación *(pendientes)*: agenda de contactos con diccionarios; inventario con listas de diccionarios
+- Listas, tuplas, diccionarios, conjuntos: cuándo usar cada una, con el coste medido — `lecciones/fundamentos/032-elegir-estructura-de-datos.html`, `ejercicios/fundamentos/032-elegir-estructura-de-datos.py` (referencia rápida en `referencia/03-listas.html`, `referencia/04-diccionarios-y-conjuntos.html` y la cheatsheet visual)
+- Ejercicio de consolidación de los fundamentos: agenda de contactos e inventario, integrando las lecciones 031-034 — `ejercicios/fundamentos/035-consolidacion-agenda-e-inventario.py`
 
 ### Módulos y entorno
 - Imports, `venv`, `pip` y `requirements.txt`, `__name__ == "__main__"` — ver `referencia/09-modulos.html`
@@ -182,13 +183,3 @@ del curso. Los temas marcados son el plan de trabajo.)*
 - **017 — Decoradores de propósito general** — `lecciones/funcional/017-decoradores.html` · `ejercicios/funcional/017-decoradores.py`
 - **018 — Proyecto: contraste imperativo vs. funcional** — `ejercicios/funcional/018-imperativo-vs-funcional.py`
   Reescribir un script imperativo en estilo funcional puro, montar un pipeline sin variables mutables, y una reflexión final: el objetivo es criterio, no dogma
-
----
-
-## Extras fuera de temario
-
-El repositorio incluye además algunos scripts exploratorios que no forman
-parte de las pistas (UI con Flet en `counter.py`, mini-APIs con Flask y
-FastAPI en `flask_demo.py` y `fastapi_ia.py`, gráficos con matplotlib en
-`sol_tierra.py`). Quedan como ejemplos de hasta dónde puede llegar Python,
-pero el desarrollo web queda deliberadamente fuera de los objetivos del curso.

@@ -183,29 +183,23 @@ else:
 <h2>Ejercicio práctico</h2>
 
 <div class="ejercicio">
-<h3>Refactoriza tu ordenamiento burbuja</h3>
+<h3>Diez ejercicios, y dos refactorizaciones de verdad</h3>
 
 <p>
-  Abre <code>algoritmos/orden_burbuja.py</code> y aplícale estos cambios:
+  Slicing (partir por la mitad, trocear en bloques, palíndromos),
+  <code>enumerate</code> (numerar y encontrar todas las posiciones),
+  <code>continue</code> y <code>for/else</code>. Y al final, lo que de
+  verdad importa: reescribir <strong>tu propio</strong>
+  <code>algoritmos/orden_burbuja.py</code> con <code>enumerate</code>, y
+  quitarle la bandera a la búsqueda binaria usando <code>while/else</code>.
 </p>
 
-<ol>
-  <li><strong>Usa <code>enumerate</code></strong> en el bucle <code>for</code> para evitar errores de índice</li>
-  <li><strong>Elimina la bandera <code>cambio</code></strong> y usa <code>break</code> + <code>else</code> en su lugar (opcional, piensa cómo)</li>
-</ol>
-
-<p>Ejecuta el script después de cada cambio para verificar que sigue funcionando.</p>
+<p>Esqueleto para teclear: <code>ejercicios/fundamentos/0001-slicing-enumerate-y-control-de-bucles.py</code></p>
 
 <div class="pista">
-  <strong>Pista para el punto 2:</strong> puedes iterar con
+  <strong>Pista para el burbuja:</strong> puedes iterar con
   <code>for i, valor in enumerate(lista[:-1])</code> — el <code>[:-1]</code>
   evita que compares el último con el siguiente (que no existe).
-</div>
-
-<div class="pista">
-  <strong>Pista para el punto 3:</strong> usa <code>while True</code>,
-  <code>break</code> cuando no haya cambios, y un bucle <code>for</code>
-  anidado. ¿O puedes hacerlo sin <code>while</code>?
 </div>
 
 </div>

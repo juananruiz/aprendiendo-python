@@ -10,7 +10,22 @@
 
 <h1>Aprendiendo Python</h1>
 <p class="subtitle">Un curso práctico organizado en módulos — cada lección con teoría completa y un ejercicio para teclear</p>
+<div class="indice-grupo">
+<h2>Introducción</h2>
+<p>Mi idea al crear este curso era hacerlo para mí mismo. Con esta idea en mente, le pedí a la IA (Claude Sonnet y compañía) que me ayudara a crear el curso. Es muy tedioso tener que ir buscando información en distintos sitios, prepararte los ejercicios y las lecciones, pensar ejemplos, etc. Además es fácil hacerse trampas con los sesgos que ya puedo traer de un lenguaje de programación como PHP que es el lenguaje que más uso en mi día a día.</p>
+<p>Pero una vez metido en el fregado vi que el curso podría ser interesante para otras personas y que igual que yo voy tirando de los recursos que otros comparten estaría bien compartir los míos. Pero tampoco quería publicar algo con mi nombre sin haberlo hecho yo mismo, así que he ido reescribiendo lo que no me gustaba de la IA, lo que prefería poner de otra forma, etc.</p>
+<p>Otra idea que mueve este curso es la de aprender Python a la vez que aprendo e implemento los algoritmos más clásicos o más famosos usados en programación, algoritmos normalmente escondidos en las librerías que suelen acompañar y completar a todos los lenguajes, especialmente en Python. La magia de estas librerías no es otra que los algoritmos que hay debajo. Así que pensé que en vez de usar ejemplos como dime tu nombre y te saludo, hacer un gestor de tareas, una calculadora o el juego de adivinar un número; podría llevarme un doble aprendizaje si los ejemplos eran la implementación de algoritmos como el ordenamiento de una lista usando burbuja, inserción o quicksort.</p>
+<p>Una gran inspiración para ello ha sido el libro "Comprender los algoritmos" de Aditya Y. Bhargava, un libro muy ameno y asequible que me entusiasmo desde el principio (aunque algo flojito en la parte del código para mi gusto.</p>
+<p>También di por casualidad con el algoritmo de Gale-Shapley para la elección de parejas. Es un algoritmo clásico que se usa en la asignación de parejas en el campo de la programación y es un muy buen ejemplo para aprender multitud de conceptos de Python.</p>
+</div>
 
+<h3>Que no encontrarás aquí (al menos de momento)</h3>
+<ul>
+	<li>Programación orientada a objetos con Python</li>
+	<li>Creación de páginas o aplicaciones web con Python</li>
+	<li>Ciencia de datos con Python</li>
+	<li>Machine learning y cosas por el estilo, aunque si aplicaciones de la IA</li>
+</ul>
 <div class="indice-grupo">
 <h2>Módulo 1 — Fundamentos</h2>
 <p>
@@ -21,6 +36,22 @@
   <li>
     <a href="fundamentos/030-el-bucle-while.html">El bucle <code>while</code>, de arriba abajo</a>
     <p>Contador, centinela, bandera, <code>while True</code> + <code>break</code>, <code>while</code>/<code>else</code>, y el bug del bucle infinito.</p>
+  </li>
+  <li>
+    <a href="fundamentos/031-funciones-builtin.html">Las funciones <em>built-in</em></a>
+    <p>El bucle que no tenías que escribir: <code>any</code>/<code>all</code> y su verdad vacua, <code>key</code>/<code>default</code>, <code>zip(strict=)</code> y el bug silencioso.</p>
+  </li>
+  <li>
+    <a href="fundamentos/032-elegir-estructura-de-datos.html">Elegir la estructura de datos correcta</a>
+    <p>Lista, tupla, dict o set: la decisión que pasa de 516 ms a 0,02 ms. Medido, con su precio en memoria.</p>
+  </li>
+  <li>
+    <a href="fundamentos/033-funciones-a-fondo.html">Funciones a fondo</a>
+    <p>Argumentos por nombre, el bug del defecto mutable, <code>*args</code>/<code>**kwargs</code>, <em>keyword-only</em> y el scope (LEGB, <code>global</code>, <code>nonlocal</code>).</p>
+  </li>
+  <li>
+    <a href="fundamentos/034-errores-y-excepciones.html">Errores y excepciones</a>
+    <p>Fallar bien: <code>try/except/else/finally</code>, capturar lo justo, la jerarquía, <code>raise ... from</code> y el estilo EAFP.</p>
   </li>
   <li>
     <a href="fundamentos/0001-slicing-enumerate-y-control-de-bucles.html">Slicing, enumerate y control de bucles</a>
@@ -141,15 +172,15 @@
 <div class="indice-grupo">
 <h2>Módulo 5 — Referencia rápida</h2>
 <p>
-  No son lecciones, son fichas de consulta: diez páginas de sintaxis (tipos,
+  No son lecciones, son fichas de consulta: once páginas de sintaxis (tipos,
   strings, listas, dicts, control de flujo, funciones, errores, ficheros,
-  módulos, clases) más una cheatsheet visual de colecciones. Para resolver
+  módulos, clases y funciones built-in) más una cheatsheet visual. Para resolver
   en segundos un "¿cómo era...?" a media práctica.
 </p>
 <ul class="indice-lista">
   <li>
     <a href="../referencia/index.html">Ir a la referencia</a>
-    <p>Índice de las diez fichas y la cheatsheet, con navegación propia entre ellas.</p>
+    <p>Índice de las once fichas y la cheatsheet, con navegación propia entre ellas.</p>
   </li>
 </ul>
 </div>
