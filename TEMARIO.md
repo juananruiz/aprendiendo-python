@@ -39,8 +39,8 @@ muchos con `assert`s de autoverificación: si pasan, el tema está superado.
 - Búsqueda lineal
 - Ordenamiento burbuja (`algoritmos/orden_burbuja.py`)
 - Ordenamiento por inserción, y qué significa que una ordenación sea estable — `lecciones/algoritmos/022-ordenacion-por-insercion.html`, `ejercicios/algoritmos/022-ordenacion-por-insercion.py`
-- Cuadrado mágico — verificación (`algoritmos/cuadrado_magico.py`)
-- Diferencia diagonal en matrices (`ejercicios/matematicas/ejercicio-diferencia-diagonal.py`)
+- Cuadrado mágico — verificación de filas, columnas y diagonales (`ejercicios/matematicas/ejercicio-cuadrado-magico.py`)
+- Diferencia diagonal en matrices (`ejercicios/matematicas/ejercicio-diferencia-diagonal.py`; versión interactiva resuelta en `ejercicios/matematicas/diferencia-diagonal.py`)
 - Comparar algoritmos midiendo tiempo real (cubierto en los ejercicios 021 y 022 con `timeit`)
 
 ### Proyecto insignia — el algoritmo del amor (Gale-Shapley)
