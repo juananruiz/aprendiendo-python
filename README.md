@@ -38,6 +38,10 @@ ni de machine learning, ni prepara ninguna certificación.
   explique un concepto de otra forma, que revise tu solución o que te ponga
   un ejercicio extra — pero teclea tú el código.
 
+## Consultar referencia rápida
+
+La carpeta referencia/ contiene fichas de sintaxis para consultar sin salir del editor.
+
 ## Estructura
 
 | Carpeta | Contenido |
@@ -60,6 +64,23 @@ tu avance es tuyo.
 Python 3.10 o superior. Sin dependencias para casi todo el curso; algunos
 scripts sueltos usan SymPy, matplotlib, SQLAlchemy o Flet (se indican en el
 propio fichero).
+
+## Instalación
+
+``` shell
+# Clonar el repositorio
+git clone https://github.com/juananruiz/aprendiendo-python.git
+cd aprendiendo-python
+
+# Abrir las lecciones en el navegador
+# Abre lecciones/index.html con tu navegador
+```
+
+## Recursos adicionales
+
+- Libro de referencia: "Comprender los algoritmos" de Aditya Y. Bhargava
+- Cheatsheet de Python incluido (png)
+- Documentación oficial de Python 3
 
 ## Licencia
 
