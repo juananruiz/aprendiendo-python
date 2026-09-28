@@ -179,6 +179,12 @@ if __name__ == "__main__":
 
     print("✅ Todo correcto. Ninguna función mutó nada.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. ¿Por qué registrar_impura("Ana") y luego registrar_impura("Carlos")

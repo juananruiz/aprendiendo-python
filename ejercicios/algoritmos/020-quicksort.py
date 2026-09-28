@@ -124,7 +124,7 @@ if __name__ == "__main__":
     pivote = prueba[idx]
     assert all(x <= pivote for x in prueba[:idx]), "todo lo de la izquierda debe ser <= pivote"
     assert all(x > pivote for x in prueba[idx + 1:]), "todo lo de la derecha debe ser > pivote"
-"""
+
     # 3. quicksort_inplace ordena de verdad, mutando la lista
     lista = [5, 3, 8, 1, 9, 2, 7]
     quicksort_inplace(lista)
@@ -151,7 +151,12 @@ if __name__ == "__main__":
         "el pivote aleatorio debería arreglar el caso de la lista ordenada"
 
     print("\n✅ Todo correcto: implementaste quicksort y confirmaste su complejidad con datos propios.")
-"""
+
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. ¿Por qué particion_lomuto es más eficiente en memoria que la versión

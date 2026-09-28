@@ -34,6 +34,10 @@ ni de machine learning, ni prepara ninguna certificación.
   superado. Ningún ejercicio viene resuelto.
 - **Consulta**: `referencia/` es una referencia rápida de sintaxis para no
   ir a Google a mitad de ejercicio.
+- **Progreso**: cada ejercicio que superas se registra solo (en local) al
+  pasar sus `assert`s. Ejecuta `python -m herramientas.progreso` cuando
+  quieras para ver tu progreso en texto: barras por módulo, racha de días y
+  el siguiente ejercicio recomendado.
 - **Un consejo**: usa un asistente de IA como profesor. Pídele que te
   explique un concepto de otra forma, que revise tu solución o que te ponga
   un ejercicio extra — pero teclea tú el código.
@@ -53,11 +57,13 @@ La carpeta referencia/ contiene fichas de sintaxis para consultar sin salir del 
 | `ejercicios/` | Esqueletos de ejercicio, espejo de los módulos de lecciones |
 | `referencia/` | Referencia rápida de sintaxis (11 fichas + cheatsheet) |
 | `algoritmos/` | Scripts de algoritmos clásicos que las lecciones citan |
+| `herramientas/` | `progreso.py` — resumen de progreso en modo texto |
 | `TEMARIO.md` | El plan completo del curso, con lo hecho y lo pendiente |
 
 Para tu **seguimiento personal**, copia el TEMARIO a una carpeta `personal/`
 (está en el `.gitignore`) y marca ahí tu progreso — el curso es de todos,
-tu avance es tuyo.
+tu avance es tuyo. Ahí mismo se guarda automáticamente `progreso.json`, el
+registro que lee `herramientas/progreso.py`.
 
 ## Requisitos
 

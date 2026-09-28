@@ -286,6 +286,12 @@ if __name__ == "__main__":
     RUTA_DATOS.unlink()
     print("✅ Proyecto insignia de la Pista 4 completado.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # ========================================================================
 # PARTE C — La reflexión (esta parte no la comprueba ningún assert)

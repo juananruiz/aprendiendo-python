@@ -254,6 +254,12 @@ if __name__ == "__main__":
 
     print("\n✅ Todo correcto. Ya sabes lo que hay dentro de un dict.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. Tu tabla y el dict nativo tienen la MISMA complejidad O(1). ¿Por qué

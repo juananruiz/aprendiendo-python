@@ -209,6 +209,12 @@ if __name__ == "__main__":
 
     print("\n✅ Todo correcto. Sabes cuándo el voraz gana y cuándo pierde.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. cobertura_exacta prueba todas las combinaciones: 2^n. Con las 5

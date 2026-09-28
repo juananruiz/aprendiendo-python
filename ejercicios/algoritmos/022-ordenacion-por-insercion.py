@@ -169,6 +169,12 @@ if __name__ == "__main__":
 
     print("\n✅ Demostrado: el mejor caso O(n) de inserción no es teoría.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. En ordenar_por_clave, ¿por qué usar > en vez de >= hace que el

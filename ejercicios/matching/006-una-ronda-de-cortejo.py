@@ -136,6 +136,12 @@ if __name__ == "__main__":
     esperado = {"Nora": "Alba", "Mar": "Cora", "Pau": "Dario"}
     if compromisos == esperado and libres == ["Bruno"]:
         print("\n✅ ¡Coincide con la tabla de la Ronda 1 de la lección!")
+
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+        from herramientas.progreso import registrar_completado
+        registrar_completado(__file__)
     else:
         print("\n❌ Todavía no coincide. Repasa las tres funciones.")
 

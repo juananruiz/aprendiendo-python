@@ -157,6 +157,12 @@ if __name__ == "__main__":
 
     print("\n✅ Todo correcto. Dominas los seis patrones de while.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. En suma_hasta_centinela, ¿qué pasaría si escribieras la condición al
