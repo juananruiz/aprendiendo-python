@@ -90,6 +90,21 @@ if __name__ == "__main__":
     for m in matchings_estables:
         print(" ", m)
 
+    # --- Verificación ---
+    assert total == 6, f"con 3 proponentes y 3 receptores hay 3! = 6 matchings posibles, no {total}"
+    assert estables == 1, f"con estas preferencias solo hay un matching estable, no {estables}"
+    assert len(matchings_estables) == 1
+    assert matchings_estables[0] == {"Alba": "Olga", "Bruno": "Mar", "Cora": "Nora"}, \
+        "el matching estable debería ser Alba-Olga · Bruno-Mar · Cora-Nora"
+
+    print("\n✅ Todo correcto: a fuerza bruta, solo 1 de los 6 matchings posibles es estable.")
+
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---
 # 1. ¿Cuántos matchings totales esperabas para 3 proponentes y 3

@@ -155,6 +155,12 @@ if __name__ == "__main__":
           f"secundaria={suma_diagonal_secundaria(MATRIZ)} "
           f"diferencia={diferencia_diagonal(MATRIZ)}")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. Tu versión de diferencia-diagonal.py hace todo en un solo bucle

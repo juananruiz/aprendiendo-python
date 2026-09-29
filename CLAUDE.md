@@ -46,14 +46,19 @@ Cuando el usuario pregunte sobre Python, prioriza:
   bloque `if __name__ == "__main__"` con `assert`s verificados contra una
   solución de referencia antes de publicarlos.
 - **Seguimiento en modo texto**: los ejercicios de fundamentos, algoritmos,
-  matching y funcional llaman a `herramientas.progreso.registrar_completado()`
-  justo después de confirmar el éxito (tras los `assert`s, o dentro de la
-  rama `if` de éxito en los ejercicios que verifican con `if/else` en vez de
-  `assert`). Guarda el progreso en `personal/progreso.json` (fuera de git).
-  `python -m herramientas.progreso` muestra el resumen (barras de progreso
-  en texto, racha, siguiente ejercicio recomendado). Un ejercicio nuevo se
-  suma automáticamente al total en cuanto añade esa llamada al terminar su
-  bloque `__main__`.
+  matching, funcional y matemáticas que tienen verificación llaman a
+  `herramientas.progreso.registrar_completado()` justo después de confirmar
+  el éxito (tras los `assert`s, o dentro de la rama `if` de éxito en los que
+  verifican con `if/else` en vez de `assert`). Guarda el progreso en
+  `personal/progreso.json` (fuera de git). `python -m herramientas.progreso`
+  muestra el resumen (barras de progreso en texto, racha, siguiente ejercicio
+  recomendado). Un ejercicio nuevo se suma automáticamente al total en cuanto
+  añade esa llamada al terminar su bloque `__main__`. Un ejercicio sin
+  ninguna verificación (sin `assert`s ni bloque `if/else` de éxito, o que
+  necesita `input()` interactivo) no puede engancharse sin escribirle antes
+  esa verificación — es el caso de `ejercicios/matching/001-004` (estilo
+  anterior a esta convención, sin `if __name__`) y de scripts ya resueltos
+  como `babylonian_squareroot.py`.
 - **Contenido público sin datos personales**: nada de nombres reales,
   empleadores ni biografía en lecciones/ejercicios. El seguimiento personal
   vive en `personal/` (fuera de git). Los nombres de ciudades y personas de
