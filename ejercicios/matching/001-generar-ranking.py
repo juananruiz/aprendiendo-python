@@ -8,9 +8,9 @@ personales sobre los destinos.
 
 Tu tarea: generar los dos rankings de preferencias (candidatos→destinos
 y destinos→candidatos) a partir de los datos brutos.
-"""
 
-from collections import OrderedDict
+Ejecuta el fichero cuando termines: hay asserts al final que deben pasar.
+"""
 
 # --- Datos de partida ---
 
@@ -21,9 +21,6 @@ candidatos = {
     "Jorge":  {"nota": 65, "preferencia_destinos": ["Toledo", "Bilbao", "Madrid", "Girona"]},
     "Elena":  {"nota": 80, "preferencia_destinos": ["Girona", "Madrid", "Toledo", "Bilbao"]},
 }
-
-for candidato, datos in candidatos.items():
-    print(candidato, datos["nota"])
 
 destinos = {
     "Madrid": {"plazas": 2, "nota_minima": 70},
@@ -43,11 +40,10 @@ def generar_ranking_candidatos(candidatos, destinos):
     ranking = {}
     for candidato, datos in candidatos.items():
         ranking[candidato] = []
-        for destino in datos["preferencia_destinos"]: 
+        for destino in datos["preferencia_destinos"]:
             if datos["nota"] >= destinos[destino]["nota_minima"]:
                 ranking[candidato].append(destino)
     return ranking
-
 
 
 def generar_ranking_destinos(candidatos, destinos):
@@ -62,16 +58,45 @@ def generar_ranking_destinos(candidatos, destinos):
 
 # --- Pruebas ---
 
-ranking_candidatos = generar_ranking_candidatos(candidatos, destinos)
-ranking_destinos = generar_ranking_destinos(candidatos, destinos)
+if __name__ == "__main__":
+    for candidato, datos in candidatos.items():
+        print(candidato, datos["nota"])
 
-print("=== Ranking candidatos → destinos ===")
-for candidato, destinos in ranking_candidatos.items():
-    print(f"  {candidato}: {destinos}")
+    ranking_candidatos = generar_ranking_candidatos(candidatos, destinos)
+    ranking_destinos = generar_ranking_destinos(candidatos, destinos)
 
-# print("\n=== Ranking destinos → candidatos ===")
-# for d, cands in ranking_destinos.items():
-#     print(f"  {d}: {cands}")
+    print("=== Ranking candidatos → destinos ===")
+    for candidato, lista_destinos in ranking_candidatos.items():
+        print(f"  {candidato}: {lista_destinos}")
+
+    print("\n=== Ranking destinos → candidatos ===")
+    for destino, lista_candidatos in ranking_destinos.items():
+        print(f"  {destino}: {lista_candidatos}")
+
+    # --- Verificación ---
+    assert ranking_candidatos == {
+        "Sofía": ["Madrid", "Bilbao", "Toledo", "Girona"],
+        "Miguel": ["Bilbao", "Girona", "Madrid"],
+        "Lucía": ["Madrid", "Girona", "Bilbao", "Toledo"],
+        "Jorge": ["Bilbao", "Girona"],
+        "Elena": ["Girona", "Madrid", "Toledo", "Bilbao"],
+    }
+    assert ranking_destinos["Madrid"] == ["Lucía", "Sofía", "Elena", "Miguel"], \
+        "Madrid pide 70: Jorge (65) se queda fuera; el resto, de mayor a menor nota"
+    assert ranking_destinos["Bilbao"] == ["Lucía", "Sofía", "Elena", "Miguel", "Jorge"], \
+        "Bilbao pide solo 60: entran los 5 candidatos"
+    assert ranking_destinos["Toledo"] == ["Lucía", "Sofía", "Elena"], \
+        "Toledo pide 75: Miguel (72) y Jorge (65) se quedan fuera"
+    assert ranking_destinos["Girona"] == ["Lucía", "Sofía", "Elena", "Miguel", "Jorge"], \
+        "Jorge llega justo a la nota mínima de Girona (65 >= 65)"
+
+    print("\n✅ Todo correcto: los dos rankings respetan la nota mínima y el orden de preferencia/nota.")
+
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
 
 
 # --- Preguntas de reflexión ---

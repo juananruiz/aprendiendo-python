@@ -24,6 +24,7 @@ MODULOS = {
     "algoritmos": "Módulo 2 — Algoritmos",
     "matching": "Módulo 3 — Matching",
     "funcional": "Módulo 4 — Funcional",
+    "matematicas": "Matemáticas (extra)",
 }
 
 ANCHO_BARRA = 20

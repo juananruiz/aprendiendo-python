@@ -196,6 +196,12 @@ if __name__ == "__main__":
     print(f"   Durero: constante {constante_magica(4)}, mágico={es_cuadrado_magico(DURERO)}")
     print(f"   Fíjate en la última fila del de Durero: 4, 15, 14, 1 -> el año 1514")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. NO_MAGICO tiene las dos diagonales sumando 15, pero no es mágico.

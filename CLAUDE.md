@@ -46,14 +46,25 @@ Cuando el usuario pregunte sobre Python, prioriza:
   bloque `if __name__ == "__main__"` con `assert`s verificados contra una
   solución de referencia antes de publicarlos.
 - **Seguimiento en modo texto**: los ejercicios de fundamentos, algoritmos,
-  matching y funcional llaman a `herramientas.progreso.registrar_completado()`
-  justo después de confirmar el éxito (tras los `assert`s, o dentro de la
-  rama `if` de éxito en los ejercicios que verifican con `if/else` en vez de
-  `assert`). Guarda el progreso en `personal/progreso.json` (fuera de git).
-  `python -m herramientas.progreso` muestra el resumen (barras de progreso
-  en texto, racha, siguiente ejercicio recomendado). Un ejercicio nuevo se
-  suma automáticamente al total en cuanto añade esa llamada al terminar su
-  bloque `__main__`.
+  matching, funcional y matemáticas que tienen verificación llaman a
+  `herramientas.progreso.registrar_completado()` justo después de confirmar
+  el éxito (tras los `assert`s, o dentro de la rama `if` de éxito en los que
+  verifican con `if/else` en vez de `assert`). Guarda el progreso en
+  `personal/progreso.json` (fuera de git). `python -m herramientas.progreso`
+  muestra el resumen (barras de progreso en texto, racha, siguiente ejercicio
+  recomendado). Un ejercicio nuevo se suma automáticamente al total en cuanto
+  añade esa llamada al terminar su bloque `__main__`. Un ejercicio sin
+  ninguna verificación (sin `assert`s ni bloque `if/else` de éxito, o que
+  necesita `input()` interactivo) no puede engancharse sin escribirle antes
+  esa verificación — es el caso de scripts ya resueltos como
+  `babylonian_squareroot.py`. Cuando el comportamiento a verificar es
+  aleatorio por diseño (`matching/003-colas-con-deque.py`, sección de
+  `simular_propuestas`), se comprueba solo la forma del resultado, no un
+  valor exacto, y se documenta esa limitación en el propio fichero.
+  `ejercicios/matching/001a-diccionarios.py` queda fuera del todo: no es un
+  esqueleto de ejercicio (sin docstring, sin `pass`, con código exploratorio
+  comentado) sino apuntes de práctica que probablemente deberían vivir en
+  `personal/` en vez de en el repo público.
 - **Contenido público sin datos personales**: nada de nombres reales,
   empleadores ni biografía en lecciones/ejercicios. El seguimiento personal
   vive en `personal/` (fuera de git). Los nombres de ciudades y personas de
