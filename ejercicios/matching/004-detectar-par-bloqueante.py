@@ -6,6 +6,8 @@ determina si el matching es estable o no.
 
 Este es el ejercicio clave para entender qué significa "estabilidad"
 antes de implementar Gale-Shapley.
+
+Ejecuta el fichero cuando termines: hay asserts al final que deben pasar.
 """
 
 # --- Preferencias ---
@@ -74,27 +76,6 @@ def es_matching_estable(prefs_candidatos, prefs_destinos, matching):
     pass
 
 
-# --- Pruebas ---
-
-matching_estable = {
-    "Ana": "Madrid",
-    "Carlos": "Barcelona",
-    "Beatriz": "Valencia",
-}
-# ¿Este matching es estable? Depende de las preferencias.
-# Compruébalo con tu función.
-
-matching_inestable = {
-    "Ana": "Barcelona",
-    "Carlos": "Madrid",
-    "Beatriz": "Valencia",
-}
-# En la lección vimos que Ana y Madrid forman par bloqueante aquí.
-
-print("Matching estable:", es_matching_estable(prefs_candidatos, prefs_destinos, matching_estable))
-print("Matching inestable:", es_matching_estable(prefs_candidatos, prefs_destinos, matching_inestable))
-
-
 # --- EXTRA: Encontrar todos los pares bloqueantes ---
 
 def encontrar_pares_bloqueantes(prefs_candidatos, prefs_destinos, matching):
@@ -103,6 +84,59 @@ def encontrar_pares_bloqueantes(prefs_candidatos, prefs_destinos, matching):
     """
     # Escribe aquí tu código
     pass
+
+
+# --- Pruebas ---
+
+if __name__ == "__main__":
+    matching_estable = {
+        "Ana": "Madrid",
+        "Carlos": "Barcelona",
+        "Beatriz": "Valencia",
+    }
+
+    matching_inestable = {
+        "Ana": "Barcelona",
+        "Carlos": "Madrid",
+        "Beatriz": "Valencia",
+    }
+    # En la lección vimos que Ana y Madrid forman par bloqueante aquí.
+
+    # 1
+    assert prefieres(prefs_candidatos, "Ana", "Madrid", "Barcelona") is True
+    assert prefieres(prefs_candidatos, "Ana", "Valencia", "Madrid") is False
+
+    # 2
+    assert obtener_asignados_por_destino(matching_estable) == {
+        "Madrid": "Ana", "Barcelona": "Carlos", "Valencia": "Beatriz",
+    }
+
+    # 3
+    assert es_par_bloqueante(prefs_candidatos, prefs_destinos,
+                              matching_inestable, "Ana", "Madrid") is True
+    assert es_par_bloqueante(prefs_candidatos, prefs_destinos,
+                              matching_estable, "Ana", "Barcelona") is False, \
+        "Ana ya está en su primera opción: no hay destino mejor al que aspirar"
+
+    # 4
+    print("Matching estable:", es_matching_estable(prefs_candidatos, prefs_destinos, matching_estable))
+    print("Matching inestable:", es_matching_estable(prefs_candidatos, prefs_destinos, matching_inestable))
+    assert es_matching_estable(prefs_candidatos, prefs_destinos, matching_estable) is True
+    assert es_matching_estable(prefs_candidatos, prefs_destinos, matching_inestable) is False
+
+    # EXTRA
+    pares = encontrar_pares_bloqueantes(prefs_candidatos, prefs_destinos, matching_inestable)
+    print("Pares bloqueantes en el matching inestable:", pares)
+    assert set(pares) == {("Ana", "Madrid"), ("Carlos", "Barcelona")}
+    assert encontrar_pares_bloqueantes(prefs_candidatos, prefs_destinos, matching_estable) == []
+
+    print("\n✅ Todo correcto: sabes detectar cuándo un matching es estable y por qué.")
+
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
 
 
 # --- Preguntas de reflexión ---

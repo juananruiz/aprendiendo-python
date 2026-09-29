@@ -56,9 +56,15 @@ Cuando el usuario pregunte sobre Python, prioriza:
   añade esa llamada al terminar su bloque `__main__`. Un ejercicio sin
   ninguna verificación (sin `assert`s ni bloque `if/else` de éxito, o que
   necesita `input()` interactivo) no puede engancharse sin escribirle antes
-  esa verificación — es el caso de `ejercicios/matching/001-004` (estilo
-  anterior a esta convención, sin `if __name__`) y de scripts ya resueltos
-  como `babylonian_squareroot.py`.
+  esa verificación — es el caso de scripts ya resueltos como
+  `babylonian_squareroot.py`. Cuando el comportamiento a verificar es
+  aleatorio por diseño (`matching/003-colas-con-deque.py`, sección de
+  `simular_propuestas`), se comprueba solo la forma del resultado, no un
+  valor exacto, y se documenta esa limitación en el propio fichero.
+  `ejercicios/matching/001a-diccionarios.py` queda fuera del todo: no es un
+  esqueleto de ejercicio (sin docstring, sin `pass`, con código exploratorio
+  comentado) sino apuntes de práctica que probablemente deberían vivir en
+  `personal/` en vez de en el repo público.
 - **Contenido público sin datos personales**: nada de nombres reales,
   empleadores ni biografía en lecciones/ejercicios. El seguimiento personal
   vive en `personal/` (fuera de git). Los nombres de ciudades y personas de
