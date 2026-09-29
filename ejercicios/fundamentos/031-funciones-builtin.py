@@ -283,6 +283,12 @@ if __name__ == "__main__":
 
     print("✅ Todo correcto. Nueve bucles menos que mantener.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. En el ejercicio 3, ¿qué habría pasado si hubieras usado max(palabras,

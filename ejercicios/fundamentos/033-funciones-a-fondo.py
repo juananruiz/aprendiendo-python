@@ -225,6 +225,12 @@ if __name__ == "__main__":
 
     print("✅ Todo correcto. Ya sabes qué pasa entre los paréntesis.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. Ejecuta registrar_roto.__defaults__ después de los asserts. ¿Qué ves

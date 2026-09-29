@@ -223,6 +223,12 @@ if __name__ == "__main__":
     print(f"  Buscar en set   de {n:,}: {t_set*1000:8.2f} ms")
     print(f"  El set es {t_lista/t_set:,.0f} veces más rápido")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. En el ejercicio 4, construir el índice cuesta O(n) una vez. ¿A partir

@@ -33,7 +33,8 @@ Cuando el usuario pregunte sobre Python, prioriza:
 | `referencia/` | Referencia rápida de sintaxis (HTML, 11 fichas + cheatsheet) |
 | `algoritmos/` | Scripts de algoritmos clásicos citados por las lecciones |
 | `assets/` | Hoja de estilos común (`estilos.css`) e imágenes |
-| `personal/` | **Solo local, en .gitignore**: MISSION, NOTES, PROGRESO y learning-records del alumno |
+| `herramientas/` | `progreso.py` — seguimiento de progreso en modo texto (ver más abajo) |
+| `personal/` | **Solo local, en .gitignore**: MISSION, NOTES, PROGRESO, learning-records del alumno y `progreso.json` |
 
 ## Convenciones
 
@@ -44,6 +45,15 @@ Cuando el usuario pregunte sobre Python, prioriza:
 - **Ejercicios**: docstring de contexto + funciones con pista y `pass` +
   bloque `if __name__ == "__main__"` con `assert`s verificados contra una
   solución de referencia antes de publicarlos.
+- **Seguimiento en modo texto**: los ejercicios de fundamentos, algoritmos,
+  matching y funcional llaman a `herramientas.progreso.registrar_completado()`
+  justo después de confirmar el éxito (tras los `assert`s, o dentro de la
+  rama `if` de éxito en los ejercicios que verifican con `if/else` en vez de
+  `assert`). Guarda el progreso en `personal/progreso.json` (fuera de git).
+  `python -m herramientas.progreso` muestra el resumen (barras de progreso
+  en texto, racha, siguiente ejercicio recomendado). Un ejercicio nuevo se
+  suma automáticamente al total en cuanto añade esa llamada al terminar su
+  bloque `__main__`.
 - **Contenido público sin datos personales**: nada de nombres reales,
   empleadores ni biografía en lecciones/ejercicios. El seguimiento personal
   vive en `personal/` (fuera de git). Los nombres de ciudades y personas de

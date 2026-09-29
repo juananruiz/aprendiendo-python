@@ -210,6 +210,12 @@ if __name__ == "__main__":
 
     print("\n✅ Todo correcto. BFS dominado: distancias, caminos y por qué hace falta el set.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. En distancias_desde, el propio dict de distancias hace de "visitados".

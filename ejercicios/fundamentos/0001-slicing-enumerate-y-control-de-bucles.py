@@ -277,6 +277,12 @@ if __name__ == "__main__":
 
     print("✅ Todo correcto. Slicing, enumerate y control de bucles dominados.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. partir_por_la_mitad() usa slicing, que COPIA. Para una lista de un

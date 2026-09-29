@@ -147,6 +147,13 @@ if __name__ == "__main__":
     print("✅ Proponente-óptimo == Receptor-pésimo (Garantía 4)" if ok_optimalidad
           else "❌ No coinciden — revisa tu código")
 
+    if ok_estable and ok_optimalidad:
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+        from herramientas.progreso import registrar_completado
+        registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---
 # 1. ¿Cuántos matchings estables salieron? ¿Coincide con lo que esperabas

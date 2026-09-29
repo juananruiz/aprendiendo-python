@@ -304,6 +304,12 @@ if __name__ == "__main__":
     print("✅ Consolidación superada. Agenda e inventario funcionando,")
     print("   sin mutar nada y fallando donde toca.")
 
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from herramientas.progreso import registrar_completado
+    registrar_completado(__file__)
+
 
 # --- Preguntas de reflexión ---------------------------------------------
 # 1. La agenda es un dict {nombre: datos}; el inventario, una lista de
